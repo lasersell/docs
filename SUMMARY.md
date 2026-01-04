@@ -1,7 +1,7 @@
 # Table of contents
 
-* [👋 Start Here](start-here.md)
-* [🚀 Getting Started](README.md)
+* [👋 Start Here](README.md)
+* [🚀 Getting Started](readme.md)
 * [🧩 Chrome Extension](chrome-extension/README.md)
   * [⬇️ Installation](chrome-extension/installation.md)
   * [🔐 Permissions](chrome-extension/permissions.md)
