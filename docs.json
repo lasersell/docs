@@ -1,0 +1,24 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Documentation",
+  "colors": {
+    "primary": "#0D9373"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": []
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "telegram": "https://t.me/lasersell",
+      "github": "https://github.com/lasersell",
+      "instagram": "https://instagram.com/xen",
+      "x": "https://x.com/xentzu"
+    }
+  }
+}
