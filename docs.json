@@ -7,7 +7,14 @@
   },
   "navigation": {
     "pages": [
-      "getting-started"
+      "getting-started",
+      {
+        "group": "Chrome Extension",
+        "icon": "chess-knight-piece",
+        "pages": [
+          "chrome-extension/installation"
+        ]
+      }
     ]
   },
   "footer": {
@@ -17,5 +24,6 @@
       "instagram": "https://instagram.com/xen",
       "x": "https://x.com/xentzu"
     }
-  }
+  },
+  "favicon": "/images/lasersell.svg"
 }
