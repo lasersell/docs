@@ -1,4 +1,82 @@
 ---
-title: 'Privacy'
+title: "Privacy & Connections"
 ---
 
+LaserSell is designed to operate with a "Least Privilege" network philosophy. We only transmit the data strictly necessary to execute your trades and verify your license.
+
+This page details exactly what data leaves your machine, where it goes, and who has access to it.
+
+## The Data We See (And Don't See)
+
+We believe transparency is the best defense against distrust. Here is a complete breakdown of our data visibility:
+
+| Data Type            | Visibility         | Where it lives                                                         |
+| -------------------- | ------------------ | ---------------------------------------------------------------------- |
+| Private Keys & Seeds | ZERO ACCESS        | **Strictly Local.** Encrypted on your disk and in your RAM.            |
+| Strategy Logic       | ZERO ACCESS        | **Strictly Local.** Your buying/selling logic runs on your machine.    |
+| Wallet Public Key    | Visible            | Sent to our API for license validation and trade routing.              |
+| Trade Requests       | Visible            | Sent to our API to construct optimized swap transactions.              |
+| PnL & Performance    | Visible (Optional) | Sent to our Telemetry Cloud to power your Chrome Extension dashboard.  |
+| IP Address           | Visible            | Visible to us (API) and your RPC Provider. (This will be your VPS IP). |
+
+## Network Connections
+
+When LaserSell is running, it establishes outbound connections to three distinct destinations.
+
+### 1. The Solana Network (RPC)
+
+- **Destination:** Your configured RPC provider (e.g., Helius, QuickNode, or a private validator).
+- **Purpose:** Reading market data (prices, bonding curves) and broadcasting signed transactions.
+- **Privacy Implication:** Your RPC provider can see your VPS IP address and the transactions you submit.
+
+### 2. LaserSell Optimization Cloud
+
+- **Destination:** `api.lasersell.app`
+- **Purpose:**
+  - **License Check:** Verifies your access rights on startup.
+  - **Transaction Routing:** When you trigger a sell, your bot sends a "Quote Request" (e.g., "Sell 100% of Token X"). Our server calculates the optimal route, fees, and slippage protection, then returns an **unsigned** transaction payload.
+- **Security Note:** This connection is purely for _construction_. The signing happens locally on your VPS after the payload is received.
+
+### 3. Telemetry & Dashboard
+
+- **Destination:** `telemetry.lasersell.app`
+- **Purpose:** Pushes real-time stats (Profit/Loss, active positions, logs) to the cloud so you can view them in the LaserSell Chrome Extension without needing to SSH into your server constantly.
+- **Privacy Implication:** This data allows you to monitor your bot remotely. It does **not** allow remote control. The connection is one-way (upload only).
+
+## Chrome Extension Privacy
+
+The LaserSell Chrome Extension is a **Passive Viewer**.
+
+- It does **not** connect to your VPS directly (no open ports required).
+- It does **not** have access to your VPS file system or keystores.
+- It simply authenticates with our Telemetry Cloud to display the data your bot has pushed there.
+- If you uninstall the extension or close the browser, your bot continues running on your VPS unaffected.
+
+## Opting Out (Going "Dark")
+
+For users who demand maximum privacy, LaserSell offers total control over telemetry.
+
+### Disabling Telemetry
+
+You can disable the connection to `telemetry.lasersell.app` by editing your `config.yml` on your VPS.
+
+1. SSH into your VPS.
+2. Open your config file (e.g., `nano config.yml`).
+3. Scroll to the `telemetry` section at the bottom.
+4. Set `enabled` to `false`.
+
+```yaml
+# config.yml
+
+telemetry:
+  # Set this to false to stop sending PnL/stats to the cloud
+  enabled: false 
+```
+
+- **Result:** Your bot will stop sending PnL updates to the cloud.
+- **Trade-off:** The Chrome Extension will no longer update. You will need to monitor your bot strictly via the terminal (SSH session).
+- **Note:** License checks and Transaction Routing (API connections) are mandatory for the bot to function and cannot be disabled.
+
+### Local Logs
+
+LaserSell writes detailed logs to your VPS disk (`logs/` directory relative to the binary). These logs may contain transaction signatures and public keys, but **never** private keys. We do not automatically upload these logs. They are yours to keep or delete.
