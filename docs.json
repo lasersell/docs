@@ -9,6 +9,7 @@
     "groups": [
       {
         "group": "Start Here",
+        "icon": "rocket-launch",
         "pages": [
           "start-here/getting-started",
           "start-here/private-rpc",
