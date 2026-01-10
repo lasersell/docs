@@ -1,0 +1,79 @@
+---
+title: "Key Safety"
+---
+
+Key safety is the absolute foundation of the LaserSell architecture. We understand that in the high-stakes environment of cryptocurrency trading, the security of your private keys is paramount.
+
+This page details the specific measures LaserSell takes to isolate your credentials, encrypt your data, and protect your funds from unauthorized access.
+
+## The Non-Custodial Guarantee
+
+**"Your Keys, Your Machine."**
+
+LaserSell is a strictly **Non-Custodial** trading tool. Unlike cloud-based trading bots or web interfaces where you surrender custody of your funds to a third party, LaserSell runs entirely on your local hardware (your personal computer or your private VPS).
+
+- **No Cloud Storage:** Your private keys are generated and stored locally. They are never sent to our servers or any external logging service.
+- **Local Signing:** All transactions are signed locally on your device before being broadcast to the Solana network.
+- **Total Control:** Because the software does not transmit your keys, we cannot freeze your funds, initiate withdrawals, or execute trades without your command.
+
+## Industry-Leading Encryption
+
+Many trading scripts and lower-tier bots store your wallet as a plaintext `wallet.json` file. This is a massive security risk; if a hacker gains access to your file system, they can simply open that file and steal your funds.
+
+LaserSell replaces this outdated method with a robust **Encrypted Keystore** system.
+
+### How It Protects You
+
+1. **Authenticated Encryption:** When you initialize LaserSell, your private key is encrypted using industry-standard authenticated encryption algorithms. This wraps your key in a mathematical "vault" that can only be opened with your unique passphrase.
+2. **Brute-Force Resistance:** The keystore utilizes memory-hard key derivation functions. Even if a bad actor steals your keystore file, the computational cost to guess your passphrase via brute-force attacks is prohibitively high.
+3. **Automatic Migration:** If you currently use a legacy plaintext `wallet.json` from another tool, LaserSell detects this and offers to automatically migrate it to our secure Keystore format, ensuring you don't leave vulnerable files on your disk.
+
+> **Important:** Because your security depends entirely on your passphrase, **there is no "Forgot Password" feature.** If you lose your passphrase, the keystore file is mathematically impossible to decrypt.
+
+## Memory Hygiene (RAM Protection)
+
+Security isn't just about files on a disk; it is also about what happens while the software is running.
+
+LaserSell utilizes advanced **Memory Wiping** techniques. When you unlock your wallet to start a session:
+
+1. The key is decrypted into the computer's Random Access Memory (RAM) only for the split second it is needed.
+2. Immediately after use, the sensitive memory is explicitly "zeroized" (scrubbed).
+
+This protects you against advanced malware or "RAM scraper" attacks that attempt to recover keys from memory while applications are running.
+
+## Best Practices for Wallet Management
+
+While LaserSell is hardened against attacks, you should always practice good Operational Security (OpSec).
+
+### 1. Treat LaserSell as a "Hot Wallet"
+
+A "Hot Wallet" is any wallet connected to the internet for active trading.
+
+- **Do not** keep your entire net worth in your trading wallet.
+- **Do not** use your main HODL wallet or hardware wallet seed phrase for high-frequency trading.
+
+### 2. Regular Fund Rotation
+
+We strongly recommend separating your long-term holdings from your active trading funds:
+
+- **Cold Storage:** Use a hardware wallet (like  Trezor) to store your main portfolio and accumulated profits.
+- **Trading Wallet:** Only transfer the specific amount of SOL/USDC you intend to trade with for the current session or day into your LaserSell wallet.
+- **Routine:** Establish a habit of regularly "sweeping" profits from your LaserSell wallet back to your Cold Storage or exchange account.
+
+## Chrome Extension Safety
+
+The LaserSell Chrome Extension is designed as a passive **Telemetry Viewer**.
+
+- It connects to the LaserSell cloud API strictly to visualize performance data (graphs, logs, and PnL).
+- It **does not** communicate directly with the trading engine or the keystore on your computer.
+- It **cannot** sign transactions, withdraw funds, or access your private key.
+
+## Anti-Phishing & Support Policy
+
+Social engineering is the most common way traders lose funds. Please remember our strict policy:
+
+- **We will NEVER ask for your Private Key or Seed Phrase.**
+- **We will NEVER ask for your Keystore Passphrase.**
+- **We will NEVER ask you to "validate" or "synchronize" your wallet on a website.**
+
+If anyone claiming to be "LaserSell Support" asks for these things, they are a scammer. Block and report them immediately.

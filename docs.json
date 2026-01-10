@@ -22,6 +22,14 @@
         "pages": [
           "chrome-extension/installation"
         ]
+      },
+      {
+        "group": "Security",
+        "pages": [
+          "security/key-safety",
+          "security/untitled-page",
+          "security/privacy"
+        ]
       }
     ]
   },
