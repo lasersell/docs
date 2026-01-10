@@ -1,4 +1,95 @@
 ---
-title: "Setting Up Linux VPS"
+title: "Setting Up The Linux VPS"
 ---
 
+While it is possible to run LaserSell on your local machine for testing, **we strongly recommend running LaserSell on a remote Linux VPS (Virtual Private Server) for live trading.**
+
+### Why run on a VPS?
+
+Trading on the Solana network requires speed, stability, and constant uptime. A VPS offers several critical advantages over running a bot on your home computer:
+
+- **Ultra-Low Latency:** Data centers have significantly faster internet connections than residential ISPs. By choosing a VPS location close to RPC nodes (e.g., New York or Amsterdam), you reduce the time it takes for your transactions to land on-chain.
+- **24/7 Uptime:** A VPS runs forever. You don't need to worry about your computer going to sleep, Windows updates forcing a restart, or a power outage at your house stopping your bot mid-trade.
+- **Isolation & Security:** Running LaserSell on a dedicated server keeps your trading keys isolated from your personal computer, reducing the risk of malware or accidental exposure.
+- **Consistent Performance:** Your bot won't have to compete for resources with your web browser, games, or other background applications.
+
+### 1. Choose a Provider
+
+We recommend **Digital Ocean** or **Vultr**. Both provide high-performance cloud servers that are perfect for hosting Rust-based applications like LaserSell.
+
+Use the links below to sign up. These referral links give you free credits to start, so you can essentially run your bot for free for the first month or two while you learn.
+
+| Feature        | Digital Ocean                                                  | Vultr                                                                 |
+| -------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Sign Up Bonus  | [Get \$200 Credit for 60 Days](https://m.do.co/c/e17d8b7daaae) | [Get \$300 Credit for 30 Days](https://www.vultr.com/?ref=9816764-9J) |
+| Starting Price | ~\$6/month                                                     | ~\$6/month                                                            |
+| Key Benefit    | Extremely user-friendly interface. Great for beginners.        | Often has slightly faster high-frequency CPUs (good for sniping).     |
+| Billing        | Hourly (cancel anytime)                                        | Hourly (cancel anytime)                                               |
+
+### 2. Select Your Server Specs
+
+You do not need a supercomputer to run LaserSell because the binary is highly optimized. However, to ensure you don't miss trades due to memory lag, we recommend the following configurations:
+
+|           | Minimum Requirements        | Recommended Requirements                                 |
+| --------- | --------------------------- | -------------------------------------------------------- |
+| CPU       | 1 vCPU                      | **2 vCPUs** (Better for handling heavy WebSocket events) |
+| RAM       | 1 GB                        | 2 GB - 4 GB                                              |
+| Storage   | 25 GB SSD                   | 50 GB NVMe SSD                                           |
+| OS        | Ubuntu 22.04 or 24.04 (LTS) | Ubuntu 22.04 or 24.04 (LTS)                              |
+| Est. Cost | ~\$6 / month                | ~\$12 - \$18 / month                                     |
+
+### 3. Initial Server Setup
+
+Once you have purchased your VPS, you will receive an IP address (e.g., `192.168.1.50`) and a `root` password.
+
+1. Open your terminal (Command Prompt on Windows, Terminal on Mac).
+2. Connect to your server via SSH:
+
+   ```bash
+   ssh root@YOUR_SERVER_IP
+   ```
+3. Update your server's package list to ensure you have the latest security patches. Run the following command:
+
+   ```bash
+   apt update && apt upgrade -y
+   ```
+4. Install the necessary dependencies to download secure packages:
+
+   ```bash
+   apt install -y curl gnupg
+   ```
+
+### 4. Install LaserSell
+
+Now that your server is up to date, you can install LaserSell using our official APT repository. This ensures you can easily update the bot in the future with a simple command.
+
+Run the following commands one by one:
+
+**1. Add the LaserSell GPG Key** This verifies that the software you are downloading is actually created by us and hasn't been tampered with.
+
+Bash
+
+```bash
+curl -fsSL https://lasersell.github.io/apt/lasersell-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+```
+
+**2. Add the Repository to your sources** This tells your server where to look for the LaserSell files.
+
+```bash
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://lasersell.github.io/apt/ stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list
+```
+
+**3. Update and Install** Pull the latest package lists and install the bot.
+
+```bash
+sudo apt update
+sudo apt install lasersell
+```
+
+**4. Verify Installation** Check that the bot is installed correctly by checking the version:
+
+```bash
+lasersell --version
+```
+
+You are now ready to configure your bot! Proceed to the next page to set up your `config.yml`.
