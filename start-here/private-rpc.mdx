@@ -2,3 +2,83 @@
 title: "Choosing A Private RPC"
 ---
 
+In high-frequency trading, your connection to the blockchain is the single most critical factor determining your success. LaserSell connects to the Solana network via a **Remote Procedure Call (RPC) Node**.
+
+While Solana offers a public mainnet endpoint, **it is effectively unusable for automated trading.**
+
+## Why a Private RPC is Required
+
+LaserSell relies on real-time data streams to detect new liquidity pools the instant they are created. Using the public Solana RPC acts as a bottleneck that will cause you to miss every profitable trade.
+
+### 1. Speed & Latency (The "Snipe" Factor)
+
+- **Public RPC:** Heavily congested. By the time the public node tells your bot "a new token launched," the price has already pumped 200%.
+- **Private RPC:** LaserSell uses **WebSockets (WSS)** to listen for on-chain events in milliseconds. A private provider ensures you receive these notifications faster than the general public, allowing you to buy in the same block as the developer.
+
+### 2. Rate Limits (Avoiding "429 Too Many Requests")
+
+- **Public RPC:** Solana caps public traffic aggressively. If LaserSell tries to check a price and submit a buy order in rapid succession, the public node will block your IP address (Error 429), leaving your bot stuck while the market moves against you.
+- **Private RPC:** Paid plans offer guaranteed **Requests Per Second (RPS)**. This allows LaserSell to spam transaction retries and poll prices continuously without being banned.
+
+### 3. Transaction Propagation
+
+- **Public RPC:** Your "Buy" transaction enters a slow, crowded queue.
+- **Private RPC:** Providers like Helius and QuickNode have direct lines to validators (stake-weighted connections). This means your transaction skips the line and gets confirmed on-chain faster.
+
+## RPC Provider Comparison
+
+We have compared the most popular Solana providers below.
+
+- **Free Tiers** are useful for setting up LaserSell and running test simulations.
+- **Paid Plans** are strongly recommended for live trading with real money.
+
+| Provider       | Free Monthly Limit         | Rate Limit (RPS)       | WSS Support                                  | Entry-Level Paid Plan                  |
+| -------------- | -------------------------- | ---------------------- | -------------------------------------------- | -------------------------------------- |
+| Public Mainnet | Unlimited (Technically)    | **~10 RPS** (Unstable) | ❌ **Very Poor **(Disconnects often)          | N/A                                    |
+| Helius         | **1 Million** Credits      | 10 RPS                 | ✅ **Native**<br />(5 concurrent connections) | **\$49 / mo**  (10M Credits, 50 RPS)   |
+| Chainstack     | **3 Million** Requests     | ~25 RPS                | ✅ **Included**                               | **\$49 / mo**  (20M Requests, 250 RPS) |
+| QuickNode      | **10 Million** API Credits | 15 RPS                 | ✅ **Included**                               | **\$49 / mo**  (80M Credits, 50 RPS)   |
+| Alchemy        | **30 Million** CUs         | ~25 RPS                | ✅ **Included**                               | **\$49 / mo**  (Pay-as-you-go)         |
+
+> **Note on "Credits" vs "Requests":**
+>
+> - **Requests (Chainstack):** 1 call = 1 request. Simple and predictable.
+> - **Credits/CUs (Helius/Alchemy):** Different actions cost different amounts. A simple "get balance" might be 1 credit, but a heavy "get program accounts" scan could be 100 credits.
+
+## Our Recommendation
+
+### 🏆 Top Choice: Helius (Dev Plan)
+
+We recommend **Helius** as the primary choice for LaserSell.
+
+- **Why:** Helius is built exclusively for Solana. Their "Geyser" plugins and transaction propagation services are superior for sniping new launches.
+- **Config:** LaserSell has a dedicated mode for Helius that optimizes data streaming.
+- **Cost:** The \$49/month **Dev Plan** provides enough throughput for a standard sniper setup.
+
+### 🥈 Alternative: Chainstack
+
+If you want simple, predictable billing or need nodes in specific geographic locations (to be closer to the exchange), **Chainstack** is an excellent alternative.
+
+- **Why:** They offer very generous limits on their "Growth" plan (250 RPS), which is great if you plan to run multiple instances of the bot simultaneously.
+
+## How to Configure
+
+Once you have purchased a plan, you will receive an **HTTP URL** and a **WSS URL** (WebSocket).
+
+1. Open your `config.yml` file.
+2. Paste your keys into the `rpc` and `stream` sections:
+
+```yaml
+rpc:
+  mode: "helius"  # or "private" if using Chainstack/QuickNode
+  # If using Chainstack/Others, uncomment and paste here:
+  # private_url: "https://solana-mainnet.core.chainstack.com/..."
+
+helius:
+  api_key: "YOUR_HELIUS_API_KEY"
+
+stream:
+  mode: "helius" # or "private"
+  # If using Chainstack/Others, uncomment and paste here:
+  # private_ws_url: "wss://solana-mainnet.core.chainstack.com/..."
+```
