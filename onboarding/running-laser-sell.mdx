@@ -1,5 +1,6 @@
 ---
 title: "Running LaserSell"
+description: "Essential commands and workflows for operating the CLI bot and managing your active trading sessions."
 ---
 
 LaserSell is a command-line application designed to run on high-performance Linux VPS environments. While the application handles complex high-frequency trading logic, its runtime behavior is controlled by a set of command-line arguments passed at startup.
@@ -29,7 +30,7 @@ The most important arguments determine **what** LaserSell watches and trades. Yo
 - **Target Audience:** Targeted single-token traders.
 - **Function:** Puts LaserSell into "Single-Mint Mode." Instead of scanning for new tokens, it focuses entirely on the specific contract address (Mint ID) provided.
 - **Why use it:** Use this when you have already bought (or are about to buy) a specific token using an external tool. LaserSell locks onto this specific mint and waits for your balance to appear, then manages the sale.
-  - _Note: This option is mutually exclusive with _`-c`_and _ `-l`_._
+  - \_Note: This option is mutually exclusive with __``-cand _ -l.``__
 
 ## Configuration & Interface Arguments
 
