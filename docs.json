@@ -18,13 +18,14 @@
       },
       {
         "group": "Chrome Extension",
-        "icon": "chess-knight-piece",
+        "icon": "camera-web",
         "pages": [
           "chrome-extension/installation"
         ]
       },
       {
         "group": "Security",
+        "icon": "lock",
         "pages": [
           "security/key-safety",
           "security/untitled-page",
