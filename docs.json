@@ -29,11 +29,44 @@
         ]
       },
       {
+        "group": "Pricing",
+        "pages": [
+          "pricing/license-subscriptions",
+          "pricing/fee-structure"
+        ]
+      },
+      {
         "group": "Security",
         "pages": [
           "security/key-safety",
           "security/untitled-page",
           "security/privacy"
+        ]
+      },
+      {
+        "group": "How To Win",
+        "pages": [
+          "how-to-win/trading-strategies-and-best-practices",
+          "how-to-win/risk-disclosures-and-responsible-trading"
+        ]
+      },
+      {
+        "group": "Use Cases and Examples",
+        "pages": []
+      },
+      {
+        "group": "What's New",
+        "pages": [
+          "whats-new/changelog"
+        ]
+      },
+      {
+        "group": "Getting Support",
+        "pages": [
+          "getting-support/faq",
+          "glossary",
+          "community",
+          "getting-support/contact"
         ]
       }
     ]
