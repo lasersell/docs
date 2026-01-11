@@ -51,10 +51,6 @@
         ]
       },
       {
-        "group": "Use Cases and Examples",
-        "pages": []
-      },
-      {
         "group": "What's New",
         "pages": [
           "whats-new/changelog"
