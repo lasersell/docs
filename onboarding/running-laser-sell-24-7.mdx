@@ -1,0 +1,79 @@
+---
+title: "Running LaserSell 24/7"
+---
+
+By default, LaserSell stops running when you close your terminal or disconnect from your VPS. However, many users prefer to run the bot continuously as a background service. This allows LaserSell to act as an "always-on" safety net for your trading activities.
+
+Before deciding to run the bot 24/7, you should weigh the benefits against the potential costs.
+
+## Pros & Cons
+
+### ✅ The Pros
+
+- **Trade from Anywhere:** With LaserSell running on your VPS, you can execute buys using your mobile wallet or browser extension without needing to log into your server. The bot will automatically detect the new position and manage the sale according to your config.
+- **Convenience:** You don't need to SSH into your VPS and start the application every time you want to take a trade.
+- **Instant Reaction:** The bot is already initialized and connected to the blockchain, eliminating the startup time required to load config files and establish WebSocket connections.
+
+### ❌ The Cons
+
+- **RPC Credit Consumption:** This is the most significant factor. Even when you aren't trading, LaserSell maintains active WebSocket connections and polls for updates to ensure it never misses a transaction. **If you are on a free-tier plan with your Private RPC provider, running 24/7 may deplete your monthly credits quickly.**
+- **Security:** While your keys are encrypted at rest, running the bot 24/7 means your wallet is "unlocked" in the server's memory for the duration of the session.
+- **Log Management:** Long-running sessions can generate large log files if you are running in verbose mode.
+
+> **Recommendation:** We recommend running 24/7 only if you have a paid Private RPC plan with sufficient limits. If you are on a free tier, start the bot only during your active trading sessions.
+
+## Using `tmux` for 24/7 Operation
+
+The industry-standard tool for keeping terminal applications running in the background is **tmux** (Terminal Multiplexer). It allows you to create a session, start LaserSell, and then "detach" from it, leaving it running even after you disconnect from your VPS.
+
+### 1. Installing tmux
+
+Since you are on a Linux VPS, install tmux using `apt`:
+
+```
+sudo apt update
+sudo apt install tmux -y
+```
+
+### 2. Creating a Session
+
+To start a new background session, assign it a name (e.g., "lasersell") so it's easy to find later.
+
+```bash
+tmux new -s lasersell
+```
+
+Once inside the new session, run your standard start command:
+
+```bash
+# Example: Start in hybrid mode
+lasersell -c -l
+```
+
+### 3. Detaching (Leaving it running)
+
+To leave the session without stopping the bot:
+
+1. Press `Ctrl` + `b`
+2. Release both keys.
+3. Press `d`.
+
+You will return to your main terminal prompt, and LaserSell will continue running silently in the background.
+
+### 4. Rejoining the Session
+
+When you want to check your profits, adjust settings, or stop the bot, re-attach to the session:
+
+```bash
+tmux attach -t lasersell
+```
+
+### 5. Managing Sessions
+
+Here are other useful commands for managing your background tasks:
+
+| Command                          | Description                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| `tmux ls`                        | List all currently running sessions.                                            |
+| `tmux kill-session -t lasersell` | Forcefully stop the session (and the bot) without attaching.                    |
+| `Ctrl`\+`b`, `[`                 | Enter "Scroll Mode" (use arrow keys to scroll up/down logs). Press `q` to exit. |
