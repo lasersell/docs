@@ -11,14 +11,14 @@
         "group": "Start Here",
         "pages": [
           "start-here/getting-started",
-          "start-here/private-rpc",
+          "start-here/choosing-a-private-rpc",
           "start-here/setting-up-linux-vps"
         ]
       },
       {
         "group": "Onboarding",
         "pages": [
-          "onboarding/laser-sell-wallet",
+          "onboarding/lasersell-wallet",
           "onboarding/configuration"
         ]
       },
