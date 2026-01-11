@@ -12,7 +12,8 @@
         "pages": [
           "start-here/getting-started",
           "start-here/choosing-a-private-rpc",
-          "start-here/setting-up-linux-vps"
+          "start-here/setting-up-linux-vps",
+          "installing-laser-sell"
         ]
       },
       {
