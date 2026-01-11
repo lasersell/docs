@@ -10,6 +10,7 @@
       {
         "group": "Start Here",
         "pages": [
+          "start-here/what-is-laser-sell",
           "start-here/getting-started",
           "start-here/choosing-a-private-rpc",
           "start-here/setting-up-linux-vps",
