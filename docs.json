@@ -63,10 +63,8 @@
       {
         "group": "Getting Support",
         "pages": [
-          "getting-support/faq",
           "glossary",
-          "community",
-          "getting-support/contact"
+          "community"
         ]
       }
     ]
