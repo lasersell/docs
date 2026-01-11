@@ -1,0 +1,64 @@
+---
+title: "LaserSell Wallet"
+---
+
+Now that you have installed LaserSell, the first step is to configure your secure wallet.
+
+Security is the core of the LaserSell architecture. We understand that your private keys control your assets, which is why LaserSell uses a **zero-trust, local-only encrypted keystore system**. We do not store your keys on our servers, and they are never saved in plain text on your hard drive.
+
+## Security Architecture
+
+LaserSell replaces insecure "plain text" wallet files (like standard `id.json` files) with an encrypted **Keystore**.
+
+- **Encryption:** Your private key is encrypted using **XChaCha20-Poly1305**, a high-performance authenticated encryption algorithm.
+- **Passphrase Protection:** You must set a **Passphrase** to lock your wallet. We use **Argon2id** (a memory-hard password hashing algorithm) to derive your encryption key, making your wallet highly resistant to brute-force attacks.
+- **Session Locking:** Your wallet is only decrypted in memory while LaserSell is running. If you close the application, the wallet automatically locks.
+
+## Initial Setup
+
+To begin, simply open your terminal and run the application:
+
+```bash
+lasersell
+```
+
+If this is your first time running LaserSell, the **Interactive Onboarding Wizard** will launch automatically.
+
+### Creating a New Wallet
+
+If you wish to generate a fresh wallet dedicated to LaserSell:
+
+1. Run `lasersell` to start the wizard.
+2. When asked **"Import an existing wallet?"**, select **No**.
+3. LaserSell will generate a secure 12-word **Seed Phrase**.
+4. **Write this phrase down immediately.** This is the _only_ time it will be displayed.
+5. Confirm that you have saved the phrase to complete the setup.
+
+### Importing an Existing Wallet
+
+If you prefer to use an existing Solana wallet (e.g., one exported from Phantom or Solflare), you can securely import it. The wizard will convert your raw key into our encrypted Keystore format.
+
+1. Run `lasersell` to start the wizard.
+2. When asked **"Import an existing wallet?"**, select **Yes**.
+3. Choose your import method:
+   - **Seed phrase:** Enter your 12 or 24-word mnemonic.
+   - **Solana keypair JSON path:** Provide the path to a standard `id.json` file.
+   - **Base58 secret key:** Paste the alphanumeric private key string exported from a browser extension.
+
+Once the import is complete, your key is encrypted and stored locally. You may safely delete any insecure plaintext files you used for the import.
+
+## Managing Your Wallet
+
+### Switching Wallets
+
+If you need to switch to a different wallet or rotate your keys, you can re-run the setup wizard at any time using the `--setup` flag. This allows you to generate a new Keystore without reinstalling the application.
+
+```bash
+lasersell --setup
+```
+
+The wizard will ask if you want to overwrite your existing config and keystore files. You can choose to overwrite them or specify new file paths (e.g., `trading-wallet.keystore.json`).
+
+### Changing Your Passphrase
+
+To change your passphrase, you must re-import your wallet (using your saved seed phrase or private key) via the `lasersell --setup` command. This ensures the wallet is re-encrypted from scratch with the new credentials.

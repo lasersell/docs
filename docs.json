@@ -17,6 +17,12 @@
         ]
       },
       {
+        "group": "Onboarding",
+        "pages": [
+          "onboarding/laser-sell-wallet"
+        ]
+      },
+      {
         "group": "Chrome Extension",
         "icon": "camera-web",
         "pages": [
