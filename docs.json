@@ -19,7 +19,8 @@
       {
         "group": "Onboarding",
         "pages": [
-          "onboarding/laser-sell-wallet"
+          "onboarding/laser-sell-wallet",
+          "onboarding/configuration"
         ]
       },
       {

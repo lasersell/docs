@@ -1,0 +1,104 @@
+---
+title: "Configuration"
+---
+
+LaserSell is designed to get you up and running quickly. Instead of manually writing configuration files from scratch, the application includes an **Interactive Setup Wizard** that runs the first time you launch it.
+
+## 1. Initial Setup (The Wizard)
+
+After you have created or imported your wallet (see [LaserSell Wallet](https://www.google.com/search?q=/onboarding/laser-sell-wallet)), the wizard will automatically proceed to the **Configuration** phase.
+
+This interactive process configures your connectivity to the Solana network. You will be prompted for the following inputs in your terminal:
+
+### Step 1: License Activation
+
+The first prompt asks for your license key.
+
+- **Input:** Paste your Whop license key here.
+- **Note:** The key is validated immediately. You cannot proceed without a valid license.
+
+### Step 2: RPC Connection
+
+The wizard asks how you want to **send transactions** and fetch account data.
+
+- **Use private RPC? [y/N]**:
+  - **No (Default/Recommended):** Uses **Helius**. You will be asked for your Helius API key later.
+  - **Yes:** Select this if you have your own private node. You will be prompted to enter your HTTP/HTTPS URL.
+- **Use public RPC?**: (Only appears if you declined private RPC). We recommend choosing **No** to stick with Helius, as public RPCs are often too slow for sniping.
+
+### Step 3: Stream Connection
+
+The wizard asks how you want to **receive market data** (new mints, price updates).
+
+- **Use Laserstream? [y/N]**:
+  - **Yes:** Uses the proprietary low-latency Laserstream backend. This requires a Helius API key.
+  - **No:** Uses standard WebSockets.
+- **Stream Source:** If you aren't using Laserstream, you can choose to stream data via Helius (recommended), a Private Node, or Public nodes.
+
+### Step 4: Credentials
+
+- **Helius API Key:** If you selected Helius for RPC or Streaming, you must paste your API Key here.
+- **Private URLs:** If you selected Private modes, you will need to paste your RPC (HTTP) and WebSocket (WSS) URLs.
+
+Once finished, the wizard saves a `config.yml` file and an encrypted keystore to your disk.
+
+## 2. The Configuration File
+
+While the wizard handles connectivity, it applies **default safety settings** for your trading strategy (e.g., Take Profit at 0.2 SOL, Stop Loss at 0.1 SOL).
+
+To customize your strategy, change slippage settings, or enable telemetry, you must edit the generated `config.yml` file.
+
+Open the file in your text editor:
+
+```bash
+nano config.yml
+```
+
+### Strategy Section (Important)
+
+This controls when LaserSell exits a position. You likely want to change these defaults to match your risk profile.
+
+```bash
+strategy:
+  target_profit: 0.2        # or "50%"
+  stop_loss: 0.1            # or "25%"
+  sell_all_timeout_sec: 30
+```
+
+- `target_profit`:
+  - **SOL Amount:** Enter a number (e.g., `0.5`) to sell when profit exceeds that amount in SOL.
+  - **Percentage:** Enter a string (e.g., `"100%"`) to sell when the position value doubles (2x).
+- `stop_loss`:
+  - **SOL Amount:** Enter a number (e.g., `0.1`) to sell if you lose that amount in SOL.
+  - **Percentage:** Enter a string (e.g., `"20%"`) to sell if the value drops 20% below your entry price.
+- `sell_all_timeout_sec`: A hard time limit. If a trade is still open after this many seconds, LaserSell will exit immediately to free up your capital.
+
+### Sell Execution
+
+Controls the safety parameters for sell transactions.
+
+```bash
+sell:
+  slippage_pad_bps: 20      # Buffer added to calculated slippage (0.20%)
+  slippage_max_bps: 2000    # Hard cap on slippage (20.00%)
+  confirm_timeout_sec: 10   # How long to wait for confirmation
+  max_retries: 2            # Retries if a sell fails
+```
+
+### Telemetry
+
+To use the Chrome Extension dashboard, ensure telemetry is enabled.
+
+```bash
+telemetry:
+  enabled: true
+```
+
+## 3. Applying Changes
+
+If you edit the `config.yml` file while LaserSell is running, the changes will **not** take effect immediately. You must restart the application:
+
+1. Press `Ctrl+C` to stop LaserSell.
+2. Run `lasersell` again.
+
+Your new settings will be loaded on startup.
