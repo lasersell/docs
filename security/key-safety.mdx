@@ -30,16 +30,13 @@ LaserSell replaces this outdated method with a robust **Encrypted Keystore** sys
 
 > **Important:** Because your security depends entirely on your passphrase, **there is no "Forgot Password" feature.** If you lose your passphrase, the keystore file is mathematically impossible to decrypt.
 
-## Memory Hygiene (RAM Protection)
+## **Memory Hygiene (Secure Unlocking)** 
 
-Security isn't just about files on a disk; it is also about what happens while the software is running.
+Security isn’t just about files on a disk; it is also about how credentials are handled in memory. LaserSell utilizes advanced **Memory Wiping** techniques during the unlocking process. When you start a session:
 
-LaserSell utilizes advanced **Memory Wiping** techniques. When you unlock your wallet to start a session:
-
-1. The key is decrypted into the computer's Random Access Memory (RAM) only for the split second it is needed.
-2. Immediately after use, the sensitive memory is explicitly "zeroized" (scrubbed).
-
-This protects you against advanced malware or "RAM scraper" attacks that attempt to recover keys from memory while applications are running.
+- Your **passphrase and decryption intermediates** are held in Random Access Memory (RAM) only for the split second they are needed.
+- Immediately after your wallet is unlocked, these sensitive secrets are explicitly “zeroized” (scrubbed).
+- This ensures your master password never lingers in memory, protecting you against malware that attempts to scrape credentials from running applications.
 
 ## Best Practices for Wallet Management
 
