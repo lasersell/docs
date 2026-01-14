@@ -36,7 +36,6 @@
       {
         "group": "Pricing",
         "pages": [
-          "pricing/license-subscriptions",
           "pricing/fee-structure"
         ]
       },
@@ -75,5 +74,5 @@
     }
   },
   "favicon": "/images/favicon.ico",
-  "logo": "/images/lasersell.svg"
+  "logo": "/images/lasersell2.svg"
 }
