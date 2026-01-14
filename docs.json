@@ -57,6 +57,7 @@
       {
         "group": "Getting Support",
         "pages": [
+          "getting-support/support",
           "getting-support/faq",
           "glossary",
           "community",
