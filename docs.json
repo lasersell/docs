@@ -36,6 +36,7 @@
       {
         "group": "Pricing",
         "pages": [
+          "pricing/renewing-access",
           "pricing/fee-structure"
         ]
       },
