@@ -30,7 +30,7 @@ The most important arguments determine **what** LaserSell watches and trades. Yo
 - **Target Audience:** Targeted single-token traders.
 - **Function:** Puts LaserSell into "Single-Mint Mode." Instead of scanning for new tokens, it focuses entirely on the specific contract address (Mint ID) provided.
 - **Why use it:** Use this when you have already bought (or are about to buy) a specific token using an external tool. LaserSell locks onto this specific mint and waits for your balance to appear, then manages the sale.
-  - \_Note: This option is mutually exclusive with __``-cand _ -l.``__
+  - \_Note: This option is mutually exclusive with **`-cand _ -l.`**
 
 ## Configuration & Interface Arguments
 
@@ -39,7 +39,7 @@ These arguments control how the application loads and how it displays informatio
 `-f <PATH>` / `--config <PATH>`
 
 - **Description:** Manually specifies the path to your `config.yml` file.
-  - **Default Behavior:** If omitted, LaserSell looks for the config in standard system directories (e.g., `~/.config/lasersell/config.yml`) or the path defined in the `LASERSELL_CONFIG_PATH` environment variable.
+  - **Default Behavior:** If omitted, LaserSell looks for the config in standard system directories (e.g., `~/.lasersell/config.yml`) .
   - **Why use it:** Essential if you run multiple bot instances with different strategies (e.g., one config for conservative exits, one for aggressive "degen" plays).
 
 `--setup`
