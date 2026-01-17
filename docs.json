@@ -30,7 +30,8 @@
       {
         "group": "Chrome Extension",
         "pages": [
-          "chrome-extension/installation"
+          "chrome-extension/installation",
+          "security/chrome-extension"
         ]
       },
       {
@@ -44,8 +45,7 @@
         "group": "Security",
         "pages": [
           "security/key-safety",
-          "security/privacy",
-          "security/chrome-extension"
+          "security/privacy"
         ]
       },
       {
