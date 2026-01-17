@@ -48,19 +48,28 @@ We have compared the most popular Solana providers below.
 
 ## Our Recommendation
 
-### 🏆 Top Choice: [Helius](https://www.helius.dev/) (Dev Plan)
+### 🏆 Top Choice: Helius (Dev Plan)
 
-We recommend **Helius** as the primary choice for LaserSell.
+We recommend Helius as the primary choice for LaserSell.
 
-- **Why:** Helius is built exclusively for Solana. Their "Geyser" plugins and transaction propagation services are superior for sniping new launches.
+- **Why:** Helius is built exclusively for Solana. Their transaction propagation services and general infrastructure are superior for ensuring your snipe transactions land on-chain quickly.
 - **Config:** LaserSell has a dedicated mode for Helius that optimizes data streaming.
-- **Cost:** The \$49/month **Dev Plan** provides enough throughput for a standard sniper setup.
+- **Cost:** The \$49/month Dev Plan provides enough throughput for a standard sniper setup.
 
-### 🥈 Alternative: [Chainstack](https://chainstack.referral-factory.com/u50NQua3)
+### 🥉 The "Free Route" Strategy (Zero Cost)
 
-If you want simple, predictable billing or need nodes in specific geographic locations (to be closer to the exchange), **Chainstack** is an excellent alternative.
+For users who want to start without overhead costs, we recommend a hybrid configuration that leverages the best free tiers from two different providers.
 
-- **Why:** They offer very generous limits on their "Growth" plan (250 RPS), which is great if you plan to run multiple instances of the bot simultaneously.
+- **Configuration:**
+  - **RPC Connection:** **Helius Free Plan**. Use this strictly for the RPC configuration.
+  - **Websocket Connection:** **Chainstack Free Plan**. Use this for the real-time data stream (WSS).
+- **Why:** This combination avoids the limitations of using a single free provider. Helius offers superior transaction landing on their RPCs, while Chainstack provides a stable and generous websocket connection on their free tier, ensuring you can stream market data without hitting immediate rate limits.
+
+### 🥈 Alternative: Chainstack (Paid)
+
+If you need simple, predictable billing or nodes in specific geographic locations to reduce latency, the paid Chainstack plans are an excellent alternative.
+
+- **Why:** They offer very generous limits on their "Growth" plan (250 RPS), which is ideal if you plan to run multiple instances of the bot simultaneously.
 
 ## How to Configure
 
