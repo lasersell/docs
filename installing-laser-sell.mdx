@@ -12,13 +12,13 @@ Run the following commands one by one:
 Bash
 
 ```bash
-curl -fsSL https://lasersell.github.io/apt/lasersell-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+curl -fsSL https://lasersell.github.io/apt/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
 ```
 
 **2. Add the Repository to your sources** This tells your server where to look for the LaserSell files.
 
 ```bash
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://lasersell.github.io/apt/ stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://lasersell.github.io/apt stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
 ```
 
 **3. Update and Install** Pull the latest package lists and install the bot.
