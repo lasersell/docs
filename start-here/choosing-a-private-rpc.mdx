@@ -56,6 +56,12 @@ We recommend Helius as the primary choice for LaserSell.
 - **Config:** LaserSell has a dedicated mode for Helius that optimizes data streaming.
 - **Cost:** The \$49/month Dev Plan provides enough throughput for a standard sniper setup.
 
+### 🥈 Alternative: Chainstack (Paid)
+
+If you need simple, predictable billing or nodes in specific geographic locations to reduce latency, the paid Chainstack plans are an excellent alternative.
+
+- **Why:** They offer very generous limits on their "Growth" plan (250 RPS), which is ideal if you plan to run multiple instances of the bot simultaneously.
+
 ### 🥉 The "Free Route" Strategy (Zero Cost)
 
 For users who want to start without overhead costs, we recommend a hybrid configuration that leverages the best free tiers from two different providers.
@@ -65,11 +71,9 @@ For users who want to start without overhead costs, we recommend a hybrid config
   - **Websocket Connection:** **Chainstack Free Plan**. Use this for the real-time data stream (WSS).
 - **Why:** This combination avoids the limitations of using a single free provider. Helius offers superior transaction landing on their RPCs, while Chainstack provides a stable and generous websocket connection on their free tier, ensuring you can stream market data without hitting immediate rate limits.
 
-### 🥈 Alternative: Chainstack (Paid)
-
-If you need simple, predictable billing or nodes in specific geographic locations to reduce latency, the paid Chainstack plans are an excellent alternative.
-
-- **Why:** They offer very generous limits on their "Growth" plan (250 RPS), which is ideal if you plan to run multiple instances of the bot simultaneously.
+<Warning>
+  This "Free Route" strategy should only just be to "try it out". Free tier WebSocket connections have a tendency to stop responding and are not optimal. It's highly recommended to get a paid plan from an RPC provider like Helius and use their WebSocket servers.
+</Warning>
 
 ## How to Configure
 
