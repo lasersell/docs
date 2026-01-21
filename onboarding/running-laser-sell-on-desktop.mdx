@@ -1,0 +1,43 @@
+---
+title: "Running LaserSell on Desktop"
+---
+
+## 1. Docker Requirement
+
+The application requires Docker. Docker executes the software within a container to ensure environment consistency.
+
+## 2. Preparation
+
+1. **Install Docker Desktop:** Install the application from the Docker website.
+2. **Create Directory:** Create a folder named `lasersell` on the desktop. Configuration files will be stored here.
+
+## 3. Execution
+
+Ensure Docker is active. Follow the steps below for the relevant operating system.
+
+### Windows (PowerShell)
+
+1. Open **PowerShell**.
+2. Type `cd` followed by a space, drag the `lasersell` folder into the window, and press **Enter**.
+3. Execute the following command:
+
+   ```shellscript
+   docker run -it -v ${PWD}:/app/.lasersell lasersell/lasersell
+   ```
+
+### Mac (Terminal)
+
+1. Open **Terminal**.
+2. Type `cd` followed by a space, drag the `lasersell` folder into the window, and press **Enter**.
+3. Execute the following command:
+
+   ```shellscript
+   docker run -it -v "$(pwd):/app/.lasersell" lasersell/lasersell
+   ```
+
+## 4. Initialization Process
+
+1. **Setup:** The LaserSell Setup Wizard initiates within the terminal.
+2. **Configuration:** Enter the license key and preferences when prompted.
+3. **File Generation:** The application saves `config.yml` and `config.keystore.json` to the local `lasersell` directory.
+4. **Operation:** Subsequent executions utilize these files for automated trading.
