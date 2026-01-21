@@ -79,5 +79,13 @@
     }
   },
   "favicon": "/images/favicon2.ico",
-  "logo": "/images/lasersell2.svg"
+  "logo": "/images/lasersell2.svg",
+  "navbar": {
+    "links": [
+      {
+        "label": "Main Site",
+        "href": "https://lasersell.io"
+      }
+    ]
+  }
 }
