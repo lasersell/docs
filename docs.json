@@ -35,8 +35,7 @@
       {
         "group": "Onboarding",
         "pages": [
-          "onboarding/lasersell-wallet",
-          "onboarding/configuration",
+          "onboarding/initial-setup",
           "onboarding/example-configuration"
         ]
       },
