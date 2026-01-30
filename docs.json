@@ -36,7 +36,8 @@
         "group": "Onboarding",
         "pages": [
           "onboarding/initial-setup",
-          "onboarding/example-configuration"
+          "onboarding/example-configuration",
+          "onboarding/lasersell-ui"
         ]
       },
       {

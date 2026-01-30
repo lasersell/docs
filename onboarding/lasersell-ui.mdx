@@ -1,0 +1,357 @@
+---
+title: "LaserSell UI"
+description: "Complete guide to the LaserSell Terminal UI (TUI): layout, navigation, status meanings, and every interactive command."
+---
+
+After you unlock your wallet (enter your keystore passphrase), LaserSell switches into its **Terminal UI (TUI)**. This screen is where you monitor detected tokens (“sessions”), see strategy settings, inspect a selected token in detail, and run commands.
+
+## UI layout at a glance
+
+The screen is split into four major areas:
+
+![Screenshot2026 01 28at6 41 59AM](/images/Screenshot2026-01-28at6.41.59AM.png)
+
+Two panes can take “focus”:
+
+- **Sessions pane** (left) — for selecting tokens and UI shortcuts
+- **Command pane** (bottom) — for typing commands
+
+The focused pane is shown with a more prominent border highlight.
+
+## Header bar
+
+The header is a single-line status summary:
+
+- **▶ RUNNING** / **⏸ PAUSED**
+  - This controls **new sessions only**:
+    - **RUNNING**: LaserSell can start new sessions when tokens are detected.
+    - **PAUSED**: LaserSell will _not_ start new sessions (existing sessions keep running).
+- **RPC _N_ ms**
+  - Displays the most recent RPC latency measurement.
+  - Color-coded in the UI:
+    - fast (green), moderate (yellow), slow (red), or `--` if unknown
+- **WS up/down**
+  - Shows whether the Solana websocket stream is connected.
+- **Wallet**
+  - Shows your wallet pubkey in shortened form: `ABCD...WXYZ`
+- **SOL**
+  - Current SOL balance (if available)
+- **USD1** / **USD1 (dev)**
+  - Current USD1 balance (if available)
+  - Shows “(dev)” when running on devnet
+
+## Sessions panel (📈 Sessions)
+
+This is the main list of tokens LaserSell has seen recently.
+
+### Summary line
+
+At the top of the panel you’ll see counters:
+
+- **Active**: sessions currently running (not closed)
+- **Pending**: detected but not yet started/filtered (roughly “in the pipeline”)
+- **Detected**: total mints detected
+- **Filtered**: mints rejected by filters
+
+### List items
+
+Each row looks like:
+
+```shellscript
+SYMBOL ABCD...WXYZ [STATUS] note…
+```
+
+- **SYMBOL**: token symbol if known, otherwise `(unknown)`
+- **ABCD...WXYZ**: mint pubkey shortened
+- **[STATUS]**: one of:
+
+| Status label | Meaning                                                  |
+| :----------- | :------------------------------------------------------- |
+| `DETECTED`   | Mint was detected (not yet filtered or started).         |
+| `FILTERED`   | Mint was filtered out; note usually contains the reason. |
+| `ACTIVE`     | A session started and is being tracked.                  |
+| `SELL SCHED` | A sell has been scheduled (exit triggered).              |
+| `SELLING`    | Sell attempts are in progress (may retry).               |
+| `CLOSED`     | Session is closed (sold or otherwise ended).             |
+| `ERROR`      | Session ended due to an error.                           |
+
+- **note…**: short “last update” message (truncated in the list)
+
+### Selection
+
+- The currently selected mint is highlighted with a marker (shown as `▸` in the UI).
+- The **Selected** panel on the right always shows details for the selected mint.
+
+## Strategy panel (🎯 Strategy)
+
+This panel shows the **currently active strategy settings** LaserSell is using:
+
+- **TP**: Target Profit (percent)
+- **SL**: Stop Loss (percent)
+- **DEADLINE**:
+  - `OFF` if disabled
+  - otherwise shows the configured deadline timeout in seconds
+- **SLIPPAGE**: max slippage allowed for sells (displayed as percent)
+
+These values update immediately if you change them via the `set …` command (see below).
+
+## Selected panel (🔎 Selected)
+
+This panel shows details for the currently selected mint.
+
+### Basic fields
+
+- **Token:** Identity line
+  - Shows `SYMBOL - Name` when available
+  - Falls back to symbol-only, name-only, or the mint short id
+- **State:** Session phase/state
+
+Session phase values you may see:
+
+| Phase label      | Meaning                                             |
+| :--------------- | :-------------------------------------------------- |
+| `DETECTING`      | Session started; still resolving initial details.   |
+| `COST BASIS`     | Cost basis has been computed/resolved.              |
+| `HOLDING`        | Position is held and monitored for exit conditions. |
+| `SELL SCHEDULED` | Exit triggered; sell is queued/scheduled.           |
+| `SELLING`        | Sell attempts are actively executing.               |
+| `CLOSED`         | Sell completed / session closed.                    |
+| `ERROR`          | Session failed and closed.                          |
+
+### Position and execution fields (when a session is active)
+
+You may see:
+
+- **Cost basis:** what LaserSell measured as the buy amount (in quote units)
+  - **Requested:** shown when available (what was requested vs. what was actually spent)
+- **Tokens:** size of the position (token count) if available
+- **Market / Quote:**
+  - Market values include: `pumpfun`, `pumpswap`, `meteora_dbc`, `meteora_damm_v2`, `raydium_launchpad`, `raydium_cpmm`
+  - Quote values include: `SOL`, `USD1`, or `OTHER`
+- **Proceeds:** estimated proceeds if the position were sold at current conditions
+- **PnL:** `proceeds - cost_basis` (colored)
+  - Also shows percent PnL when cost basis is known
+- **Deadline remaining:**
+  - `OFF` if deadline disabled
+  - otherwise the remaining time until the deadline triggers
+
+### Sell attempt fields (when selling or after a sell)
+
+- **Sell:** attempt number, slippage used for that attempt, and retry count
+
+### Expanded diagnostics (toggle on/off)
+
+Press **Enter** while focused on the Sessions pane to toggle “expanded details”. When expanded, the Selected panel can include:
+
+- **Token program** and **Token account** (short ids)
+- **Fee bps** and **P95 down/slot** (diagnostic metrics)
+- **Curve complete** (yes/no/unknown)
+- **Last update age**
+- **Last sell error** (truncated)
+- **Last signature** (shortened)
+
+These are primarily for troubleshooting / support context.
+
+### Progress to TP gauge
+
+At the bottom is a gauge labeled **Progress to TP**.
+
+- It estimates how close the selected session is to hitting your configured target profit.
+- It’s based on **current estimated proceeds vs. cost basis vs. target-profit amount**.
+- If data isn’t available yet, it will show `0%`.
+
+## Output panel (logs + responses)
+
+This is a rolling feed of:
+
+- your typed commands
+- LaserSell replies (success/info/warn/error)
+- surfaced log events (when relevant)
+
+Line prefixes:
+
+- `❯` command you typed
+- `✓` success reply
+- `↳` informational reply
+- `⚠` warning
+- `✖` error
+
+Use `clear` to wipe this panel.
+
+## Command input panel (❯ Command)
+
+This is where you type commands.
+
+- When empty, it shows a hint like: `Type a command… (? for help)`
+- When focused, a cursor block is shown.
+
+Editing / history:
+
+- **Enter**: run the command
+- **Esc**: clear the command line (and cancels pending confirmations)
+- **Up/Down**: browse command history
+- **Backspace**: delete
+
+## Keyboard controls
+
+### Global
+
+- **Ctrl+C**: quit immediately
+- **Tab / Shift+Tab**: toggle focus between:
+  - Sessions pane
+  - Command pane
+
+### Sessions pane (left) controls
+
+These only work when the **Sessions** pane is focused:
+
+- **Up / Down**: move selection
+- **Enter**: toggle expanded details in the Selected panel
+- **Space**: pause/resume **new sessions**
+- **m**: toggle mouse capture (enables/disables mouse interaction)
+
+## Mouse controls
+
+Mouse interaction only works when:
+
+1. Sessions pane is focused, and
+2. mouse capture is enabled
+
+Supported actions:
+
+- **Left click** on a session row: select that mint
+- **Scroll wheel**: move selection up/down
+- **Left click** on the RUNNING/PAUSED area in the header: toggle pause/resume
+- **Left click** in the output or command area: focus the command input (and mouse capture will be released)
+
+## Command reference
+
+Type these in the **Command** panel and press Enter.
+
+### `help` / `?`
+
+Prints the built-in help list (the available commands).
+
+Example:
+
+```shellscript
+help
+```
+
+### `quit` / `exit` / `q`
+
+Quits the TUI (same end result as Ctrl+C).
+
+Example:
+
+```shellscript
+q
+```
+
+### `pause`
+
+Pauses **new sessions** (does not stop existing ones).
+
+Example:
+
+```shellscript
+pause
+```
+
+If already paused, it will tell you.
+
+### `resume`
+
+Resumes starting new sessions.
+
+Example:
+
+```shellscript
+resume
+```
+
+If already running, it will tell you.
+
+### `sell` / `s`
+
+Queues an immediate sell for the **currently selected mint**.
+
+Behavior:
+
+- Requires confirmation.
+- After you run `sell`, you must type `y` (or `yes`) quickly to confirm.
+- If you type `n`/`no`, it cancels.
+- The confirmation prompt times out very quickly (a couple seconds). If it times out, re-run `sell`.
+
+Example flow:
+
+```shellscript
+sell
+y
+```
+
+If no session is selected, it warns you.
+
+### `extension code`
+
+Requests a new pairing code (for telemetry/extension pairing) **only if telemetry is enabled in your config**.
+
+Example:
+
+```shellscript
+extension code
+```
+
+What you’ll see:
+
+- An info line that it’s requesting a code
+- Then output lines like:
+  - `Pairing code: …`
+  - `Expires at: …`
+
+If telemetry is disabled, it will warn you.
+
+### `set …` (live settings)
+
+Updates strategy/sell settings **and writes them to your config file automatically**, then applies them live (no restart required).
+
+Supported forms:
+
+- `set tp <percent>`
+- `set sl <percent>`
+- `set slippage <percent>`
+- `set timeout <seconds>`
+
+Examples:
+
+```shellscript
+set tp 6%
+set sl 0%
+set slippage 20%
+set timeout 45
+```
+
+Notes:
+
+- `tp` and `sl` require a percent string like `6%` (include the `%`).
+- `slippage` accepts percent input and is converted internally (1% = 100 bps).
+- `timeout` is whole seconds:
+  - `0` disables the deadline timeout.
+
+If LaserSell can’t load or write the config, it will print an error.
+
+### `clear`
+
+Clears the Output panel (does not affect sessions).
+
+Example:
+
+```shellscript
+clear
+```
+
+## Common operational notes
+
+- If `sell` says “No session selected,” focus the Sessions pane (Tab), pick a mint (Up/Down or mouse), then try again.
+- If you want to copy text from your terminal and mouse selection isn’t working, toggle mouse capture off (`m`) while focused on the Sessions pane.
+- If the Selected panel shows `--` values, the session likely hasn’t resolved that data yet (cost basis/position tokens/proceeds update over time).
