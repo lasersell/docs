@@ -11,9 +11,15 @@
         "group": "Start Here",
         "pages": [
           "start-here/what-is-lasersell",
-          "start-here/getting-started",
-          "start-here/choosing-a-private-rpc",
-          "start-here/setting-up-linux-vps"
+          "start-here/getting-started"
+        ]
+      },
+      {
+        "group": "Prerequisites",
+        "pages": [
+          "prerequisites/overview",
+          "start-here/setting-up-linux-vps",
+          "start-here/choosing-a-private-rpc"
         ]
       },
       {
