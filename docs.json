@@ -58,6 +58,7 @@
       {
         "group": "Security",
         "pages": [
+          "security/wallet-encryption",
           "security/key-safety",
           "security/privacy"
         ]

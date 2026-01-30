@@ -1,0 +1,13 @@
+---
+title: "Wallet Encryption"
+---
+
+Security is the core of the LaserSell architecture. We understand that your private keys control your assets, which is why LaserSell uses a **zero-trust, local-only encrypted keystore system**. We do not store your keys on our servers, and they are never saved in plain text on your hard drive.
+
+## Security Architecture
+
+LaserSell replaces insecure "plain text" wallet files (like standard `id.json` files) with an encrypted **Keystore**.
+
+- **Encryption:** Your private key is encrypted using **XChaCha20-Poly1305**, a high-performance authenticated encryption algorithm.
+- **Passphrase Protection:** You must set a **Passphrase** to lock your wallet. We use **Argon2id** (a memory-hard password hashing algorithm) to derive your encryption key, making your wallet highly resistant to brute-force attacks.
+- **Session Locking:** Your wallet is only decrypted in memory while LaserSell is running. If you close the application, the wallet automatically locks.
