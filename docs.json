@@ -10,7 +10,8 @@
       {
         "group": "Start Here",
         "pages": [
-          "start-here/what-is-lasersell"
+          "start-here/what-is-lasersell",
+          "start-here/quickstart"
         ]
       },
       {
