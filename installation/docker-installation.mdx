@@ -1,4 +1,34 @@
 ---
-title: 'Docker Installation'
+title: "Docker Installation"
 ---
 
+### Docker setup (official)
+
+This is the official Docker path and is designed to store LaserSell config files in a local folder you create (mounted into the container).
+
+#### 1) Preparation
+
+- Install Docker Desktop
+- Create a new empty folder named `lasersell` (example: on your Desktop)
+
+#### 2) Run & Setup
+
+Open a terminal, `cd` into that folder, then run:
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+**Mac (Terminal):**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+#### 3) What happens next
+
+- On first run, the **LaserSell Setup Wizard** launches in the container.
+- When finished, it writes `config.yml` and `config.keystore.json` into your `lasersell` folder (via the mounted volume).
+- On next run, it detects those files and starts normally.
