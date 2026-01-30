@@ -71,16 +71,12 @@ For users who want to start without overhead costs, we recommend a hybrid config
   - **Websocket Connection:** **Chainstack Free Plan**. Use this for the real-time data stream (WSS).
 - **Why:** This combination avoids the limitations of using a single free provider. Helius offers superior transaction landing on their RPCs, while Chainstack provides a generous websocket connection on their free tier, ensuring you can stream market data without hitting immediate rate limits.
 
-<Warning>
-  This "Free Route" strategy should only just be used to "try it out". Free tier WebSocket connections have a tendency to stop responding and are not optimal. It's highly recommended to get a paid plan from an RPC provider like Helius and use their WebSocket servers.
-</Warning>
-
 ## How to Configure
 
-Once you have purchased a plan, you will receive an **HTTP URL** and a **WSS URL** (WebSocket).
+After selecting either a premium plan or the free tier, your dedicated HTTP and WebSocket (WSS) endpoints will be generated and made available to you.
 
-1. Open your `config.yml` file.
-2. Paste your keys into the `rpc` and `stream` sections:
+1. Open your `config.yml` file (generally located in `~/.lasersell`) .
+2. To finalize your setup, input your credentials into the `config.yml` file. If you are using our recommended **Helius** setup, simply paste your API key into the `helius` section. 
 
 ```yaml
 rpc:
@@ -91,8 +87,39 @@ rpc:
 helius:
   api_key: "YOUR_HELIUS_API_KEY"
 
-stream:
+websocket:
   mode: "helius" # or "private"
   # If using Chainstack/Others, uncomment and paste here:
   # private_ws_url: "wss://solana-mainnet.core.chainstack.com/..."
+```
+
+For **Chainstack** or other providers, enter your dedicated HTTP and WebSocket URLs into the `private_url` and `private_ws_url` fields.
+
+```yaml
+rpc:
+  mode: "private"  # or "helius" if using Helius
+  # If using Chainstack/Others, uncomment and paste here:
+  private_url: "https://solana-mainnet.core.chainstack.com/..."
+
+helius:
+  api_key: "YOUR_HELIUS_API_KEY"
+
+websocket:
+  mode: "private" # or "helius"
+  # If using Chainstack/Others, uncomment and paste here:
+  private_ws_url: "wss://solana-mainnet.core.chainstack.com/..."
+```
+
+**Maximize free-tier limits** by combining providers: point your RPC settings to **Helius** and your WebSocket (WSS) settings to **Chainstack**, as detailed in our '**Free Route**' strategy.
+
+```yaml
+rpc:
+  mode: "helius"
+
+helius:
+  api_key: "YOUR_HELIUS_API_KEY"
+
+websocket:
+  mode: "private"
+  private_ws_url: "wss://solana-mainnet.core.chainstack.com/..."
 ```
