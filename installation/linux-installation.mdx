@@ -1,42 +1,25 @@
 ---
 title: "Linux Installation"
-description: "Linux is the primary and recommended platform for running LaserSell, especially for 24/7 operation."
 ---
 
-### Supported Architectures
-
-- `x86_64`
-- `arm64` (Raspberry Pi, ARM servers)
-
-### Recommended Method: Install Script
-
-The official install script:
-
-- Detects architecture automatically
-- Installs the correct binary
-- Places `lasersell` on your `PATH`
-- Handles updates cleanly
+### Linux (Debian/Ubuntu/WSL) via [install.sh](http://install.sh) (recommended)
 
 ```shellscript
 curl -fsSL https://dl.lasersell.io/install.sh | bash
 ```
 
-After installation, restart your shell or reload your profile.
-
-### Verify Installation
+### Linux (Debian/Ubuntu/WSL) manual APT setup (no [install.sh](http://install.sh))
 
 ```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+### Verify
+
+```
 lasersell --version
 ```
-
-You should see the current LaserSell version printed.
-
-### Permissions & PATH Notes
-
-If `lasersell` is not found:
-
-```shellscript
-which lasersell
-```
-
-Ensure the install directory is included in your `PATH`.
