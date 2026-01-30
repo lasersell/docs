@@ -37,9 +37,7 @@
         "pages": [
           "onboarding/lasersell-wallet",
           "onboarding/configuration",
-          "onboarding/example-configuration",
-          "onboarding/platform-and-coin-support",
-          "onboarding/running-laser-sell-24-7"
+          "onboarding/example-configuration"
         ]
       },
       {
@@ -50,7 +48,19 @@
         ]
       },
       {
-        "group": "Pricing",
+        "group": "Operations",
+        "pages": [
+          "onboarding/running-laser-sell-24-7"
+        ]
+      },
+      {
+        "group": "Supported Platforms",
+        "pages": [
+          "onboarding/platform-and-coin-support"
+        ]
+      },
+      {
+        "group": "Fees & Policies",
         "pages": [
           "pricing/fee-structure"
         ]
