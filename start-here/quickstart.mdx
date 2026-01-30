@@ -1,4 +1,233 @@
 ---
-title: 'Quickstart'
+title: "Quickstart"
+description: "Install LaserSell, run the setup wizard, and (optionally) pair the Chrome Extension dashboard."
 ---
 
+LaserSell runs on your machine (desktop/laptop or a Linux VPS) and automatically executes sells when it detects new positions you buy. It is non-custodial: your keys stay on your machine. For live trading, a Linux VPS plus a private RPC is the recommended setup for uptime and latency.
+
+If you are brand new, read [What Is LaserSell](https://docs.lasersell.io/start-here/what-is-lasersell) first.
+
+## What you’ll do
+
+By the end of this page, you will have:
+
+- LaserSell installed
+- A config file and encrypted wallet keystore created by the onboarding wizard
+- LaserSell running and connected to your RPC and WebSocket
+- Optionally, the Chrome Extension paired to your running instance
+
+## 0) Before you start
+
+You need three things.
+
+### 1) Where LaserSell will run
+
+- Desktop or laptop (fastest way to start)
+- Linux VPS (recommended for live trading and uptime)
+
+### 2) RPC and WebSocket
+
+- Recommended: Helius (API key required)
+- Alternative: Any private provider that gives both (like [Chainstack](https://chainstack.com/))
+  - HTTPS RPC URL
+  - WSS WebSocket URL
+
+### 3) Wallet plan
+
+Treat LaserSell as a **hot wallet**. Only fund it with what you intend to actively trade.
+
+Helpful pages:
+
+- Prerequisites Overview
+- Setting Up the Linux VPS
+- Choosing a Private RPC
+
+## 1) Pick your runtime: Desktop vs VPS
+
+### Option A: Desktop or laptop
+
+Use this if you are testing or want to get running quickly.
+
+- Choose an RPC and WebSocket
+- Install LaserSell
+- Run the setup wizard locally
+
+### Option B: Linux VPS (recommended)
+
+Use this if you want uptime and consistent latency.
+
+- Provision a VPS (Ubuntu 22.04+ or Debian 12+)
+- Choose a VPS in the same region as your RPC provider
+- Install LaserSell on the VPS
+- Run LaserSell inside tmux so it stays running after disconnect
+
+See: [Setting Up the Linux VPS](https://docs.lasersell.io/start-here/setting-up-linux-vps)
+
+## 2) Install LaserSell
+
+LaserSell is distributed as a proprietary precompiled binary.
+
+Run:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+Then verify:
+
+```shellscript
+lasersell --version
+```
+
+Platform-specific guides (use these if you want the “official” per-OS steps):
+
+- [Installation Overview](https://docs.lasersell.io/installation/overview)
+- [Linux Installation](https://docs.lasersell.io/installation/linux-installation)
+- [macOS Installation](https://docs.lasersell.io/installation/mac-os-installation)
+- [Windows Installation (WSL)](https://docs.lasersell.io/installation/windows-installation)
+- [Docker Installation](https://docs.lasersell.io/installation/docker-installation)
+
+## 3) Run the onboarding wizard (creates config + encrypted wallet)
+
+Start LaserSell:
+
+```shellscript
+lasersell
+```
+
+If no config exists, the wizard runs automatically on first launch. You can run it any time with:
+
+```shellscript
+lasersell --setup
+```
+
+### What it creates
+
+By default, the wizard creates:
+
+- `~/.lasersell/config.yml`
+- `~/.lasersell/wallet.keystore.json`
+
+### Important: use a real interactive terminal
+
+The wizard requires a real TTY. Don’t run the wizard through a non-interactive service/pipe.
+
+### Recommended “fast path” answers
+
+When prompted:
+
+1. **Use recommended settings?** → **Yes**\
+   (This applies defaults and skips extra questions.)
+2. **RPC provider**
+
+- **Helius (Recommended)** → enter your API key
+- **Private Node** → enter your `https://...` RPC URL
+- **Public Node** → works, but least reliable under load
+
+3. **WebSocket provider**
+
+- **Helius WebSocket** (requires Helius Dev plan)
+- **Private WebSocket** → enter your `wss://...` URL
+- **Public WebSocket** → slowest / least reliable for fast detection
+
+4. **Wallet**
+
+- Create a new wallet (you’ll be shown a seed phrase once) **or**
+- Import an existing wallet (seed phrase / base58 secret key / Solana keypair JSON)
+
+5. **Security / passphrase**\
+   Set a strong passphrase. There is no “forgot password”. If you lose it, the keystore is not recoverable.
+
+Full walkthrough of every prompt:
+
+- **Initial Setup**
+
+## 4) Start LaserSell and verify it’s “ready”
+
+After the wizard completes, run:
+
+```shellscript
+lasersell
+```
+
+Sanity checks:
+
+- No obvious RPC / WebSocket connection errors
+- Your wallet pubkey matches what you intended
+- You understand your default strategy (take profit / stop loss / deadline / slippage)
+
+If you want to inspect/edit settings manually:
+
+- **LaserSell UI**
+- **Example Configuration**
+
+## 5) Pair the Chrome Extension dashboard (optional, recommended)
+
+The extension gives you a real-time telemetry dashboard in Chrome.
+
+1. Install + pin it:
+
+- **Chrome Extension Installation**
+
+2. Pair it to your running LaserSell:
+
+- In the LaserSell command line, run:
+
+```shellscript
+extension code
+```
+
+- Copy the 10-character pairing code
+- Paste it into the extension popup → **Connect**
+- Open the side panel dashboard
+
+### If `extension code` doesn’t work
+
+`extension code` requires telemetry to be enabled.
+
+Your config should include:
+
+```yaml
+telemetry:
+  enabled: true
+```
+
+## 6) Run 24/7 on a VPS (optional)
+
+If you want LaserSell running continuously, use `tmux`.
+
+Quick path:
+
+```shellscript
+sudo apt update
+sudo apt install tmux -y
+
+tmux new -s lasersell
+lasersell
+```
+
+Detach without stopping LaserSell:
+
+- `Ctrl` + `b`, then `d`
+
+Re-attach later:
+
+```shellscript
+tmux attach -t lasersell
+```
+
+Read this before doing 24/7:
+
+- Running continuously consumes RPC credits and keeps the wallet unlocked in memory during the session.\
+  See: **Running LaserSell 24/7 (with Tmux)**
+
+## Security and risk (don’t skip)
+
+- LaserSell is non-custodial, but you are responsible for your keys and the results of your trades.
+- Treat the trading wallet as a hot wallet. Don’t keep your entire stack in it. Sweep profits regularly.
+
+Read:
+
+- [Key Safety](https://docs.lasersell.io/security/key-safety)
+- [Wallet Encryption](https://docs.lasersell.io/security/wallet-encryption)
+- [Risk Disclosures and Responsible Trading](https://docs.lasersell.io/how-to-win/risk-disclosures-and-responsible-trading)
