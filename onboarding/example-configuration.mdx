@@ -1,0 +1,45 @@
+---
+title: "Example Configuration"
+---
+
+```yaml
+account:
+  # Optional env overrides:
+  # - LASERSELL_KEYPAIR_PATH
+  keypair_path: "/abs/path/wallet.keystore.json" # default: ~/.lasersell/wallet.keystore.json; encrypted Lasersell keystore (recommended); legacy Solana keypair JSON also supported
+
+rpc:
+  mode: "helius"                 # helius (default), public, or private
+  # Optional env override: LASERSELL_PRIVATE_RPC_URL
+  # private_url: "https://example-rpc.yourdomain.com"
+
+helius:
+  # Optional env override: LASERSELL_HELIUS_API_KEY
+  api_key: "HELIUS_API_KEY"       # used for Helius RPC + Websocket (optional in public mode)
+
+strategy:
+  # Use a percent string based on the detected buy amount.
+  # Examples: target_profit: "10%"; stop_loss: "0.5%".
+  # Set stop_loss to 0% to disable it.
+  target_profit: "10%"        # take profit as percent of buy
+  stop_loss: "0%"             # stop loss as percent of buy (0% disables)
+  deadline_timeout: 30        # force sell-all after N seconds (0 disables)
+
+websocket:
+  mode: "helius"              # helius (default), public, or private
+  # Optional env override: LASERSELL_PRIVATE_WS_URL
+  # private_url: "wss://example-ws.yourdomain.com"
+
+sell:
+  slippage_pad_bps: 2000               # extra slippage added on top of computed value
+  slippage_retry_bump_bps_first: 20    # extra pad added after first slippage error
+  slippage_retry_bump_bps_next: 40     # extra pad added after subsequent slippage errors
+  slippage_max_bps: 2500               # max slippage in basis points
+  confirm_timeout_sec: 25              # devnet default (mainnet default is 10)
+  max_retries: 2                       # retry count for failed sells
+
+telemetry:
+  # Optional env overrides:
+  # - LASERSELL_TELEMETRY_DISABLED
+  enabled: true
+```

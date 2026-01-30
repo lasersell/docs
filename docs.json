@@ -22,6 +22,7 @@
         "pages": [
           "onboarding/lasersell-wallet",
           "onboarding/configuration",
+          "onboarding/example-configuration",
           "onboarding/platform-and-coin-support",
           "onboarding/running-laser-sell",
           "onboarding/running-laser-sell-on-desktop",
