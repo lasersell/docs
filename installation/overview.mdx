@@ -3,29 +3,31 @@ title: "Overview"
 description: "This section covers how to install LaserSell on all supported platforms."
 ---
 
-LaserSell is distributed as a **precompiled, closed-source binary**. There is no build-from-source path.
+LaserSell is distributed as a **proprietary, precompiled binary**. The official install entrypoint for all platforms is:
 
-### Supported Operating Systems
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
 
-- **Linux** (x86_64, arm64 / Raspberry Pi)
-- **macOS** (Intel & Apple Silicon)
-- **Windows** (x86_64)
-- **Docker** (advanced / optional)
+This install script is the **recommended** method and is used for Linux, macOS, and Windows (via WSL).
 
-### Installation Methods
+### Supported Platforms
 
-- **Native install (recommended)**\
-  Best performance, full OS integration.
-- **Docker install (advanced)**\
-  For containerized or server-based environments.
+- **Linux (Debian/Ubuntu)** via `install.sh` or manual APT setup
+- **macOS** via `install.sh` or Homebrew (or tarball mode)
+- **Windows** is supported **via WSL** (not a native `.exe` install)
+- **Docker** (optional / advanced) using the official `lasersell/lasersell` image
 
-> All official binaries and install scripts are hosted at\
-> [**https://dl.lasersell.io**](https://dl.lasersell.io)
+### Migrating from the old repo
 
-### After Installation
+If you previously used the old `lasersell.github.io/apt` repo, run:
 
-Once installed, continue to **Quickstart** to:
+```shellscript
+curl -fsSL https://dl.lasersell.io/migrate.sh | bash
+```
 
-- Run initial setup
-- Unlock your wallet
-- Verify your first live session
+### Upgrading
+
+- APT: `sudo apt update && sudo apt install lasersell`
+- Homebrew: `brew upgrade lasersell`
+- Tarball install: rerun `install.sh` (overwrites the binary)
