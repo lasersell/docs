@@ -3,26 +3,29 @@ title: "macOS Installation"
 description: "LaserSell supports both Intel and Apple Silicon (M-series) Macs."
 ---
 
-### Recommended Method: Homebrew
+### macOS via install.sh (recommended)
 
-LaserSell provides an official Homebrew tap.
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### macOS via Homebrew
 
 ```shellscript
 brew tap lasersell/lasersell
 brew install lasersell
 ```
 
-Homebrew will automatically install the correct binary for your architecture.
+### macOS without Homebrew (tarball mode)
 
-### Verify Installation
+If you want a tarball-based install path:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+### Verify
 
 ```shellscript
 lasersell --version
 ```
-
-### Gatekeeper / Security Notes
-
-On first run, macOS may warn about downloaded binaries.\
-If needed, allow execution via **System Settings → Privacy & Security**.
-
-LaserSell binaries are distributed directly from `dl.lasersell.io`.
