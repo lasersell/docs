@@ -61,7 +61,8 @@
       {
         "group": "Fees & Policies",
         "pages": [
-          "pricing/fee-structure"
+          "pricing/fee-structure",
+          "how-to-win/risk-disclosures-and-responsible-trading"
         ]
       },
       {
@@ -73,17 +74,9 @@
         ]
       },
       {
-        "group": "How To Win",
-        "pages": [
-          "how-to-win/trading-strategies-and-best-practices",
-          "how-to-win/risk-disclosures-and-responsible-trading"
-        ]
-      },
-      {
         "group": "Getting Support",
         "pages": [
           "getting-support/support",
-          "getting-support/faq",
           "glossary",
           "community",
           "getting-support/report-a-bug",
