@@ -1,4 +1,42 @@
 ---
-title: 'Linux Installation'
+title: "Linux Installation"
+description: "Linux is the primary and recommended platform for running LaserSell, especially for 24/7 operation."
 ---
 
+### Supported Architectures
+
+- `x86_64`
+- `arm64` (Raspberry Pi, ARM servers)
+
+### Recommended Method: Install Script
+
+The official install script:
+
+- Detects architecture automatically
+- Installs the correct binary
+- Places `lasersell` on your `PATH`
+- Handles updates cleanly
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+After installation, restart your shell or reload your profile.
+
+### Verify Installation
+
+```shellscript
+lasersell --version
+```
+
+You should see the current LaserSell version printed.
+
+### Permissions & PATH Notes
+
+If `lasersell` is not found:
+
+```shellscript
+which lasersell
+```
+
+Ensure the install directory is included in your `PATH`.
