@@ -1,4 +1,23 @@
 ---
-title: 'Windows Installation'
+title: "Windows Installation"
 ---
 
+### Windows is supported via WSL
+
+1. Install WSL (Windows Terminal or PowerShell as Administrator):
+
+```shellscript
+wsl --install
+```
+
+2. Restart your computer, then open your WSL Linux distro (e.g., Ubuntu), then run:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### Verify (inside WSL)
+
+```shellscript
+lasersell --version
+```
