@@ -54,6 +54,12 @@
         ]
       },
       {
+        "group": "Core Concepts",
+        "pages": [
+          "core-concepts/why-local-execution-wins"
+        ]
+      },
+      {
         "group": "Supported Platforms",
         "pages": [
           "onboarding/platform-and-coin-support"
