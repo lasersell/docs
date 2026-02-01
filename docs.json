@@ -57,6 +57,7 @@
         "group": "Core Concepts",
         "pages": [
           "core-concepts/comparison-laser-sell-vs-standard-market-orders",
+          "core-concepts/non-custodial-by-design",
           "core-concepts/why-local-execution-wins",
           "core-concepts/closing-the-execution-gap",
           "core-concepts/replacing-emotion-with-execution",

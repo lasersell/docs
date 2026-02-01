@@ -1,0 +1,54 @@
+---
+title: "Non-Custodial By Design"
+description: "LaserSell runs locally to ensure maximum security and zero latency, keeping your private keys encrypted on your device and never on a centralized server."
+---
+
+At LaserSell, we believe in a simple, non-negotiable truth of crypto: **Not your keys, not your coins.**
+
+We chose to build LaserSell as a **local client** rather than a web-based dApp or a cloud-hosted Telegram bot. This decision was not made for ease of development. It is actually harder to build software this way, but we do it for the safety, security, and sovereignty of our users.
+
+## The Problem with "Cloud" Trading
+
+Most trading tools and "sniper bots" on the market today operate as **custodial** or **semi-custodial** services. They require you to input your private key into a website, or they generate a wallet for you that lives on their database.
+
+This introduces a massive, centralized point of failure. If that website is hacked, your keys are gone. If their database is leaked, your funds are drained.
+
+### Real-World Risks
+
+History has proven repeatedly that centralized logging and key management are prime targets for attackers.
+
+- **The Slope Wallet Incident (2022):** Millions of dollars were drained from Solana users not because of a blockchain flaw, but because a centralized server logged user seed phrases in **plaintext**. Users trusted a centralized transmission method, and their keys were exposed in a database leak.
+- **Cloud Bot "Honeypots":** Many Telegram bots generate wallets for their users, storing thousands of private keys in a single database. This creates a "honeypot" for hackers. It presents a single target that, if breached, yields the keys to thousands of wallets at once.
+
+By removing the centralized server from the equation, LaserSell removes the honeypot. We cannot lose your keys because we never have them.
+
+## The LaserSell Standard: Local Encryption
+
+We aim to raise the standard for how trading tools handle sensitive data.
+
+### Better Than the Default
+
+Surprisingly, even the standard developer tools provided by Solana are not secure by default. When you generate a keypair using the standard Solana CLI tools, it saves your private key to a file in **plaintext**.
+
+- **The Risk:** If malware scans your computer and finds that file, it can read your private key instantly.
+- **The LaserSell Solution:** LaserSell does **not** use plaintext storage. When you import or generate a wallet in LaserSell, we encrypt the keypair locally on your machine using industry-standard encryption.
+
+This means that even if someone gained access to your file system, they would still need your specific LaserSell decryption password to access your funds.
+
+## Performance Through Decentralization
+
+Our non-custodial approach is not just about safety; it is about **speed**.
+
+When you trade on a centralized website, your request has to travel to their server, wait in their queue, and then be sent to the blockchain. This creates an **"Execution Gap"** which is the latency that causes you to lose potential profit.
+
+LaserSell runs locally on your machine or your private VPS. Your transaction goes directly from **Your Device** to the **Solana RPC**. There is no middleman, no queue, and no server lag. You are trading directly with the blockchain, exactly as decentralized finance was intended.
+
+## Our Transparency Guarantee
+
+We cannot control how you use your keys on other platforms, but as a software distributor, we have a responsibility to be transparent about how we handle them.
+
+- **No "Cloud" Backup:** We do not back up your keys to the cloud.
+- **No Hidden Access:** Our router is a pass-through mechanism; it does not retain custody of your assets.
+- **No Key Sharing:** Your keys never leave your local environment.
+
+You are the only person who can access your funds. That is how crypto was designed to work, and that is how LaserSell is built to operate.
