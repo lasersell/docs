@@ -56,7 +56,8 @@
       {
         "group": "Core Concepts",
         "pages": [
-          "core-concepts/why-local-execution-wins"
+          "core-concepts/why-local-execution-wins",
+          "core-concepts/closing-the-execution-gap"
         ]
       },
       {
