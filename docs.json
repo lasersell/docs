@@ -57,7 +57,8 @@
         "group": "Core Concepts",
         "pages": [
           "core-concepts/why-local-execution-wins",
-          "core-concepts/closing-the-execution-gap"
+          "core-concepts/closing-the-execution-gap",
+          "core-concepts/replacing-emotion-with-execution"
         ]
       },
       {
