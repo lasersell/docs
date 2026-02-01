@@ -1,12 +1,12 @@
 ---
-title: "Comparison: LaserSell vs. Standard Market Orders"
+title: "Comparison: LaserSell vs. Standard Market/Limit Orders"
 ---
 
-A common question for new users is: _"Why should I use LaserSell when I can just click 'Market Sell' on a trading website?"_
+A common question for new users is: "Why should I use LaserSell when I can just click 'Market Sell' or set a 'Limit Order' on a trading website?"
 
-While a standard market order is sufficient for casual trading, it is mechanically distinct from the execution engine inside LaserSell. When you rely on a web interface to exit a position, you are introducing multiple layers of friction that do not exist in LaserSell's architecture.
+While standard orders are sufficient for casual trading, they are mechanically distinct from the execution engine inside LaserSell. When you rely on a web interface or a shared order book to exit a position, you are introducing multiple layers of friction and third-party reliance. 
 
-The following breakdown compares the lifecycle of a standard market order against a LaserSell automated exit.
+To achieve top-tier execution speed, automation is a requirement, not an option.
 
 ### 1. The Data Source (Stale vs. Live)
 
@@ -20,7 +20,7 @@ LaserSell bypasses the middleman. It maintains a direct, high-speed connection t
 
 ### 2. The Reaction Trigger (Human vs. Machine)
 
-**Standard Market Order:**
+**Standard Market Order: **
 
 Execution relies on human reflexes. You must:
 
@@ -32,19 +32,21 @@ Execution relies on human reflexes. You must:
 
 This process introduces seconds of latency. In volatile "PvP" rounds, seconds are often the difference between profit and loss.
 
-**LaserSell:**
+**LaserSell: **
 
 LaserSell removes the biological bottleneck. You pre-define your Take Profit and Stop Loss targets. The software evaluates every single price update against your rules. The millisecond a block arrives that satisfies your criteria, the exit transaction is constructed and signed immediately. Zero reaction time, zero hesitation.
 
-### 3. The Propagation Path (Public vs. Priority)
+### 3. LaserSell vs Traditional Take Profit / Stop Loss Methods
 
-**Standard Market Order:**
+**Standard TP/SL (Limit Orders):** 
 
-Most web wallets broadcast transactions through standard public channels. During periods of high network congestion, these transactions can get stuck in a queue or dropped entirely, forcing you to retry while the price continues to move against you.
+Most traders attempt to secure profits using limit orders or off-chain aggregators. These are passive and dangerous in high-volatility environments (like memecoins). If a coin "rugs" or dumps rapidly, the price often gaps right past your limit order. Because no buyer exists at your exact specific price, your order remains unfilled while the value goes to zero. You are left "holding the bag" waiting for a fill that never comes.\
+\
+Limit orders typically fail to execute in a highly volatile environment. Source: https://support.jup.ag/hc/en-us/articles/22628213363484-Why-was-my-Limit-order-not-executed
 
-**LaserSell:**
+**LaserSell (True Auto-Exit):** 
 
-LaserSell is built for congestion. It utilizes specialized, direct transaction endpoints and automatically attaches "miner tips" (priority fees) to every trade. This effectively puts your transaction in the "fast lane," significantly increasing the probability that your exit is processed in the very next block, even when the network is clogged.
+LaserSell uses a proactive, deterministic approach. It does not place passive limit orders that can be skipped. Instead, it monitors the chain for your target value. The moment your Profit or Loss threshold is triggered, LaserSell fires a high-priority **market swap** (utilizing Jito tips for speed). It prioritizes _getting you out_ over waiting for a perfect price match, ensuring you actually exit the position before the price collapses further.
 
 ### 4. The Outcome (Reactive vs. Deterministic)
 
@@ -58,11 +60,13 @@ LaserSell is a deterministic tool. Because it executes on the _same_ block that 
 
 ### Summary
 
-| **Feature**          | **Standard Web Market Order** | **LaserSell Auto-Exit**     |
-| :------------------- | :---------------------------- | :-------------------------- |
-| **Data Feed**        | API Polling (Delayed)         | Direct Stream (Real-Time)   |
-| **Trigger**          | Manual Human Reaction         | Instant Algorithmic Trigger |
-| **Execution**        | Click + Wallet Confirm        | Automated & Instant         |
-| **Network Priority** | Standard / Low                | High Priority / Jito Tipped |
+| **Aspect**                    | **Traditional TP/SL Methods (Limit Orders & Manual Monitoring)**                                                                                      | **LaserSell Auto-Exit (True TP/SL)**                                                                                                       |
+| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Data Feed**                 | Relies on delayed API polling or off-chain price oracles; prices shown can be seconds old                                                             | Real-time on-chain blockchain streams; detects price changes in the exact block they occur                                                 |
+| **Trigger Mechanism**         | Off-chain keepers, bots, or manual human reaction; prone to lag or missed signals                                                                     | Fully algorithmic and automated; triggers instantly when user-defined price or percentage target is reached                                |
+| **Execution Speed**           | Dependent on third-party fillers, normal fees, or manual wallet confirmation; transactions often land in later blocks                                 | Automated market swap with optimized priority fees (e.g., Jito tips); executes in the same block as the trigger for near-instant exit      |
+| **Reliability in Volatility** | Frequently misses targets due to delays, partial fills, or failed transactions during congestion/rugs; limit orders may never fill if price gaps past | Deterministic execution even in extreme volatility; sells before price can collapse further, minimizing slippage                           |
+| **Suitability for Memecoins** | Poor for rapid pumps/dumps; limit orders can leave you holding the bag or selling too late                                                            | Purpose-built for high-speed scenarios; supports percentage-based or absolute price targets for both TP (lock profits) and SL (cut losses) |
+| **Overall Outcome**           | Reactive, inconsistent fills; higher risk of emotional decisions or bot failures                                                                      | Proactive, hands-off protection; achieves "true" TP/SL by combining precise triggers with lightning-fast market execution                  |
 
 > **Core Concept:** Use a market order when you are casually entering or exiting a long-term hold. Use LaserSell when you need to execute a precise plan in a highly volatile environment where every millisecond counts.
