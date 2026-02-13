@@ -15,14 +15,6 @@
         ]
       },
       {
-        "group": "Prerequisites",
-        "pages": [
-          "prerequisites/overview",
-          "start-here/setting-up-linux-vps",
-          "start-here/choosing-a-private-rpc"
-        ]
-      },
-      {
         "group": "Installation",
         "pages": [
           "installation/overview",
