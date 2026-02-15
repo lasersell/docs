@@ -6,80 +6,88 @@
     "primary": "#0D9373"
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Start Here",
-        "pages": [
-          "start-here/what-is-lasersell",
-          "start-here/quickstart"
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Start Here",
+            "pages": [
+              "start-here/what-is-lasersell",
+              "start-here/quickstart"
+            ]
+          },
+          {
+            "group": "Installation",
+            "pages": [
+              "installation/overview",
+              "installation/linux-installation",
+              "installation/mac-os-installation",
+              "installation/windows-installation",
+              "installation/docker-installation"
+            ]
+          },
+          {
+            "group": "Onboarding",
+            "pages": [
+              "onboarding/initial-setup",
+              "onboarding/lasersell-ui",
+              "onboarding/example-configuration"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "onboarding/running-laser-sell-24-7"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "core-concepts/comparison-laser-sell-vs-standard-market-orders",
+              "core-concepts/non-custodial-by-design",
+              "core-concepts/why-local-execution-wins",
+              "core-concepts/closing-the-execution-gap",
+              "core-concepts/replacing-emotion-with-execution",
+              "core-concepts/the-modular-execution-layer",
+              "core-concepts/escaping-a-rug-pull"
+            ]
+          },
+          {
+            "group": "Supported Platforms",
+            "pages": [
+              "onboarding/platform-and-coin-support"
+            ]
+          },
+          {
+            "group": "Fees & Policies",
+            "pages": [
+              "pricing/fee-structure",
+              "how-to-win/risk-disclosures-and-responsible-trading"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/wallet-encryption",
+              "security/key-safety",
+              "security/privacy"
+            ]
+          },
+          {
+            "group": "Getting Support",
+            "pages": [
+              "getting-support/support",
+              "glossary",
+              "community",
+              "getting-support/report-a-bug",
+              "getting-support/changelog"
+            ]
+          }
         ]
       },
       {
-        "group": "Installation",
-        "pages": [
-          "installation/overview",
-          "installation/linux-installation",
-          "installation/mac-os-installation",
-          "installation/windows-installation",
-          "installation/docker-installation"
-        ]
-      },
-      {
-        "group": "Onboarding",
-        "pages": [
-          "onboarding/initial-setup",
-          "onboarding/lasersell-ui",
-          "onboarding/example-configuration"
-        ]
-      },
-      {
-        "group": "Operations",
-        "pages": [
-          "onboarding/running-laser-sell-24-7"
-        ]
-      },
-      {
-        "group": "Core Concepts",
-        "pages": [
-          "core-concepts/comparison-laser-sell-vs-standard-market-orders",
-          "core-concepts/non-custodial-by-design",
-          "core-concepts/why-local-execution-wins",
-          "core-concepts/closing-the-execution-gap",
-          "core-concepts/replacing-emotion-with-execution",
-          "core-concepts/the-modular-execution-layer",
-          "core-concepts/escaping-a-rug-pull"
-        ]
-      },
-      {
-        "group": "Supported Platforms",
-        "pages": [
-          "onboarding/platform-and-coin-support"
-        ]
-      },
-      {
-        "group": "Fees & Policies",
-        "pages": [
-          "pricing/fee-structure",
-          "how-to-win/risk-disclosures-and-responsible-trading"
-        ]
-      },
-      {
-        "group": "Security",
-        "pages": [
-          "security/wallet-encryption",
-          "security/key-safety",
-          "security/privacy"
-        ]
-      },
-      {
-        "group": "Getting Support",
-        "pages": [
-          "getting-support/support",
-          "glossary",
-          "community",
-          "getting-support/report-a-bug",
-          "getting-support/changelog"
-        ]
+        "tab": "API Docs"
       }
     ]
   },
