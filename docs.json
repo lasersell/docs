@@ -33,13 +33,6 @@
         ]
       },
       {
-        "group": "Chrome Extension",
-        "pages": [
-          "chrome-extension/installation",
-          "security/chrome-extension"
-        ]
-      },
-      {
         "group": "Operations",
         "pages": [
           "onboarding/running-laser-sell-24-7"
