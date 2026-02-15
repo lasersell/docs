@@ -102,7 +102,10 @@
     }
   },
   "favicon": "/images/favicon2.ico",
-  "logo": "/images/lasersell2.svg",
+  "logo": {
+    "light": "/images/lasersell2.svg",
+    "dark": "/images/lasersell2.svg"
+  },
   "navbar": {
     "links": [
       {
