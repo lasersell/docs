@@ -104,7 +104,8 @@
   "favicon": "/images/favicon2.ico",
   "logo": {
     "light": "/images/lasersell-light-full.svg",
-    "dark": "/images/lasersell-dark-full.svg"
+    "dark": "/images/lasersell-dark-full.svg",
+    "href": "https://www.lasersell.io"
   },
   "navbar": {
     "links": [
@@ -124,5 +125,10 @@
   },
   "fonts": {
     "family": "Inter"
+  },
+  "background": {
+    "color": {
+      "dark": "#09090b"
+    }
   }
 }
