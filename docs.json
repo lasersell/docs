@@ -103,8 +103,8 @@
   },
   "favicon": "/images/favicon2.ico",
   "logo": {
-    "light": "/images/lasersell-light-full.png",
-    "dark": "/images/lasersell-dark-full.png",
+    "light": "/images/lasersell-light-full-1.png",
+    "dark": "/images/lasersell-dark-full-1.png",
     "href": "https://www.lasersell.io"
   },
   "navbar": {
