@@ -107,20 +107,7 @@
     "href": "https://www.lasersell.io"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Main Site",
-        "href": "https://lasersell.io"
-      },
-      {
-        "label": "Install",
-        "href": "https://lasersell.io/install"
-      },
-      {
-        "label": "Discord",
-        "href": "https://discord.gg/lasersell"
-      }
-    ]
+    "links": []
   },
   "fonts": {
     "family": "Inter"
