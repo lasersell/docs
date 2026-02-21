@@ -117,5 +117,10 @@
       "dark": "#09090b",
       "light": "#FFFFFF"
     }
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-VGBZM8LGHB"
+    }
   }
 }
