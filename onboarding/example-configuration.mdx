@@ -34,17 +34,17 @@ strategy:
 
   target_profit: "20%"       # exit when profit reaches this %
   stop_loss: "10%"           # exit when loss reaches this %
-  trailing_stop: "5%"        # exit when profit drops this % from its peak
-  deadline_timeout: 120      # force exit after N seconds (0 to disable)
+  trailing_stop: "5%"        # exit when profit drops this % of entry from its peak
+  deadline_timeout: 0        # force exit after N seconds (0 to disable)
   sell_on_graduation: false  # auto-sell when token migrates to a new DEX
 
 sell:
-  slippage_pad_bps: 2000              # extra slippage on top of computed value (bps)
+  slippage_pad_bps: 2500              # extra slippage on top of computed value (bps)
   slippage_retry_bump_bps_first: 20   # extra pad after first slippage error
   slippage_retry_bump_bps_next: 40    # extra pad after subsequent slippage errors
-  slippage_max_bps: 2500              # max slippage cap (bps)
+  slippage_max_bps: 3000              # max slippage cap (bps)
   confirm_timeout_sec: 10             # tx confirmation timeout
-  max_retries: 2                      # retry count for failed sells
+  max_retries: 3                      # retry count for failed sells
 ```
 
 ## Environment variable overrides

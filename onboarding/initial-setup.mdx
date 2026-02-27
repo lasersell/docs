@@ -30,9 +30,9 @@ Select **Yes** to use defaults and skip strategy questions:
 |---------|---------|
 | Target Profit | 6% |
 | Stop Loss | 10% |
-| Trailing Stop | 0% (disabled) |
-| Deadline | 120 seconds |
-| Slippage | 20% |
+| Trailing Stop | 5% |
+| Deadline | off |
+| Slippage | 25% (max 30%) |
 | Sell on Graduation | off |
 
 Select **No** to configure each value manually.
@@ -52,7 +52,7 @@ If you selected No for recommended settings, you'll be prompted for each strateg
 
 - **Target Profit**: sell when profit reaches this % (e.g. `6%`)
 - **Stop Loss**: sell when loss reaches this % (e.g. `10%`)
-- **Trailing Stop**: sell when profit drops this % from its peak (e.g. `5%`)
+- **Trailing Stop**: sell when profit drops this % of entry from its peak (e.g. `5%`)
 - **Deadline Timeout**: force sell after N seconds (e.g. `120`)
 - **Slippage Tolerance**: max slippage for sells (e.g. `20%`)
 - **Sell on Graduation**: auto-sell when token migrates to an AMM (`y/N`)
