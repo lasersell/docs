@@ -160,7 +160,10 @@
       "instagram": "https://instagram.com/xen"
     }
   },
-  "favicon": "/images/favicon2.ico",
+  "favicon": {
+    "light": "/images/favicon2.ico",
+    "dark": "/images/favicon2.ico"
+  },
   "logo": {
     "light": "/images/lasersell-light-full-2.png",
     "dark": "/images/lasersell-dark-full-1.png",
