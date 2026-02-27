@@ -1,0 +1,248 @@
+---
+title: "Quickstart"
+description: "Build, sign, and submit your first sell transaction in under five minutes, then set up an auto sell stream."
+---
+
+## Prerequisites
+
+- A LaserSell API key ([get one here](/api/authentication)).
+- A Solana keypair file (JSON array of bytes).
+- Node.js 18+ (for the TypeScript example) or the runtime for your preferred language.
+
+## Example 1: Build, Sign, and Send a Sell Transaction
+
+This example calls the LaserSell API to build an unsigned sell transaction, signs it locally, and submits through Helius Sender.
+
+<CodeGroup>
+```typescript TypeScript
+import { readFile } from "node:fs/promises";
+import { Keypair } from "@solana/web3.js";
+import {
+  ExitApiClient,
+  sendTransaction,
+  sendTargetHeliusSender,
+  signUnsignedTx,
+  type BuildSellTxRequest,
+} from "@lasersell/lasersell-sdk";
+
+const apiKey = process.env.LASERSELL_API_KEY!;
+const keypairPath = "./keypair.json";
+
+// Load keypair
+const raw = await readFile(keypairPath, "utf8");
+const keypair = Keypair.fromSecretKey(
+  Uint8Array.from(JSON.parse(raw))
+);
+
+// Build unsigned tx
+const client = ExitApiClient.withApiKey(apiKey);
+const request: BuildSellTxRequest = {
+  mint: "So11111111111111111111111111111111111111112",
+  user_pubkey: keypair.publicKey.toBase58(),
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+};
+const unsignedTxB64 = await client.buildSellTxB64(request);
+
+// Sign locally
+const signedTx = signUnsignedTx(unsignedTxB64, keypair);
+
+// Submit
+const signature = await sendTransaction(
+  sendTargetHeliusSender(),
+  signedTx
+);
+console.log("Signature:", signature);
+```
+
+```python Python
+import asyncio, json
+from pathlib import Path
+from solders.keypair import Keypair
+from lasersell_sdk.exit_api import ExitApiClient, BuildSellTxRequest, SellOutput
+from lasersell_sdk.tx import SendTargetHeliusSender, send_transaction, sign_unsigned_tx
+
+async def main():
+    api_key = "YOUR_API_KEY"
+    keypair_bytes = json.loads(Path("./keypair.json").read_text())
+    signer = Keypair.from_bytes(bytes(keypair_bytes))
+
+    client = ExitApiClient.with_api_key(api_key)
+    request = BuildSellTxRequest(
+        mint="So11111111111111111111111111111111111111112",
+        user_pubkey=str(signer.pubkey()),
+        amount_tokens=1_000_000,
+        slippage_bps=2_000,
+        output=SellOutput.SOL,
+    )
+    unsigned_tx_b64 = await client.build_sell_tx_b64(request)
+
+    signed_tx = sign_unsigned_tx(unsigned_tx_b64, signer)
+    signature = await send_transaction(SendTargetHeliusSender(), signed_tx)
+    print("Signature:", signature)
+
+asyncio.run(main())
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildSellTxRequest};
+use lasersell_sdk::tx::{SendTarget, sign_unsigned_tx, send_transaction};
+use solana_sdk::signature::read_keypair_file;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let api_key = std::env::var("LASERSELL_API_KEY")?;
+    let keypair = read_keypair_file("./keypair.json")?;
+
+    let client = ExitApiClient::with_api_key(&api_key);
+    let request = BuildSellTxRequest {
+        mint: "So11111111111111111111111111111111111111112".into(),
+        user_pubkey: keypair.pubkey().to_string(),
+        amount_tokens: 1_000_000,
+        slippage_bps: Some(2_000),
+        output: Some("SOL".into()),
+        ..Default::default()
+    };
+
+    let unsigned_tx_b64 = client.build_sell_tx_b64(&request).await?;
+    let signed_tx = sign_unsigned_tx(&unsigned_tx_b64, &keypair)?;
+    let signature = send_transaction(&SendTarget::HeliusSender, &signed_tx).await?;
+    println!("Signature: {signature}");
+    Ok(())
+}
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/gagliardetto/solana-go"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+func main() {
+    ctx := context.Background()
+    apiKey := "YOUR_API_KEY"
+    privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("./keypair.json")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    client := lasersell.NewExitAPIClientWithAPIKey(apiKey)
+    resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+        Mint:         "So11111111111111111111111111111111111111112",
+        UserPubkey:   privateKey.PublicKey().String(),
+        AmountTokens: 1_000_000,
+        SlippageBps:  intPtr(2_000),
+        Output:       strPtr("SOL"),
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    signedTx, err := lasersell.SignUnsignedTx(resp.Tx, privateKey)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    sig, err := lasersell.SendTransaction(ctx, nil, lasersell.SendTargetHeliusSender(), signedTx)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Signature:", sig)
+}
+
+func intPtr(v int) *int    { return &v }
+func strPtr(v string) *string { return &v }
+```
+</CodeGroup>
+
+## Example 2: Auto Sell with the Exit Intelligence Stream
+
+Connect the Exit Intelligence Stream to monitor wallets and automatically execute exits when your strategy thresholds are reached.
+
+<CodeGroup>
+```typescript TypeScript
+import { readFile } from "node:fs/promises";
+import { Keypair } from "@solana/web3.js";
+import {
+  StreamClient,
+  StreamSession,
+  sendTransaction,
+  sendTargetHeliusSender,
+  signUnsignedTx,
+} from "@lasersell/lasersell-sdk";
+
+const apiKey = process.env.LASERSELL_API_KEY!;
+const raw = await readFile("./keypair.json", "utf8");
+const signer = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
+
+const client = new StreamClient(apiKey);
+const session = await StreamSession.connect(client, {
+  wallet_pubkeys: [signer.publicKey.toBase58()],
+  strategy: {
+    target_profit_pct: 5,
+    stop_loss_pct: 1.5,
+  },
+  deadline_timeout_sec: 45,
+});
+
+while (true) {
+  const event = await session.recv();
+  if (event === null) break;
+
+  if (
+    event.type === "exit_signal_with_tx" &&
+    event.message.type === "exit_signal_with_tx"
+  ) {
+    const signed = signUnsignedTx(event.message.unsigned_tx_b64, signer);
+    const sig = await sendTransaction(sendTargetHeliusSender(), signed);
+    console.log("Exit submitted:", sig);
+  }
+}
+```
+
+```python Python
+import asyncio, json
+from pathlib import Path
+from solders.keypair import Keypair
+from lasersell_sdk.stream.client import StreamClient, StreamConfigure
+from lasersell_sdk.stream.session import StreamSession
+from lasersell_sdk.tx import SendTargetHeliusSender, send_transaction, sign_unsigned_tx
+
+async def main():
+    signer = Keypair.from_bytes(bytes(json.loads(Path("./keypair.json").read_text())))
+    client = StreamClient("YOUR_API_KEY")
+    session = await StreamSession.connect(
+        client,
+        StreamConfigure(
+            wallet_pubkeys=[str(signer.pubkey())],
+            strategy={"target_profit_pct": 5.0, "stop_loss_pct": 1.5},
+            deadline_timeout_sec=45,
+        ),
+    )
+
+    while True:
+        event = await session.recv()
+        if event is None:
+            break
+        if event.type == "exit_signal_with_tx":
+            msg = event.message
+            signed = sign_unsigned_tx(str(msg["unsigned_tx_b64"]), signer)
+            sig = await send_transaction(SendTargetHeliusSender(), signed)
+            print("Exit submitted:", sig)
+
+asyncio.run(main())
+```
+</CodeGroup>
+
+## Next Steps
+
+- [POST /v1/sell](/api/exit-api/sell) — Full request and response schema for sell transactions.
+- [Exit Intelligence Stream](/api/stream/overview) — Deep dive into the WebSocket stream.
+- [Transaction Signing](/api/transactions/signing) — Understand the non custodial signing flow.

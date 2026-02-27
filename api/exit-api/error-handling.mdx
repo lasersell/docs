@@ -1,0 +1,153 @@
+---
+title: "Error Handling"
+description: "HTTP status codes, error envelope format, ExitApiError kinds, and retry behavior for the LaserSell API."
+---
+
+## HTTP Status Codes
+
+| Status | Meaning                  | Retryable |
+|--------|--------------------------|-----------|
+| 200    | Success                  | —         |
+| 400    | Bad request (invalid parameters) | No  |
+| 401    | Unauthorized (missing or invalid API key) | No |
+| 429    | Rate limited             | Yes       |
+| 500+   | Server error             | Yes       |
+
+## Error Envelope
+
+Non success responses return a JSON body with one or more of these fields:
+
+```json
+{
+  "status": "error",
+  "error": "descriptive error message",
+  "reason": "alternate reason field",
+  "message": "alternate message field"
+}
+```
+
+The SDKs parse all three variants (`error`, `reason`, `message`) and surface them through the `ExitApiError` type.
+
+## `ExitApiError` Kinds
+
+Every SDK exposes an `ExitApiError` (or equivalent) with a `kind` discriminator:
+
+| Kind              | Trigger                                    | Retryable |
+|-------------------|--------------------------------------------|-----------|
+| `transport`       | Network failure, DNS error, timeout        | Yes       |
+| `http_status`     | Non 2xx HTTP response                      | Yes if status >= 500 or 429 |
+| `envelope_status` | Server returned `{ "status": "error" }`    | No        |
+| `parse`           | Response body could not be parsed as JSON  | No        |
+
+### Checking Retryability
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## Built in Retry Behavior
+
+All SDKs include automatic retry with these defaults:
+
+| Setting             | Default Value |
+|---------------------|---------------|
+| Max attempts        | 2             |
+| Initial backoff     | 25 ms         |
+| Max backoff         | 25 ms         |
+| Jitter              | 25 ms         |
+| Connect timeout     | 200 ms        |
+| Attempt timeout     | 900 ms        |
+
+Retries only trigger for errors where `isRetryable()` returns `true` (transport failures, 5xx responses, and 429 rate limits).
+
+### Customizing Retry Policy
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+</CodeGroup>
+
+## Best Practices
+
+- **Do not retry** `400` or `401` errors. These indicate a request or authentication problem that must be fixed in code.
+- **Back off exponentially** on `429` responses. The built in retry handles this automatically.
+- **Log error details** including `kind`, `status`, and `body` for debugging.
+- If you see consistent `envelope_status` errors, verify your `mint` address and `user_pubkey` are correct.

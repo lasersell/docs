@@ -1,0 +1,229 @@
+---
+title: "Market Context"
+description: "Full MarketContextMsg schema with nested objects for each supported DEX protocol."
+---
+
+## Overview
+
+`MarketContextMsg` describes the DEX pool and protocol used for a token's market. It appears in:
+
+- `position_opened` server events
+- `exit_signal_with_tx` server events
+- `BuildSellTxRequest` (optional, to skip server side resolution)
+
+If omitted from a build request, the server resolves the context automatically.
+
+## `MarketContextMsg` Schema
+
+| Field               | Type     | Required | Description                                    |
+|---------------------|----------|----------|------------------------------------------------|
+| `market_type`       | `string` | Yes      | One of the supported market types (see below). |
+| `pumpfun`           | `object` | No       | Pump.fun bonding curve context.                |
+| `pumpswap`          | `object` | No       | PumpSwap AMM context.                          |
+| `meteora_dbc`       | `object` | No       | Meteora DBC context.                           |
+| `meteora_damm_v2`   | `object` | No       | Meteora DAMM V2 context.                       |
+| `raydium_launchpad` | `object` | No       | Raydium Launchpad context.                     |
+| `raydium_cpmm`      | `object` | No       | Raydium CPMM context.                          |
+
+Exactly one of the nested objects should be present, matching the `market_type`.
+
+## `market_type` Values
+
+| Value                | Protocol              |
+|----------------------|-----------------------|
+| `pump_fun`           | Pump.fun              |
+| `pump_swap`          | PumpSwap              |
+| `meteora_dbc`        | Meteora DBC           |
+| `meteora_damm_v2`    | Meteora DAMM V2       |
+| `raydium_launchpad`  | Raydium Launchpad     |
+| `raydium_cpmm`       | Raydium CPMM          |
+
+## Nested Context Objects
+
+### `PumpFunContextMsg`
+
+Empty object. Pump.fun bonding curve tokens do not require additional pool context.
+
+```json
+{
+  "market_type": "pump_fun",
+  "pumpfun": {}
+}
+```
+
+### `PumpSwapContextMsg`
+
+| Field           | Type     | Required | Description                    |
+|-----------------|----------|----------|--------------------------------|
+| `pool`          | `string` | Yes      | PumpSwap pool address.         |
+| `global_config` | `string` | No       | PumpSwap global config address. |
+
+```json
+{
+  "market_type": "pump_swap",
+  "pumpswap": {
+    "pool": "PoolAddr...",
+    "global_config": "ConfigAddr..."
+  }
+}
+```
+
+### `MeteoraDbcContextMsg`
+
+| Field        | Type     | Required | Description                      |
+|--------------|----------|----------|----------------------------------|
+| `pool`       | `string` | Yes      | Meteora DBC pool address.        |
+| `config`     | `string` | Yes      | Pool configuration address.      |
+| `quote_mint` | `string` | Yes      | Quote asset mint (SOL or other). |
+
+```json
+{
+  "market_type": "meteora_dbc",
+  "meteora_dbc": {
+    "pool": "PoolAddr...",
+    "config": "ConfigAddr...",
+    "quote_mint": "So111..."
+  }
+}
+```
+
+### `MeteoraDammV2ContextMsg`
+
+| Field  | Type     | Required | Description                   |
+|--------|----------|----------|-------------------------------|
+| `pool` | `string` | Yes      | Meteora DAMM V2 pool address. |
+
+```json
+{
+  "market_type": "meteora_damm_v2",
+  "meteora_damm_v2": {
+    "pool": "PoolAddr..."
+  }
+}
+```
+
+### `RaydiumLaunchpadContextMsg`
+
+| Field                | Type     | Required | Description                           |
+|----------------------|----------|----------|---------------------------------------|
+| `pool`               | `string` | Yes      | Raydium Launchpad pool address.       |
+| `config`             | `string` | Yes      | Pool configuration address.           |
+| `platform`           | `string` | Yes      | Platform address.                     |
+| `quote_mint`         | `string` | Yes      | Quote asset mint.                     |
+| `user_quote_account` | `string` | Yes      | User's quote token account.           |
+
+```json
+{
+  "market_type": "raydium_launchpad",
+  "raydium_launchpad": {
+    "pool": "PoolAddr...",
+    "config": "ConfigAddr...",
+    "platform": "PlatformAddr...",
+    "quote_mint": "So111...",
+    "user_quote_account": "QuoteATA..."
+  }
+}
+```
+
+### `RaydiumCpmmContextMsg`
+
+| Field                | Type     | Required | Description                   |
+|----------------------|----------|----------|-------------------------------|
+| `pool`               | `string` | Yes      | Raydium CPMM pool address.   |
+| `config`             | `string` | Yes      | Pool configuration address.   |
+| `quote_mint`         | `string` | Yes      | Quote asset mint.             |
+| `user_quote_account` | `string` | Yes      | User's quote token account.   |
+
+```json
+{
+  "market_type": "raydium_cpmm",
+  "raydium_cpmm": {
+    "pool": "PoolAddr...",
+    "config": "ConfigAddr...",
+    "quote_mint": "So111...",
+    "user_quote_account": "QuoteATA..."
+  }
+}
+```
+
+## Passing Market Context in Build Requests
+
+You can include `market_context` in a `BuildSellTxRequest` to skip server side pool resolution. This is useful when you already have the context from a `position_opened` or `exit_signal_with_tx` event.
+
+<CodeGroup>
+```typescript TypeScript
+const request: BuildSellTxRequest = {
+  mint: "TOKEN_MINT",
+  user_pubkey: "WALLET",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  market_context: {
+    market_type: "pump_swap",
+    pumpswap: { pool: "PoolAddr..." },
+  },
+};
+```
+
+```python Python
+request = BuildSellTxRequest(
+    mint="TOKEN_MINT",
+    user_pubkey="WALLET",
+    amount_tokens=1_000_000,
+    slippage_bps=2_000,
+    market_context={
+        "market_type": "pump_swap",
+        "pumpswap": {"pool": "PoolAddr..."},
+    },
+)
+```
+
+```rust Rust
+let request = BuildSellTxRequest {
+    mint: "TOKEN_MINT".into(),
+    user_pubkey: "WALLET".into(),
+    amount_tokens: 1_000_000,
+    slippage_bps: Some(2_000),
+    market_context: Some(MarketContextMsg {
+        market_type: "pump_swap".into(),
+        pumpswap: Some(PumpSwapContextMsg { pool: "PoolAddr...".into(), ..Default::default() }),
+        ..Default::default()
+    }),
+    ..Default::default()
+};
+```
+
+```go Go
+resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+    Mint:         "TOKEN_MINT",
+    UserPubkey:   "WALLET",
+    AmountTokens: 1_000_000,
+    SlippageBps:  intPtr(2_000),
+    MarketContext: &stream.MarketContextMsg{
+        MarketType: "pump_swap",
+        PumpSwap:   &stream.PumpSwapContextMsg{Pool: "PoolAddr..."},
+    },
+})
+```
+</CodeGroup>
+
+## TypeScript Type Reference
+
+```typescript
+type MarketTypeMsg =
+  | "pump_fun"
+  | "pump_swap"
+  | "meteora_dbc"
+  | "meteora_damm_v2"
+  | "raydium_launchpad"
+  | "raydium_cpmm";
+
+interface MarketContextMsg {
+  market_type: MarketTypeMsg;
+  pumpfun?: PumpFunContextMsg;
+  pumpswap?: PumpSwapContextMsg;
+  meteora_dbc?: MeteoraDbcContextMsg;
+  meteora_damm_v2?: MeteoraDammV2ContextMsg;
+  raydium_launchpad?: RaydiumLaunchpadContextMsg;
+  raydium_cpmm?: RaydiumCpmmContextMsg;
+}
+```

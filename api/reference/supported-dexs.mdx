@@ -1,0 +1,60 @@
+---
+title: "Supported DEXs"
+description: "Protocols, market types, graduation support, and launchpad coverage for LaserSell swap routing."
+---
+
+## Supported Protocols
+
+LaserSell routes swaps through multiple Solana DEX protocols. The `market_type` field in `MarketContextMsg` identifies which protocol is being used for a given token.
+
+| `market_type`        | Protocol              | Type            | Description                                     |
+|----------------------|-----------------------|-----------------|-------------------------------------------------|
+| `pump_fun`           | Pump.fun              | Bonding curve   | Original Pump.fun bonding curve.                |
+| `pump_swap`          | PumpSwap              | AMM             | Graduated Pump.fun tokens on the PumpSwap AMM.  |
+| `meteora_dbc`        | Meteora DBC           | Dynamic bonding | Meteora dynamic bonding curve pools.            |
+| `meteora_damm_v2`    | Meteora DAMM V2       | AMM             | Meteora dynamic AMM V2 pools.                   |
+| `raydium_launchpad`  | Raydium Launchpad     | Bonding curve   | Raydium launchpad bonding curve tokens.         |
+| `raydium_cpmm`       | Raydium CPMM          | AMM             | Raydium constant product market maker pools.    |
+
+## Bonding Curves vs AMM Pools
+
+**Bonding curve** protocols (`pump_fun`, `meteora_dbc`, `raydium_launchpad`) use a mathematical curve to determine price. Tokens on bonding curves may later **graduate** to a full AMM pool.
+
+**AMM** protocols (`pump_swap`, `meteora_damm_v2`, `raydium_cpmm`) use constant product or dynamic liquidity pools. These offer deeper liquidity and standard swap mechanics.
+
+## Graduation
+
+Some tokens launch on a bonding curve and later "graduate" to an AMM when certain conditions are met (usually a market cap threshold). LaserSell detects graduation events and can automatically sell on graduation if `sell_on_graduation: true` is set in your strategy.
+
+| Source Curve         | Graduates To            |
+|----------------------|-------------------------|
+| `pump_fun`           | `pump_swap`             |
+| `meteora_dbc`        | `meteora_damm_v2`       |
+| `raydium_launchpad`  | `raydium_cpmm`          |
+
+When graduation occurs, the Exit Intelligence Stream updates the `market_context` and continues tracking seamlessly.
+
+## Launchpad Coverage
+
+LaserSell monitors all major Solana token launchpads:
+
+- **Pump.fun** — The most popular memecoin launchpad. Tokens start on a bonding curve and graduate to PumpSwap.
+- **Meteora** — Dynamic bonding curves that graduate to DAMM V2 pools.
+- **Raydium Launchpad** — Raydium's native launchpad with graduation to CPMM pools.
+
+New protocols are added as they gain adoption on Solana. The `market_type` enum will expand accordingly.
+
+## Using Market Context
+
+The `market_context` is included in `position_opened` and `exit_signal_with_tx` events. You can also pass it in a `BuildSellTxRequest` to skip server side resolution:
+
+```json
+{
+  "market_type": "pump_swap",
+  "pumpswap": {
+    "pool": "PoolAddress..."
+  }
+}
+```
+
+See [Market Context](/api/reference/market-context) for the full nested schema per protocol.

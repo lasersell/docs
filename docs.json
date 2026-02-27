@@ -87,7 +87,60 @@
         ]
       },
       {
-        "tab": "API Docs"
+        "tab": "API Docs",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "api/overview",
+              "api/authentication",
+              "api/quickstart"
+            ]
+          },
+          {
+            "group": "LaserSell API",
+            "pages": [
+              "api/exit-api/sell",
+              "api/exit-api/buy",
+              "api/exit-api/error-handling"
+            ]
+          },
+          {
+            "group": "Exit Intelligence Stream",
+            "pages": [
+              "api/stream/overview",
+              "api/stream/connection-lifecycle",
+              "api/stream/strategy-configuration",
+              "api/stream/server-events",
+              "api/stream/client-messages"
+            ]
+          },
+          {
+            "group": "Transaction Submission",
+            "pages": [
+              "api/transactions/signing",
+              "api/transactions/send-targets"
+            ]
+          },
+          {
+            "group": "SDK Guides",
+            "pages": [
+              "api/sdk/typescript",
+              "api/sdk/python",
+              "api/sdk/rust",
+              "api/sdk/go"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "api/reference/supported-dexs",
+              "api/reference/partner-fees",
+              "api/reference/rate-limits",
+              "api/reference/market-context"
+            ]
+          }
+        ]
       }
     ]
   },

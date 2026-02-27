@@ -1,0 +1,197 @@
+---
+title: "TypeScript SDK"
+description: "Install, configure, and use the LaserSell TypeScript SDK for building transactions, streaming positions, and submitting trades."
+---
+
+## Installation
+
+```bash
+npm install @lasersell/lasersell-sdk
+```
+
+The package ships with TypeScript declarations and supports both ESM and CommonJS.
+
+## Modules
+
+| Import                          | Purpose                                |
+|---------------------------------|----------------------------------------|
+| `ExitApiClient`                 | Build unsigned buy/sell transactions.  |
+| `StreamClient`                  | Low level WebSocket stream client.     |
+| `StreamSession`                 | High level stream with position tracking. |
+| `signUnsignedTx`                | Sign an unsigned base64 transaction.   |
+| `signUnsignedTxB64Fast`         | Fast path in place signing (returns base64). |
+| `sendTransaction`               | Submit a signed transaction.           |
+| `sendTargetRpc`, `sendTargetHeliusSender`, `sendTargetAstralane` | Send target constructors. |
+
+## API Client
+
+```typescript
+import {
+  ExitApiClient,
+  type BuildSellTxRequest,
+  type BuildBuyTxRequest,
+} from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+// Build sell
+const sellRequest: BuildSellTxRequest = {
+  mint: "TOKEN_MINT",
+  user_pubkey: "WALLET",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+};
+const sellResponse = await client.buildSellTx(sellRequest);
+const txB64 = sellResponse.tx;
+
+// Build buy
+const buyRequest: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT",
+  user_pubkey: "WALLET",
+  amount_quote_units: 100_000_000,
+  slippage_bps: 2_000,
+};
+const buyResponse = await client.buildBuyTx(buyRequest);
+```
+
+### Client Options
+
+```typescript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  connect_timeout_ms: 500,
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+## Exit Intelligence Stream Session
+
+```typescript
+import {
+  StreamClient,
+  StreamSession,
+  sendTransaction,
+  sendTargetHeliusSender,
+  signUnsignedTx,
+} from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+const session = await StreamSession.connect(client, {
+  wallet_pubkeys: ["WALLET_PUBKEY"],
+  strategy: {
+    target_profit_pct: 5,
+    stop_loss_pct: 1.5,
+    trailing_stop_pct: 3,
+  },
+  deadline_timeout_sec: 45,
+});
+
+while (true) {
+  const event = await session.recv();
+  if (event === null) break;
+
+  switch (event.type) {
+    case "position_opened":
+      console.log("New position:", event.handle.mint);
+      break;
+
+    case "exit_signal_with_tx":
+      if (event.message.type === "exit_signal_with_tx") {
+        const signed = signUnsignedTx(event.message.unsigned_tx_b64, keypair);
+        const sig = await sendTransaction(sendTargetHeliusSender(), signed);
+        console.log("Exit submitted:", sig);
+      }
+      break;
+
+    case "pnl_update":
+      if (event.message.type === "pnl_update") {
+        console.log(
+          `PnL position=${event.message.position_id} profit=${event.message.profit_units}`
+        );
+      }
+      break;
+  }
+}
+```
+
+### Lane Splitting
+
+For high throughput scenarios, split the Exit Intelligence Stream into priority lanes:
+
+```typescript
+const connection = await client.connectLanes(configure, {
+  lowPriorityCapacity: 512,
+});
+const [sender, highRx, lowRx] = connection.split();
+
+// High priority: exit signals, position events
+for await (const msg of highRx) {
+  // Handle critical messages
+}
+```
+
+## Transaction Helpers
+
+```typescript
+import {
+  signUnsignedTx,
+  signUnsignedTxB64Fast,
+  signAndSendUnsignedTxB64,
+  sendTransaction,
+  sendTransactionB64To,
+  encodeSignedTx,
+  sendTargetRpc,
+  sendTargetHeliusSender,
+  sendTargetAstralane,
+  sendTargetDefaultRpc,
+} from "@lasersell/lasersell-sdk";
+
+// Standard sign
+const signedTx = signUnsignedTx(unsignedTxB64, keypair);
+
+// Fast sign (returns base64 string)
+const signedB64 = signUnsignedTxB64Fast(unsignedTxB64, keypair);
+
+// Sign + send in one step
+const sig = await signAndSendUnsignedTxB64(
+  sendTargetHeliusSender(),
+  unsignedTxB64,
+  keypair,
+);
+
+// Send a pre-signed transaction
+const sig2 = await sendTransaction(sendTargetRpc("https://rpc.example.com"), signedTx);
+
+// Send a pre-signed base64 string
+const sig3 = await sendTransactionB64To(sendTargetHeliusSender(), signedB64);
+```
+
+## Error Handling
+
+```typescript
+import { ExitApiError, TxSubmitError, StreamClientError } from "@lasersell/lasersell-sdk";
+
+try {
+  await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    // error.kind, error.status, error.body, error.isRetryable()
+  }
+  if (error instanceof TxSubmitError) {
+    // error.kind, error.target, error.status
+  }
+  if (error instanceof StreamClientError) {
+    // error.kind
+  }
+}
+```
+
+## Complete Example
+
+See the [Quickstart](/api/quickstart) for a full working example that builds, signs, and submits a sell transaction.

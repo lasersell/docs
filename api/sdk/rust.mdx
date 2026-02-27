@@ -1,0 +1,184 @@
+---
+title: "Rust SDK"
+description: "Install, configure, and use the LaserSell Rust SDK with async/.await for building transactions and streaming positions."
+---
+
+## Installation
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+lasersell-sdk = "0.1"
+tokio = { version = "1", features = ["full"] }
+```
+
+## Modules
+
+| Module                        | Purpose                                |
+|-------------------------------|----------------------------------------|
+| `lasersell_sdk::exit_api`     | `ExitApiClient`, request/response types, `ExitApiError` |
+| `lasersell_sdk::tx`           | `SendTarget`, `sign_unsigned_tx`, `send_transaction` |
+| `lasersell_sdk::stream::client` | `StreamClient`, `StreamConnection`, `StreamSender` |
+| `lasersell_sdk::stream::session` | `StreamSession`, position tracking |
+| `lasersell_sdk::stream::proto`  | Message types (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+| `lasersell_sdk::retry`        | `RetryPolicy` configuration            |
+
+## API Client
+
+All methods are `async` and return `Result<T, ExitApiError>`.
+
+```rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildSellTxRequest, BuildBuyTxRequest};
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+    // Build sell transaction
+    let sell_request = BuildSellTxRequest {
+        mint: "TOKEN_MINT".into(),
+        user_pubkey: "WALLET".into(),
+        amount_tokens: 1_000_000,
+        slippage_bps: Some(2_000),
+        output: Some("SOL".into()),
+        ..Default::default()
+    };
+    let sell_response = client.build_sell_tx(&sell_request).await?;
+    println!("Sell tx: {}", sell_response.tx);
+
+    // Build buy transaction
+    let buy_request = BuildBuyTxRequest {
+        mint: "TOKEN_MINT".into(),
+        user_pubkey: "WALLET".into(),
+        amount_quote_units: 100_000_000,
+        slippage_bps: Some(2_000),
+        ..Default::default()
+    };
+    let buy_response = client.build_buy_tx(&buy_request).await?;
+    println!("Buy tx: {}", buy_response.tx);
+
+    Ok(())
+}
+```
+
+### Custom Options
+
+```rust
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+use std::time::Duration;
+
+let options = ExitApiClientOptions {
+    connect_timeout: Duration::from_millis(500),
+    attempt_timeout: Duration::from_secs(2),
+    retry_policy: RetryPolicy {
+        max_attempts: 3,
+        initial_backoff: Duration::from_millis(50),
+        max_backoff: Duration::from_millis(200),
+        jitter: Duration::from_millis(50),
+    },
+};
+
+let client = ExitApiClient::with_options(Some("YOUR_API_KEY"), options);
+```
+
+## Exit Intelligence Stream Session
+
+```rust
+use lasersell_sdk::stream::client::StreamClient;
+use lasersell_sdk::stream::session::StreamSession;
+use lasersell_sdk::stream::proto::StrategyConfigMsg;
+use lasersell_sdk::tx::{SendTarget, sign_unsigned_tx, send_transaction};
+use solana_sdk::signature::read_keypair_file;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let keypair = read_keypair_file("./keypair.json")?;
+
+    let client = StreamClient::new("YOUR_API_KEY");
+    let session = StreamSession::connect(&client, StreamConfigure {
+        wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
+        strategy: StrategyConfigMsg {
+            target_profit_pct: 5.0,
+            stop_loss_pct: 1.5,
+            trailing_stop_pct: Some(3.0),
+            sell_on_graduation: None,
+        },
+        deadline_timeout_sec: Some(45),
+    }).await?;
+
+    loop {
+        let event = match session.recv().await {
+            Some(event) => event,
+            None => break,
+        };
+
+        match &event {
+            StreamEvent::ExitSignalWithTx { message, .. } => {
+                let signed = sign_unsigned_tx(&message.unsigned_tx_b64, &keypair)?;
+                let sig = send_transaction(&SendTarget::HeliusSender, &signed).await?;
+                println!("Exit submitted: {sig}");
+            }
+            StreamEvent::PositionOpened { handle, .. } => {
+                println!("New position: {}", handle.mint);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+```
+
+## Transaction Helpers
+
+```rust
+use lasersell_sdk::tx::{
+    SendTarget,
+    sign_unsigned_tx,
+    send_transaction,
+    astralane_iris_url,
+    MAINNET_BETA_RPC_URL,
+};
+
+// Sign
+let signed_tx = sign_unsigned_tx(&unsigned_tx_b64, &keypair)?;
+
+// Send via Helius Sender
+let sig = send_transaction(&SendTarget::HeliusSender, &signed_tx).await?;
+
+// Send via custom RPC
+let sig = send_transaction(
+    &SendTarget::Rpc { url: "https://rpc.example.com".into() },
+    &signed_tx,
+).await?;
+
+// Send via Astralane
+let sig = send_transaction(
+    &SendTarget::Astralane {
+        api_key: "KEY".into(),
+        region: Some("fr".into()),
+    },
+    &signed_tx,
+).await?;
+```
+
+## Error Handling
+
+```rust
+use lasersell_sdk::exit_api::ExitApiError;
+use lasersell_sdk::tx::TxSubmitError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => println!("tx: {}", response.tx),
+    Err(e) => {
+        eprintln!("Error kind: {:?}", e.kind());
+        eprintln!("Retryable: {}", e.is_retryable());
+    }
+}
+```
+
+## Complete Example
+
+See the [Quickstart](/api/quickstart) for a full working example.

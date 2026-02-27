@@ -1,0 +1,166 @@
+---
+title: "Partner Fees"
+description: "Configure partner fees on buy and sell transactions using basis points or flat lamport amounts."
+---
+
+## Overview
+
+The LaserSell API supports adding a partner fee to any buy or sell transaction. This lets integrators collect a fee routed to a specified wallet as part of the swap instruction.
+
+Partner fees are optional and configured per request. They are **not** related to LaserSell's own protocol fee.
+
+## Fee Modes
+
+You can specify the fee in one of two ways. These modes are mutually exclusive; do not set both on the same request.
+
+### Basis Points Mode
+
+Set `partner_fee_bps` to charge a percentage of the swap value.
+
+| Field                   | Type     | Description                                |
+|-------------------------|----------|--------------------------------------------|
+| `partner_fee_recipient` | `string` | Recipient wallet address (base58 pubkey).  |
+| `partner_fee_bps`       | `number` | Fee in basis points. Max `50` (0.5%).      |
+
+**Example**: A 25 bps (0.25%) fee on a 1 SOL swap routes 0.0025 SOL to the recipient.
+
+### Flat Lamports Mode
+
+Set `partner_fee_lamports` to charge a fixed amount in lamports.
+
+| Field                   | Type     | Description                                |
+|-------------------------|----------|--------------------------------------------|
+| `partner_fee_recipient` | `string` | Recipient wallet address (base58 pubkey).  |
+| `partner_fee_lamports`  | `number` | Fee in lamports. Max `50,000,000` (0.05 SOL). |
+
+## Limits
+
+| Mode       | Maximum Value            | Equivalent         |
+|------------|--------------------------|--------------------|
+| bps        | 50 bps                   | 0.5%               |
+| lamports   | 50,000,000 lamports      | 0.05 SOL           |
+
+Requests exceeding these limits will be rejected with a `400` error.
+
+## Code Examples
+
+### Sell with BPS Fee
+
+<CodeGroup>
+```typescript TypeScript
+const request: BuildSellTxRequest = {
+  mint: "TOKEN_MINT",
+  user_pubkey: "WALLET",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+  partner_fee_recipient: "FEE_WALLET_PUBKEY",
+  partner_fee_bps: 25, // 0.25%
+};
+
+const response = await client.buildSellTx(request);
+```
+
+```python Python
+request = BuildSellTxRequest(
+    mint="TOKEN_MINT",
+    user_pubkey="WALLET",
+    amount_tokens=1_000_000,
+    slippage_bps=2_000,
+    output=SellOutput.SOL,
+    partner_fee_recipient="FEE_WALLET_PUBKEY",
+    partner_fee_bps=25,
+)
+
+response = await client.build_sell_tx(request)
+```
+
+```rust Rust
+let request = BuildSellTxRequest {
+    mint: "TOKEN_MINT".into(),
+    user_pubkey: "WALLET".into(),
+    amount_tokens: 1_000_000,
+    slippage_bps: Some(2_000),
+    output: Some("SOL".into()),
+    partner_fee_recipient: Some("FEE_WALLET_PUBKEY".into()),
+    partner_fee_bps: Some(25),
+    ..Default::default()
+};
+
+let response = client.build_sell_tx(&request).await?;
+```
+
+```go Go
+resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+    Mint:                "TOKEN_MINT",
+    UserPubkey:          "WALLET",
+    AmountTokens:        1_000_000,
+    SlippageBps:         intPtr(2_000),
+    Output:              strPtr("SOL"),
+    PartnerFeeRecipient: strPtr("FEE_WALLET_PUBKEY"),
+    PartnerFeeBps:       intPtr(25),
+})
+```
+</CodeGroup>
+
+### Buy with Flat Lamports Fee
+
+<CodeGroup>
+```typescript TypeScript
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT",
+  user_pubkey: "WALLET",
+  amount_quote_units: 100_000_000,
+  slippage_bps: 2_000,
+  partner_fee_recipient: "FEE_WALLET_PUBKEY",
+  partner_fee_lamports: 5_000_000, // 0.005 SOL
+};
+
+const response = await client.buildBuyTx(request);
+```
+
+```python Python
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT",
+    user_pubkey="WALLET",
+    amount_quote_units=100_000_000,
+    slippage_bps=2_000,
+    partner_fee_recipient="FEE_WALLET_PUBKEY",
+    partner_fee_lamports=5_000_000,
+)
+
+response = await client.build_buy_tx(request)
+```
+
+```rust Rust
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT".into(),
+    user_pubkey: "WALLET".into(),
+    amount_quote_units: 100_000_000,
+    slippage_bps: Some(2_000),
+    partner_fee_recipient: Some("FEE_WALLET_PUBKEY".into()),
+    partner_fee_lamports: Some(5_000_000),
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+```
+
+```go Go
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:                "TOKEN_MINT",
+    UserPubkey:          "WALLET",
+    AmountQuoteUnits:    100_000_000,
+    SlippageBps:         intPtr(2_000),
+    PartnerFeeRecipient: strPtr("FEE_WALLET_PUBKEY"),
+    PartnerFeeLamports:  intPtr(5_000_000),
+})
+```
+</CodeGroup>
+
+## Important Notes
+
+- The `partner_fee_recipient` wallet must be a valid base58 Solana public key.
+- The recipient does not need to have an existing account; the fee instruction will create one if necessary.
+- Setting both `partner_fee_bps` and `partner_fee_lamports` on the same request will result in a `400` error.
+- Partner fees are deducted from the swap output and routed atomically within the same transaction.

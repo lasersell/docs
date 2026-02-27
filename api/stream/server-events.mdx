@@ -1,0 +1,226 @@
+---
+title: "Server Events"
+description: "Complete schema and JSON examples for all 8 server message types sent by the Exit Intelligence Stream."
+---
+
+## Message Types
+
+The server sends messages with a `type` discriminator. All SDKs parse these into typed objects.
+
+| Type                    | Priority | Description                                    |
+|-------------------------|----------|------------------------------------------------|
+| `hello_ok`              | High     | Connection accepted, session started.          |
+| `pong`                  | High     | Response to client ping.                       |
+| `error`                 | High     | Server error notification.                     |
+| `balance_update`        | High     | Token balance changed for a tracked wallet.    |
+| `position_opened`       | High     | New position detected and tracking started.    |
+| `position_closed`       | High     | Position tracking ended.                       |
+| `exit_signal_with_tx`   | High     | Exit threshold met; unsigned tx included.      |
+| `pnl_update`            | Low      | Periodic profit and loss snapshot.             |
+
+## `hello_ok`
+
+Sent once immediately after the WebSocket opens. Contains the session ID and tier limits.
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+| Field            | Type     | Description                         |
+|------------------|----------|-------------------------------------|
+| `session_id`     | `number` | Unique session identifier.          |
+| `server_time_ms` | `number` | Server timestamp in milliseconds.   |
+| `limits`         | `object` | Tier capacity and rate limits. See [Rate Limits](/api/reference/rate-limits). |
+
+## `pong`
+
+Response to a client `ping`. Use for latency measurement.
+
+```json
+{
+  "type": "pong",
+  "server_time_ms": 1706000000001
+}
+```
+
+| Field            | Type     | Description                       |
+|------------------|----------|-----------------------------------|
+| `server_time_ms` | `number` | Server timestamp in milliseconds. |
+
+## `error`
+
+Server side error notification. Check the `code` to determine severity.
+
+```json
+{
+  "type": "error",
+  "code": "invalid_strategy",
+  "message": "target_profit_pct must be >= 0"
+}
+```
+
+| Field     | Type     | Description                    |
+|-----------|----------|--------------------------------|
+| `code`    | `string` | Machine readable error code.   |
+| `message` | `string` | Human readable error detail.   |
+
+## `balance_update`
+
+Emitted when a token balance changes in a tracked wallet (new arrivals, transfers, sells).
+
+```json
+{
+  "type": "balance_update",
+  "wallet_pubkey": "Abc123...",
+  "mint": "TokenMint...",
+  "token_account": "ATA...",
+  "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "tokens": 5000000,
+  "slot": 280000000
+}
+```
+
+| Field            | Type     | Required | Description                                          |
+|------------------|----------|----------|------------------------------------------------------|
+| `wallet_pubkey`  | `string` | Yes      | Wallet that owns the token account.                  |
+| `mint`           | `string` | Yes      | Token mint address.                                  |
+| `token_account`  | `string` | No       | Associated token account address.                    |
+| `token_program`  | `string` | No       | Token program ID (SPL Token or Token 2022).          |
+| `tokens`         | `number` | Yes      | Current balance in atomic units.                     |
+| `slot`           | `number` | Yes      | Solana slot at which the balance was observed.        |
+
+## `position_opened`
+
+A new position has been detected and tracking has begun.
+
+```json
+{
+  "type": "position_opened",
+  "position_id": 1,
+  "wallet_pubkey": "Abc123...",
+  "mint": "TokenMint...",
+  "token_account": "ATA...",
+  "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "tokens": 5000000,
+  "entry_quote_units": 100000000,
+  "market_context": {
+    "market_type": "pump_swap",
+    "pumpswap": {
+      "pool": "PoolAddress..."
+    }
+  },
+  "slot": 280000000
+}
+```
+
+| Field               | Type     | Required | Description                                    |
+|---------------------|----------|----------|------------------------------------------------|
+| `position_id`       | `number` | Yes      | Server assigned position identifier.           |
+| `wallet_pubkey`     | `string` | Yes      | Wallet holding the position.                   |
+| `mint`              | `string` | Yes      | Token mint address.                            |
+| `token_account`     | `string` | Yes      | Associated token account.                      |
+| `token_program`     | `string` | No       | Token program ID.                              |
+| `tokens`            | `number` | Yes      | Token balance at entry.                        |
+| `entry_quote_units` | `number` | Yes      | Entry value in quote asset atomic units.       |
+| `market_context`    | `object` | No       | Market/pool context. See [Market Context](/api/reference/market-context). |
+| `slot`              | `number` | Yes      | Solana slot at detection.                      |
+
+## `position_closed`
+
+A position has been removed from tracking.
+
+```json
+{
+  "type": "position_closed",
+  "position_id": 1,
+  "wallet_pubkey": "Abc123...",
+  "mint": "TokenMint...",
+  "token_account": "ATA...",
+  "reason": "stop_loss",
+  "slot": 280000100
+}
+```
+
+| Field            | Type     | Required | Description                                |
+|------------------|----------|----------|--------------------------------------------|
+| `position_id`    | `number` | Yes      | Position identifier.                       |
+| `wallet_pubkey`  | `string` | Yes      | Wallet that held the position.             |
+| `mint`           | `string` | Yes      | Token mint address.                        |
+| `token_account`  | `string` | No       | Associated token account.                  |
+| `reason`         | `string` | Yes      | Why the position was closed (e.g., `"stop_loss"`, `"target_profit"`, `"trailing_stop"`, `"deadline"`, `"manual"`). |
+| `slot`           | `number` | Yes      | Solana slot at close.                      |
+
+## `exit_signal_with_tx`
+
+The most important event. Sent when a position meets your exit criteria. Includes a pre built unsigned transaction ready for signing.
+
+```json
+{
+  "type": "exit_signal_with_tx",
+  "session_id": 42,
+  "position_id": 1,
+  "wallet_pubkey": "Abc123...",
+  "mint": "TokenMint...",
+  "token_account": "ATA...",
+  "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "position_tokens": 5000000,
+  "profit_units": 50000000,
+  "reason": "target_profit",
+  "triggered_at_ms": 1706000005000,
+  "market_context": {
+    "market_type": "pump_swap",
+    "pumpswap": { "pool": "PoolAddress..." }
+  },
+  "unsigned_tx_b64": "AQAAAA..."
+}
+```
+
+| Field              | Type     | Required | Description                                       |
+|--------------------|----------|----------|---------------------------------------------------|
+| `session_id`       | `number` | Yes      | Session that generated this signal.               |
+| `position_id`      | `number` | Yes      | Position identifier.                              |
+| `wallet_pubkey`    | `string` | Yes      | Wallet holding the position.                      |
+| `mint`             | `string` | Yes      | Token mint address.                               |
+| `token_account`    | `string` | No       | Associated token account.                         |
+| `token_program`    | `string` | No       | Token program ID.                                 |
+| `position_tokens`  | `number` | Yes      | Tokens held at signal time.                       |
+| `profit_units`     | `number` | Yes      | Estimated profit in quote asset atomic units.     |
+| `reason`           | `string` | Yes      | Trigger reason (e.g., `"target_profit"`, `"stop_loss"`, `"trailing_stop"`, `"deadline"`). |
+| `triggered_at_ms`  | `number` | Yes      | Millisecond timestamp when the signal was generated. |
+| `market_context`   | `object` | No       | Market/pool context for the sell route.           |
+| `unsigned_tx_b64`  | `string` | Yes      | Base64 encoded unsigned `VersionedTransaction`.    |
+
+## `pnl_update`
+
+Periodic profit and loss snapshot for a tracked position.
+
+```json
+{
+  "type": "pnl_update",
+  "position_id": 1,
+  "profit_units": 25000000,
+  "proceeds_units": 125000000,
+  "server_time_ms": 1706000003000
+}
+```
+
+| Field            | Type     | Description                                        |
+|------------------|----------|----------------------------------------------------|
+| `position_id`    | `number` | Position identifier.                               |
+| `profit_units`   | `number` | Current estimated profit in quote asset atomic units. |
+| `proceeds_units` | `number` | Current estimated total proceeds.                  |
+| `server_time_ms` | `number` | Server timestamp in milliseconds.                  |
+
+`pnl_update` messages are delivered at the interval defined by `limits.pnl_flush_ms`. When using lane splitting, they flow through the low priority channel.

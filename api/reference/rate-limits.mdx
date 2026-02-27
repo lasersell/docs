@@ -1,0 +1,125 @@
+---
+title: "Rate Limits and Tiers"
+description: "Understand tier capacity, the limits object from hello_ok, and how to handle 429 responses."
+---
+
+## Tier Limits
+
+When you connect to the Exit Intelligence Stream, the `hello_ok` message includes a `limits` object that reflects your API key's tier:
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+## `LimitsMsg` Schema
+
+| Field                        | Type     | Description                                                 |
+|------------------------------|----------|-------------------------------------------------------------|
+| `hi_capacity`                | `number` | Maximum high priority messages the server will buffer.       |
+| `pnl_flush_ms`              | `number` | Interval in milliseconds between `pnl_update` flushes.      |
+| `max_positions_per_session`  | `number` | Maximum positions tracked in a single session.               |
+| `max_wallets_per_session`    | `number` | Maximum wallets that can be monitored in a single session.   |
+| `max_positions_per_wallet`   | `number` | Maximum positions tracked per wallet.                        |
+| `max_sessions_per_api_key`   | `number` | Maximum concurrent stream sessions per API key.              |
+
+## Reading Limits in Code
+
+<CodeGroup>
+```typescript TypeScript
+const session = await StreamSession.connect(client, configure);
+
+// The hello_ok message is the first event
+const event = await session.recv();
+if (event?.type === "message" && event.message.type === "hello_ok") {
+  const limits = event.message.limits;
+  console.log("Max positions:", limits.max_positions_per_session);
+  console.log("Max wallets:", limits.max_wallets_per_session);
+  console.log("PnL interval:", limits.pnl_flush_ms, "ms");
+}
+```
+
+```python Python
+event = await session.recv()
+if event and event.message.get("type") == "hello_ok":
+    limits = event.message["limits"]
+    print("Max positions:", limits["max_positions_per_session"])
+    print("Max wallets:", limits["max_wallets_per_session"])
+```
+
+```rust Rust
+if let Some(event) = session.recv().await {
+    if let ServerMessage::HelloOk { limits, .. } = &event.message {
+        println!("Max positions: {}", limits.max_positions_per_session);
+        println!("Max wallets: {}", limits.max_wallets_per_session);
+        println!("PnL interval: {} ms", limits.pnl_flush_ms);
+    }
+}
+```
+
+```go Go
+event, err := session.Recv(ctx)
+if err == nil {
+    if msg, ok := event.Message.(stream.HelloOkServerMessage); ok {
+        fmt.Println("Max positions:", msg.Limits.MaxPositionsPerSession)
+        fmt.Println("Max wallets:", msg.Limits.MaxWalletsPerSession)
+        fmt.Println("PnL interval:", msg.Limits.PnlFlushMs, "ms")
+    }
+}
+```
+</CodeGroup>
+
+## REST API Rate Limits
+
+The REST API (`/v1/sell`, `/v1/buy`) is also subject to rate limits per API key. When you exceed the limit, the server responds with HTTP `429 Too Many Requests`.
+
+### Handling 429 Responses
+
+The SDKs automatically retry `429` responses using the built in retry policy. If you see persistent 429 errors:
+
+1. **Check your request frequency.** Reduce the rate of API calls.
+2. **Batch requests.** If building multiple transactions, space them out.
+3. **Increase retry backoff.** Configure a longer backoff to give the server time to recover.
+
+```typescript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  retry_policy: {
+    max_attempts: 4,
+    initial_backoff_ms: 100,
+    max_backoff_ms: 1000,
+    jitter_ms: 100,
+  },
+});
+```
+
+## Exit Intelligence Stream Capacity
+
+If you exceed the Exit Intelligence Stream's capacity limits (e.g., too many positions or wallets), the server sends an `error` message:
+
+```json
+{
+  "type": "error",
+  "code": "capacity_exceeded",
+  "message": "max_positions_per_session limit reached"
+}
+```
+
+The stream connection remains open. Remove positions with `close_position` or reduce wallets with `update_wallets` to free capacity.
+
+## Best Practices
+
+- **Read limits on connect.** Use the `limits` object to validate your configuration before sending positions.
+- **Monitor for capacity errors.** Log and alert on `error` messages with capacity related codes.
+- **Use lane splitting.** For high position counts, use `connectLanes()` to prevent `pnl_update` messages from blocking time sensitive events.
+- **Respect 429 responses.** Do not retry immediately; use exponential backoff.

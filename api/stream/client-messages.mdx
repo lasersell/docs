@@ -1,0 +1,286 @@
+---
+title: "Client Messages"
+description: "Complete schema and JSON examples for all 6 client message types sent to the Exit Intelligence Stream."
+---
+
+## Message Types
+
+| Type                   | Description                                        |
+|------------------------|----------------------------------------------------|
+| `ping`                 | Latency probe; server responds with `pong`.        |
+| `configure`            | Initial session setup with wallets and strategy.   |
+| `update_strategy`      | Change strategy parameters mid session.            |
+| `close_position`       | Remove a position from tracking.                   |
+| `request_exit_signal`  | Manually request an exit transaction.              |
+| `update_wallets`       | Add or remove wallets mid session.                 |
+
+## `ping`
+
+```json
+{
+  "type": "ping",
+  "client_time_ms": 1706000000000
+}
+```
+
+| Field            | Type     | Required | Description                      |
+|------------------|----------|----------|----------------------------------|
+| `client_time_ms` | `number` | Yes      | Client timestamp in milliseconds. Compare with `pong.server_time_ms` to measure latency. |
+
+## `configure`
+
+Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy to evaluate.
+
+```json
+{
+  "type": "configure",
+  "wallet_pubkeys": [
+    "WalletPubkey1...",
+    "WalletPubkey2..."
+  ],
+  "strategy": {
+    "target_profit_pct": 5.0,
+    "stop_loss_pct": 1.5,
+    "trailing_stop_pct": 3.0,
+    "sell_on_graduation": false
+  }
+}
+```
+
+| Field            | Type       | Required | Description                                     |
+|------------------|------------|----------|-------------------------------------------------|
+| `wallet_pubkeys` | `string[]` | Yes      | One or more wallet public keys to monitor.      |
+| `strategy`       | `object`   | Yes      | Strategy configuration. See [Strategy Configuration](/api/stream/strategy-configuration). |
+
+The SDKs send `configure` automatically when you call `StreamClient.connect()` or `StreamSession.connect()`.
+
+## `update_strategy`
+
+Update the strategy without reconnecting. Takes effect immediately for all tracked positions.
+
+```json
+{
+  "type": "update_strategy",
+  "strategy": {
+    "target_profit_pct": 15.0,
+    "stop_loss_pct": 3.0,
+    "trailing_stop_pct": 7.0,
+    "sell_on_graduation": true
+  }
+}
+```
+
+| Field      | Type     | Required | Description             |
+|------------|----------|----------|-------------------------|
+| `strategy` | `object` | Yes      | New strategy to apply.  |
+
+<CodeGroup>
+```typescript TypeScript
+session.updateStrategy({
+  target_profit_pct: 15,
+  stop_loss_pct: 3,
+  trailing_stop_pct: 7,
+});
+```
+
+```python Python
+session.sender().update_strategy({
+    "target_profit_pct": 15.0,
+    "stop_loss_pct": 3.0,
+    "trailing_stop_pct": 7.0,
+})
+```
+
+```rust Rust
+session.update_strategy(StrategyConfigMsg {
+    target_profit_pct: 15.0,
+    stop_loss_pct: 3.0,
+    trailing_stop_pct: Some(7.0),
+    sell_on_graduation: None,
+}, None);
+```
+
+```go Go
+session.Sender().UpdateStrategy(stream.StrategyConfigMsg{
+    TargetProfitPct: 15.0,
+    StopLossPct:     3.0,
+    TrailingStopPct: 7.0,
+})
+```
+</CodeGroup>
+
+## `close_position`
+
+Remove a position from tracking. The server will stop monitoring PnL and will not generate exit signals for it. Identify the position by either `position_id` or `token_account`.
+
+```json
+{
+  "type": "close_position",
+  "position_id": 1
+}
+```
+
+Or by token account:
+
+```json
+{
+  "type": "close_position",
+  "token_account": "ATA..."
+}
+```
+
+| Field            | Type     | Required | Description                                           |
+|------------------|----------|----------|-------------------------------------------------------|
+| `position_id`    | `number` | No*      | Position ID to close. Mutually exclusive with `token_account`. |
+| `token_account`  | `string` | No*      | Token account address. Mutually exclusive with `position_id`. |
+
+*One of `position_id` or `token_account` is required.
+
+<CodeGroup>
+```typescript TypeScript
+// By handle (from StreamSession)
+session.close(handle);
+
+// By position ID (via sender)
+session.sender().closeById(1);
+
+// By token account
+session.sender().closePosition("ATA...");
+```
+
+```python Python
+# By position ID
+session.sender().close_by_id(1)
+
+# By token account
+session.sender().close_position("ATA...")
+```
+
+```rust Rust
+// By position handle
+session.close(handle);
+
+// By position ID
+session.sender().close_by_id(1);
+
+// By token account
+session.sender().close_position("ATA...");
+```
+
+```go Go
+// By position ID
+sender.CloseByID(1)
+
+// By token account
+sender.ClosePosition("ATA...")
+```
+</CodeGroup>
+
+## `request_exit_signal`
+
+Manually request the server to generate an exit transaction for a position, regardless of whether the strategy thresholds have been met.
+
+```json
+{
+  "type": "request_exit_signal",
+  "position_id": 1,
+  "slippage_bps": 3000
+}
+```
+
+Or by token account:
+
+```json
+{
+  "type": "request_exit_signal",
+  "token_account": "ATA...",
+  "slippage_bps": 3000
+}
+```
+
+| Field            | Type     | Required | Description                                             |
+|------------------|----------|----------|---------------------------------------------------------|
+| `position_id`    | `number` | No*      | Position ID. Mutually exclusive with `token_account`.   |
+| `token_account`  | `string` | No*      | Token account. Mutually exclusive with `position_id`.   |
+| `slippage_bps`   | `number` | No       | Override slippage for this exit transaction.             |
+
+*One of `position_id` or `token_account` is required.
+
+The server responds with an `exit_signal_with_tx` containing the unsigned transaction.
+
+<CodeGroup>
+```typescript TypeScript
+// Using StreamSession
+session.requestExitSignal(handle, 3000);
+
+// Using sender directly
+session.sender().requestExitSignal("ATA...", 3000);
+session.sender().requestExitSignalById(1, 3000);
+```
+
+```python Python
+session.sender().request_exit_signal("ATA...", slippage_bps=3000)
+session.sender().request_exit_signal_by_id(1, slippage_bps=3000)
+```
+
+```rust Rust
+session.request_exit_signal(handle, Some(3000));
+
+// Using sender directly
+session.sender().request_exit_signal("ATA...", Some(3000));
+session.sender().request_exit_signal_by_id(1, Some(3000));
+```
+
+```go Go
+sender.RequestExitSignal("ATA...", intPtr(3000))
+sender.RequestExitSignalByID(1, intPtr(3000))
+```
+</CodeGroup>
+
+## `update_wallets`
+
+Add or remove wallets from the session without reconnecting. The server will start monitoring the new set and stop tracking wallets that are no longer listed.
+
+```json
+{
+  "type": "update_wallets",
+  "wallet_pubkeys": [
+    "WalletPubkey1...",
+    "WalletPubkey3..."
+  ]
+}
+```
+
+| Field            | Type       | Required | Description                              |
+|------------------|------------|----------|------------------------------------------|
+| `wallet_pubkeys` | `string[]` | Yes      | Updated list of wallets to monitor.      |
+
+<CodeGroup>
+```typescript TypeScript
+session.sender().updateWallets([
+  "WalletPubkey1...",
+  "WalletPubkey3...",
+]);
+```
+
+```python Python
+session.sender().update_wallets([
+    "WalletPubkey1...",
+    "WalletPubkey3...",
+])
+```
+
+```rust Rust
+session.sender().update_wallets(vec![
+    "WalletPubkey1...".into(),
+    "WalletPubkey3...".into(),
+]);
+```
+
+```go Go
+sender.UpdateWallets([]string{
+    "WalletPubkey1...",
+    "WalletPubkey3...",
+})
+```
+</CodeGroup>

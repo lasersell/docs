@@ -1,0 +1,170 @@
+---
+title: "Send Targets"
+description: "Choose how to submit signed transactions: Default RPC, custom RPC, Helius Sender, or Astralane Iris."
+---
+
+## What is a Send Target?
+
+A `SendTarget` tells the SDK where to submit your signed transaction. The LaserSell SDKs support four targets, each optimized for different use cases.
+
+## Available Targets
+
+### Default RPC
+
+Uses the Solana public mainnet beta endpoint (`https://api.mainnet-beta.solana.com`). This endpoint is rate limited and best suited for testing only.
+
+<CodeGroup>
+```typescript TypeScript
+import { sendTargetDefaultRpc } from "@lasersell/lasersell-sdk";
+
+const target = sendTargetDefaultRpc();
+```
+
+```python Python
+from lasersell_sdk.tx import SendTargetRpc
+
+target = SendTargetRpc()  # defaults to mainnet-beta
+```
+
+```rust Rust
+use lasersell_sdk::tx::SendTarget;
+
+let target = SendTarget::Rpc { url: lasersell_sdk::tx::MAINNET_BETA_RPC_URL.into() };
+```
+
+```go Go
+target := lasersell.SendTargetDefaultRpc()
+```
+</CodeGroup>
+
+### Custom RPC
+
+Specify your own RPC endpoint URL. Recommended for production with a private RPC provider such as Helius or Chainstack (free tiers available).
+
+<CodeGroup>
+```typescript TypeScript
+import { sendTargetRpc } from "@lasersell/lasersell-sdk";
+
+const target = sendTargetRpc("https://your-private-rpc.example.com");
+```
+
+```python Python
+from lasersell_sdk.tx import SendTargetRpc
+
+target = SendTargetRpc(url="https://your-private-rpc.example.com")
+```
+
+```rust Rust
+let target = SendTarget::Rpc { url: "https://your-private-rpc.example.com".into() };
+```
+
+```go Go
+target := lasersell.SendTargetRpc("https://your-private-rpc.example.com")
+```
+</CodeGroup>
+
+### Helius Sender
+
+Routes through the Helius Sender `/fast` endpoint for optimized transaction landing. No API key required for Helius Sender.
+
+<CodeGroup>
+```typescript TypeScript
+import { sendTargetHeliusSender } from "@lasersell/lasersell-sdk";
+
+const target = sendTargetHeliusSender();
+```
+
+```python Python
+from lasersell_sdk.tx import SendTargetHeliusSender
+
+target = SendTargetHeliusSender()
+```
+
+```rust Rust
+let target = SendTarget::HeliusSender;
+```
+
+```go Go
+target := lasersell.SendTargetHeliusSender()
+```
+</CodeGroup>
+
+**Connection Warming**: For the best latency, you can warm the Helius Sender connection:
+
+```typescript
+import { startHeliusSenderWarmLoop, pingHeliusSender } from "@lasersell/lasersell-sdk";
+
+// One-time ping
+const ok = await pingHeliusSender();
+
+// Continuous warm loop (pings every 30s)
+const { stop } = startHeliusSenderWarmLoop({ intervalMs: 30_000 });
+// Call stop() when done
+```
+
+### Astralane Iris
+
+Routes through the Astralane Iris gateway. Requires an Astralane API key and supports regional endpoints for latency optimization.
+
+<CodeGroup>
+```typescript TypeScript
+import { sendTargetAstralane } from "@lasersell/lasersell-sdk";
+
+const target = sendTargetAstralane("ASTRALANE_API_KEY", "fr");
+```
+
+```python Python
+from lasersell_sdk.tx import SendTargetAstralane
+
+target = SendTargetAstralane(api_key="ASTRALANE_API_KEY", region="fr")
+```
+
+```rust Rust
+let target = SendTarget::Astralane {
+    api_key: "ASTRALANE_API_KEY".into(),
+    region: Some("fr".into()),
+};
+```
+
+```go Go
+target := lasersell.SendTargetAstralane("ASTRALANE_API_KEY", "fr")
+```
+</CodeGroup>
+
+## Available Regions (Astralane)
+
+| Code  | Location       | Notes             |
+|-------|----------------|-------------------|
+| `fr`  | Frankfurt      | Recommended       |
+| `fr2` | Frankfurt 2    |                   |
+| `ams` | Amsterdam      | Recommended       |
+| `ams2`| Amsterdam 2    |                   |
+| `la`  | San Francisco  |                   |
+| `ny`  | New York       |                   |
+| `jp`  | Tokyo          |                   |
+| `sg`  | Singapore      |                   |
+| `lim` | Limburg        |                   |
+| `lit` | Lithuania      |                   |
+
+If no region is specified, the SDK defaults to `fr` (Frankfurt).
+
+## Recommendations
+
+| Use Case                        | Recommended Target    |
+|---------------------------------|-----------------------|
+| Testing and development         | Default RPC           |
+| Production (general)            | Helius Sender         |
+| Production (latency sensitive)  | Astralane Iris        |
+| Production (existing RPC setup) | Custom RPC            |
+
+For automated trading bots, **Helius Sender** or **Astralane Iris** provide the best transaction landing rates. Avoid using the public Solana RPC in production as it is heavily rate limited.
+
+## Send Mode vs Send Target
+
+The `send_mode` field on `BuildSellTxRequest` and `BuildBuyTxRequest` tells the **server** which endpoint context to optimize the transaction for. The `SendTarget` controls where **your client** submits the signed transaction. For best results, align them:
+
+| `send_mode` (server) | `SendTarget` (client)      |
+|-----------------------|----------------------------|
+| `"rpc"`               | `sendTargetRpc(url)`       |
+| `"helius_sender"`     | `sendTargetHeliusSender()` |
+| `"astralane"`         | `sendTargetAstralane(...)` |

@@ -1,0 +1,157 @@
+---
+title: "Exit Intelligence Stream Overview"
+description: "Introduction to the LaserSell Exit Intelligence Stream for real time position tracking and automated exit execution."
+---
+
+## What is the Exit Intelligence Stream?
+
+The Exit Intelligence Stream is a persistent WebSocket connection that monitors your wallets on chain, tracks token positions, evaluates your profit and loss strategy in real time, and delivers pre built unsigned exit transactions when your thresholds are met.
+
+## Endpoint
+
+```
+wss://stream.lasersell.io/v1/ws
+```
+
+Authentication is handled via the `x-api-key` header, which the SDKs set automatically.
+
+## When to Use the Exit Intelligence Stream vs REST
+
+| Scenario                                     | Use                          |
+|----------------------------------------------|------------------------------|
+| Automated sell when profit/loss target is hit | Exit Intelligence Stream     |
+| One off buy or sell transaction               | REST (LaserSell API)         |
+| Continuous position monitoring                | Exit Intelligence Stream     |
+| Building a transaction for user confirmation  | REST (LaserSell API)         |
+| Bot that reacts to wallet activity            | Exit Intelligence Stream     |
+
+Use the **Exit Intelligence Stream** when you want the server to watch your positions and deliver exit transactions automatically. Use the **REST API** when you need a single transaction built on demand.
+
+## High Level Flow
+
+1. **Connect** to `wss://stream.lasersell.io/v1/ws` with your API key.
+2. Receive `hello_ok` from the server (includes session ID and rate limits).
+3. **Send `configure`** with wallet public keys and your strategy parameters.
+4. Receive initial `balance_update` messages for existing token holdings.
+5. **The stream monitors** your wallets for new token arrivals and tracks profit and loss.
+6. When a position hits your target profit, stop loss, trailing stop, or deadline, the server sends an `exit_signal_with_tx`.
+7. **Sign locally** and submit the unsigned transaction.
+
+```
+Client                          Server
+  │                               │
+  │──── connect (x-api-key) ────► │
+  │◄──── hello_ok ────────────── │
+  │──── configure ──────────────► │
+  │◄──── balance_update ──────── │
+  │◄──── position_opened ─────── │
+  │◄──── pnl_update ──────────── │
+  │◄──── exit_signal_with_tx ─── │
+  │──── (sign + submit) ────────► │ (to Solana)
+  │                               │
+```
+
+## SDK Entry Points
+
+The SDKs provide two abstraction levels:
+
+- **`StreamClient`** — Low level client. Manages the WebSocket connection, reconnection, and message framing. Returns raw `ServerMessage` objects.
+- **`StreamSession`** — High level wrapper. Wraps `StreamClient` with position tracking, deadline timers, and typed `StreamEvent` objects that include a `PositionHandle`.
+
+For most use cases, start with `StreamSession`.
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient, StreamSession } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+const session = await StreamSession.connect(client, {
+  wallet_pubkeys: ["WALLET_PUBKEY"],
+  strategy: { target_profit_pct: 5, stop_loss_pct: 1.5 },
+  deadline_timeout_sec: 45,
+});
+
+while (true) {
+  const event = await session.recv();
+  if (event === null) break;
+  // Handle event...
+}
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient, StreamConfigure
+from lasersell_sdk.stream.session import StreamSession
+
+client = StreamClient("YOUR_API_KEY")
+session = await StreamSession.connect(
+    client,
+    StreamConfigure(
+        wallet_pubkeys=["WALLET_PUBKEY"],
+        strategy={"target_profit_pct": 5.0, "stop_loss_pct": 1.5},
+        deadline_timeout_sec=45,
+    ),
+)
+
+while True:
+    event = await session.recv()
+    if event is None:
+        break
+    # Handle event...
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use lasersell_sdk::stream::session::StreamSession;
+
+let client = StreamClient::new("YOUR_API_KEY");
+let session = StreamSession::connect(&client, StreamConfigure {
+    wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
+    strategy: StrategyConfigMsg {
+        target_profit_pct: 5.0,
+        stop_loss_pct: 1.5,
+        ..Default::default()
+    },
+    deadline_timeout_sec: Some(45),
+}).await?;
+
+loop {
+    let event = match session.recv().await {
+        Some(event) => event,
+        None => break,
+    };
+    // Handle event...
+}
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
+    WalletPubkeys: []string{"WALLET_PUBKEY"},
+    Strategy: stream.StrategyConfigMsg{
+        TargetProfitPct: 5.0,
+        StopLossPct:     1.5,
+    },
+    DeadlineTimeoutSec: 45,
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+for {
+    event, err := session.Recv(ctx)
+    if errors.Is(err, io.EOF) {
+        break
+    }
+    // Handle event...
+}
+```
+</CodeGroup>
+
+## Next Steps
+
+- [Connection Lifecycle](/api/stream/connection-lifecycle) — Detailed handshake, reconnection, and lane splitting.
+- [Strategy Configuration](/api/stream/strategy-configuration) — Configure profit targets, stop losses, and trailing stops.
+- [Server Events](/api/stream/server-events) — Complete schema for all 8 server message types.
+- [Client Messages](/api/stream/client-messages) — All 6 client message types and their schemas.

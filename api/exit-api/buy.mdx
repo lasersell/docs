@@ -1,0 +1,128 @@
+---
+title: "POST /v1/buy"
+description: "Build an unsigned buy transaction to swap SOL for tokens via the LaserSell API."
+---
+
+## Endpoint
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## Headers
+
+| Header         | Required | Description                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | Yes      | Must be `application/json`      |
+| `x-api-key`    | Yes      | Your LaserSell API key          |
+
+## Request Body — `BuildBuyTxRequest`
+
+| Field                   | Type     | Required | Description                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | Yes      | Token mint address to buy (base58).                                         |
+| `user_pubkey`           | `string` | Yes      | Your wallet public key (base58).                                            |
+| `amount_quote_units`    | `number` | Yes      | Amount to spend in quote asset atomic units (lamports for SOL).             |
+| `slippage_bps`          | `number` | No       | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
+| `mode`                  | `string` | No       | Routing mode hint.                                                          |
+| `send_mode`             | `string` | No       | Transaction send mode: `"helius_sender"`, `"astralane"`, or `"rpc"`.        |
+| `tip_lamports`          | `number` | No       | Optional priority fee tip in lamports.                                      |
+| `partner_fee_recipient` | `string` | No       | Partner fee recipient wallet (base58 pubkey).                               |
+| `partner_fee_bps`       | `number` | No       | Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`. |
+| `partner_fee_lamports`  | `number` | No       | Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`. |
+
+## Response — `BuildTxResponse`
+
+| Field   | Type     | Description                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64 encoded unsigned Solana `VersionedTransaction`. |
+| `route` | `object` | Optional routing metadata.                      |
+| `debug` | `object` | Optional debug information.                     |
+
+## curl Example
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_quote_units": 100000000,
+    "slippage_bps": 2000
+  }'
+```
+
+## SDK Examples
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount_quote_units: 100_000_000, // 0.1 SOL in lamports
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount_quote_units=100_000_000,
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount_quote_units: 100_000_000,
+    slippage_bps: Some(2_000),
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:             "TOKEN_MINT_ADDRESS",
+    UserPubkey:       "YOUR_WALLET_PUBKEY",
+    AmountQuoteUnits: 100_000_000,
+    SlippageBps:      intPtr(2_000),
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## Error Responses
+
+See [Error Handling](/api/exit-api/error-handling) for the full error envelope specification and retryable error logic.

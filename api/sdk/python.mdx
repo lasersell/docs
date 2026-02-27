@@ -1,0 +1,199 @@
+---
+title: "Python SDK"
+description: "Install, configure, and use the LaserSell Python SDK with async patterns for building transactions and streaming positions."
+---
+
+## Installation
+
+```bash
+pip install lasersell-sdk
+```
+
+Optional extras for additional features:
+
+```bash
+# Transaction signing (requires solders)
+pip install lasersell-sdk[tx]
+
+# WebSocket stream (requires websockets)
+pip install lasersell-sdk[stream]
+
+# Both
+pip install lasersell-sdk[tx,stream]
+```
+
+## Modules
+
+| Import Path                               | Purpose                                |
+|-------------------------------------------|----------------------------------------|
+| `lasersell_sdk.exit_api`                  | `ExitApiClient`, request/response types, `ExitApiError` |
+| `lasersell_sdk.tx`                        | `sign_unsigned_tx`, `send_transaction`, `SendTarget*` classes |
+| `lasersell_sdk.stream.client`             | `StreamClient`, `StreamConfigure`, `StreamSender` |
+| `lasersell_sdk.stream.session`            | `StreamSession`, `StreamEvent`, `PositionHandle` |
+| `lasersell_sdk.stream.proto`              | Message types (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+
+## API Client
+
+All API client methods are `async` and must be awaited.
+
+```python
+import asyncio
+from lasersell_sdk.exit_api import ExitApiClient, BuildSellTxRequest, SellOutput
+
+async def main():
+    client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+    request = BuildSellTxRequest(
+        mint="TOKEN_MINT",
+        user_pubkey="WALLET",
+        amount_tokens=1_000_000,
+        slippage_bps=2_000,
+        output=SellOutput.SOL,
+    )
+
+    response = await client.build_sell_tx(request)
+    print("Unsigned tx:", response.tx)
+
+asyncio.run(main())
+```
+
+### Buy Transactions
+
+```python
+from lasersell_sdk.exit_api import BuildBuyTxRequest
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT",
+    user_pubkey="WALLET",
+    amount_quote_units=100_000_000,
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+```
+
+### Custom Options
+
+```python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+## Exit Intelligence Stream Session
+
+```python
+import asyncio
+from lasersell_sdk.stream.client import StreamClient, StreamConfigure
+from lasersell_sdk.stream.session import StreamSession
+from lasersell_sdk.tx import SendTargetHeliusSender, send_transaction, sign_unsigned_tx
+
+async def main():
+    client = StreamClient("YOUR_API_KEY")
+    session = await StreamSession.connect(
+        client,
+        StreamConfigure(
+            wallet_pubkeys=["WALLET_PUBKEY"],
+            strategy={
+                "target_profit_pct": 5.0,
+                "stop_loss_pct": 1.5,
+            },
+            deadline_timeout_sec=45,
+        ),
+    )
+
+    while True:
+        event = await session.recv()
+        if event is None:
+            break
+
+        if event.type == "position_opened" and event.handle is not None:
+            print(f"New position: {event.handle.mint}")
+
+        if event.type == "exit_signal_with_tx":
+            msg = event.message
+            signed = sign_unsigned_tx(str(msg["unsigned_tx_b64"]), signer)
+            sig = await send_transaction(SendTargetHeliusSender(), signed)
+            print(f"Exit submitted: {sig}")
+
+asyncio.run(main())
+```
+
+## Transaction Helpers
+
+```python
+from lasersell_sdk.tx import (
+    sign_unsigned_tx,
+    send_transaction,
+    send_transaction_b64_to,
+    encode_signed_tx,
+    SendTargetRpc,
+    SendTargetHeliusSender,
+    SendTargetAstralane,
+)
+
+# Sign
+signed_tx = sign_unsigned_tx(unsigned_tx_b64, keypair)
+
+# Send
+signature = await send_transaction(SendTargetHeliusSender(), signed_tx)
+
+# Send with custom RPC
+signature = await send_transaction(
+    SendTargetRpc(url="https://rpc.example.com"),
+    signed_tx,
+)
+
+# Astralane
+signature = await send_transaction(
+    SendTargetAstralane(api_key="KEY", region="fr"),
+    signed_tx,
+)
+```
+
+## Error Handling
+
+```python
+from lasersell_sdk.exit_api import ExitApiError
+from lasersell_sdk.tx import TxSubmitError
+from lasersell_sdk.stream.client import StreamClientError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as e:
+    print(f"Kind: {e.kind}, Retryable: {e.is_retryable()}")
+    print(f"Status: {e.status}, Body: {e.body}")
+except TxSubmitError as e:
+    print(f"Kind: {e.kind}, Target: {e.target}")
+except StreamClientError as e:
+    print(f"Kind: {e.kind}")
+```
+
+## Loading a Keypair
+
+```python
+import json
+from pathlib import Path
+from solders.keypair import Keypair
+
+raw = json.loads(Path("./keypair.json").read_text())
+keypair = Keypair.from_bytes(bytes(raw))
+```
+
+Requires the `solders` package, which is included in the `[tx]` extra.
+
+## Complete Example
+
+See the [Quickstart](/api/quickstart) for a complete build, sign, and submit workflow.

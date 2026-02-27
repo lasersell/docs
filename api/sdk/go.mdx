@@ -1,0 +1,210 @@
+---
+title: "Go SDK"
+description: "Install, configure, and use the LaserSell Go SDK with context.Context patterns for building transactions and streaming positions."
+---
+
+## Installation
+
+```bash
+go get github.com/lasersell/lasersell-sdk/go
+```
+
+## Packages
+
+| Package                                   | Purpose                                |
+|-------------------------------------------|----------------------------------------|
+| `github.com/lasersell/lasersell-sdk/go`   | `ExitAPIClient`, `SendTarget`, `SignUnsignedTx`, `SendTransaction` |
+| `github.com/lasersell/lasersell-sdk/go/stream` | `StreamClient`, `Session`, `StreamConfigure`, message types |
+
+## API Client
+
+All methods accept a `context.Context` for cancellation and timeouts.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+func main() {
+    ctx := context.Background()
+    client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+    // Build sell
+    sellResp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+        Mint:         "TOKEN_MINT",
+        UserPubkey:   "WALLET",
+        AmountTokens: 1_000_000,
+        SlippageBps:  intPtr(2_000),
+        Output:       strPtr("SOL"),
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Sell tx:", sellResp.Tx)
+
+    // Build buy
+    buyResp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+        Mint:             "TOKEN_MINT",
+        UserPubkey:       "WALLET",
+        AmountQuoteUnits: 100_000_000,
+        SlippageBps:      intPtr(2_000),
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Buy tx:", buyResp.Tx)
+}
+
+func intPtr(v int) *int       { return &v }
+func strPtr(v string) *string { return &v }
+```
+
+### Custom Options
+
+```go
+opts := lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 500 * time.Millisecond,
+    AttemptTimeout: 2 * time.Second,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+}
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", opts)
+```
+
+## Exit Intelligence Stream Session
+
+```go
+package main
+
+import (
+    "context"
+    "errors"
+    "fmt"
+    "io"
+    "log"
+
+    "github.com/gagliardetto/solana-go"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+    "github.com/lasersell/lasersell-sdk/go/stream"
+)
+
+func main() {
+    ctx := context.Background()
+
+    privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("./keypair.json")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    client := stream.NewStreamClient("YOUR_API_KEY")
+    session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
+        WalletPubkeys: []string{"WALLET_PUBKEY"},
+        Strategy: stream.StrategyConfigMsg{
+            TargetProfitPct: 5.0,
+            StopLossPct:     1.5,
+        },
+        DeadlineTimeoutSec: 45,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for {
+        event, err := session.Recv(ctx)
+        if errors.Is(err, io.EOF) {
+            break
+        }
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        switch msg := event.Message.(type) {
+        case stream.PositionOpenedServerMessage:
+            fmt.Printf("New position: %s\n", msg.Mint)
+
+        case stream.ExitSignalWithTxServerMessage:
+            signedTx, err := lasersell.SignUnsignedTx(msg.UnsignedTxB64, privateKey)
+            if err != nil {
+                log.Printf("Sign error: %v", err)
+                continue
+            }
+            sig, err := lasersell.SendTransaction(
+                ctx, nil, lasersell.SendTargetHeliusSender(), signedTx,
+            )
+            if err != nil {
+                log.Printf("Send error: %v", err)
+                continue
+            }
+            fmt.Printf("Exit submitted: %s\n", sig)
+
+        case stream.ErrorServerMessage:
+            log.Printf("Stream error: code=%s message=%s", msg.Code, msg.Message)
+        }
+    }
+}
+```
+
+## Transaction Helpers
+
+```go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+// Sign
+signedTx, err := lasersell.SignUnsignedTx(unsignedTxB64, privateKey)
+
+// Send via Helius Sender
+sig, err := lasersell.SendTransaction(ctx, nil, lasersell.SendTargetHeliusSender(), signedTx)
+
+// Send via custom RPC
+sig, err = lasersell.SendTransaction(ctx, nil,
+    lasersell.SendTargetRpc("https://rpc.example.com"), signedTx)
+
+// Send via Astralane
+sig, err = lasersell.SendTransaction(ctx, nil,
+    lasersell.SendTargetAstralane("KEY", "fr"), signedTx)
+```
+
+## Error Handling
+
+```go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("Status:", apiErr.Status)
+    }
+}
+```
+
+## `context.Context` Patterns
+
+All Go SDK methods accept `context.Context` as their first argument. Use this to control:
+
+- **Timeouts**: `context.WithTimeout(ctx, 5*time.Second)`
+- **Cancellation**: `context.WithCancel(ctx)` for graceful shutdown
+- **Deadlines**: `context.WithDeadline(ctx, time.Now().Add(30*time.Second))`
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+defer cancel()
+
+resp, err := client.BuildSellTx(ctx, request)
+```
+
+## Complete Example
+
+See the [Quickstart](/api/quickstart) for a full working example.

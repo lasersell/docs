@@ -1,0 +1,165 @@
+---
+title: "Strategy Configuration"
+description: "Configure target profit, stop loss, trailing stop, and sell on graduation thresholds for the Exit Intelligence Stream."
+---
+
+## `StrategyConfigMsg` Schema
+
+| Field                | Type      | Required | Description                                                 |
+|----------------------|-----------|----------|-------------------------------------------------------------|
+| `target_profit_pct`  | `number`  | Yes      | Take profit threshold as a percentage (e.g., `5` = 5%).      |
+| `stop_loss_pct`      | `number`  | Yes      | Stop loss threshold as a percentage (e.g., `1.5` = 1.5%).    |
+| `trailing_stop_pct`  | `number`  | No       | Trailing stop percentage from the peak. Activates only after the position is in profit. |
+| `sell_on_graduation` | `boolean` | No       | If `true`, auto sells when a bonding curve token graduates to an AMM pool. |
+
+At least one of `target_profit_pct`, `stop_loss_pct`, `trailing_stop_pct`, or `deadline_timeout_sec` (on the configure message) must be greater than zero.
+
+## Setting Strategy at Connection Time
+
+Strategy is provided in the `configure` message when you first connect:
+
+<CodeGroup>
+```typescript TypeScript
+const session = await StreamSession.connect(client, {
+  wallet_pubkeys: ["WALLET_PUBKEY"],
+  strategy: {
+    target_profit_pct: 10,
+    stop_loss_pct: 2,
+    trailing_stop_pct: 5,
+    sell_on_graduation: true,
+  },
+  deadline_timeout_sec: 60,
+});
+```
+
+```python Python
+session = await StreamSession.connect(
+    client,
+    StreamConfigure(
+        wallet_pubkeys=["WALLET_PUBKEY"],
+        strategy={
+            "target_profit_pct": 10.0,
+            "stop_loss_pct": 2.0,
+            "trailing_stop_pct": 5.0,
+            "sell_on_graduation": True,
+        },
+        deadline_timeout_sec=60,
+    ),
+)
+```
+
+```rust Rust
+let session = StreamSession::connect(&client, StreamConfigure {
+    wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
+    strategy: StrategyConfigMsg {
+        target_profit_pct: 10.0,
+        stop_loss_pct: 2.0,
+        trailing_stop_pct: Some(5.0),
+        sell_on_graduation: Some(true),
+    },
+    deadline_timeout_sec: Some(60),
+}).await?;
+```
+
+```go Go
+session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
+    WalletPubkeys: []string{"WALLET_PUBKEY"},
+    Strategy: stream.StrategyConfigMsg{
+        TargetProfitPct:    10.0,
+        StopLossPct:        2.0,
+        TrailingStopPct:    5.0,
+        SellOnGraduation:   true,
+    },
+    DeadlineTimeoutSec: 60,
+})
+```
+</CodeGroup>
+
+## Trailing Stop Explained
+
+The trailing stop tracks the highest profit observed since the position opened. When profit drops from that peak by `trailing_stop_pct`, an exit signal fires.
+
+### Numerical Example
+
+| Time  | Profit (%) | Peak (%) | Drop from Peak (%) | Trailing Stop (5%) |
+|-------|-----------|----------|--------------------|--------------------|
+| t=0   | 0         | 0        | 0                  | Not active         |
+| t=1   | 3         | 3        | 0                  | Not active         |
+| t=2   | 8         | 8        | 0                  | Active, no trigger |
+| t=3   | 6         | 8        | 2                  | Active, no trigger |
+| t=4   | 4         | 8        | 4                  | Active, no trigger |
+| t=5   | 2.5       | 8        | 5.5                | **Triggered** (drop >= 5%) |
+
+The trailing stop only activates once the position is in profit. If the position goes negative before ever being in profit, the stop loss triggers instead.
+
+## Updating Strategy Mid Session
+
+You can change the strategy at any time without reconnecting by sending an `update_strategy` message:
+
+```json
+{
+  "type": "update_strategy",
+  "strategy": {
+    "target_profit_pct": 15,
+    "stop_loss_pct": 3,
+    "trailing_stop_pct": 7
+  }
+}
+```
+
+Using the SDK:
+
+<CodeGroup>
+```typescript TypeScript
+session.updateStrategy({
+  target_profit_pct: 15,
+  stop_loss_pct: 3,
+  trailing_stop_pct: 7,
+});
+```
+
+```python Python
+session.sender().update_strategy({
+    "target_profit_pct": 15.0,
+    "stop_loss_pct": 3.0,
+    "trailing_stop_pct": 7.0,
+})
+```
+
+```rust Rust
+session.update_strategy(StrategyConfigMsg {
+    target_profit_pct: 15.0,
+    stop_loss_pct: 3.0,
+    trailing_stop_pct: Some(7.0),
+    sell_on_graduation: None,
+}, None);
+```
+
+```go Go
+session.Sender().UpdateStrategy(stream.StrategyConfigMsg{
+    TargetProfitPct: 15.0,
+    StopLossPct:     3.0,
+    TrailingStopPct: 7.0,
+})
+```
+</CodeGroup>
+
+The new strategy takes effect immediately for all tracked positions. No positions are closed or reopened; the server simply re evaluates existing positions against the new thresholds.
+
+## Deadline Timeout
+
+The `deadline_timeout_sec` is set on the `configure` message (not on the strategy object itself). It defines the maximum time in seconds to hold a position before requesting an exit signal, regardless of profit or loss.
+
+Setting `deadline_timeout_sec: 60` means the Exit Intelligence Stream will attempt to exit any position held for more than 60 seconds.
+
+When using `StreamSession`, the deadline timer runs client side and automatically calls `requestExitSignal` when it fires. If you are using `StreamClient` directly, you must implement deadline logic yourself.
+
+## Validation Rules
+
+- `target_profit_pct` must be >= 0.
+- `stop_loss_pct` must be >= 0.
+- `trailing_stop_pct` (if provided) must be >= 0.
+- `deadline_timeout_sec` must be >= 0.
+- At least one of these values must be > 0.
+
+Violating these rules raises a `StreamClientError` with kind `"protocol"`.
