@@ -25,16 +25,13 @@ No funds, tokens, or keys are ever stored or accessed by LaserSell infrastructur
 
 ## Architecture at a Glance
 
-```
-┌──────────────┐        ┌──────────────────┐        ┌──────────────┐
-│  Your Code   │──REST──│  LaserSell API   │        │  Solana RPC  │
-│  (SDK)       │        │  api.lasersell.io│        │  or Sender   │
-│              │──WS────│  Exit Intel.     │        │              │
-└──────┬───────┘        │  stream.lasersell│        └──────▲───────┘
-       │                └──────────────────┘               │
-       │  sign locally                                     │
-       └───────────────────────────────────────────────────┘
-                     submit signed tx
+```mermaid
+flowchart LR
+    A["Your Code\n(SDK)"] -->|REST| B["LaserSell API\napi.lasersell.io"]
+    A -->|WebSocket| C["Exit Intelligence Stream\nstream.lasersell.io"]
+    B -->|unsigned tx| A
+    C -->|unsigned tx| A
+    A -->|sign locally\nthen submit| D["Solana RPC\nor Sender"]
 ```
 
 ## SDK Languages

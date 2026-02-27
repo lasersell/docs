@@ -3,6 +3,10 @@ title: "POST /v1/buy"
 description: "Build an unsigned buy transaction to swap SOL for tokens via the LaserSell API."
 ---
 
+<Warning>
+If you plan to track this buy with the Exit Intelligence Stream, you **must** connect the stream **before** submitting the buy transaction. The stream detects new positions by observing on chain token arrivals in real time. If the stream is not connected when the buy lands, the position will not be tracked and no exit signals will be generated for it.
+</Warning>
+
 ## Endpoint
 
 ```

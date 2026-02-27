@@ -11,8 +11,9 @@ LaserSell never touches your private key. Every transaction follows this pattern
 2. **Sign** — You decode, sign, and re encode locally using your keypair.
 3. **Submit** — You send the signed transaction to the Solana network via a [send target](/api/transactions/send-targets).
 
-```
-API ──► unsigned_tx_b64 ──► sign locally ──► signed_tx_b64 ──► Solana
+```mermaid
+flowchart LR
+    A[LaserSell API] -->|unsigned_tx_b64| B[Sign Locally] -->|signed_tx_b64| C[Solana]
 ```
 
 ## Loading a Keypair

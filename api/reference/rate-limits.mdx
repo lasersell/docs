@@ -3,7 +3,42 @@ title: "Rate Limits and Tiers"
 description: "Understand tier capacity, the limits object from hello_ok, and how to handle 429 responses."
 ---
 
-## Tier Limits
+## Pricing Tiers
+
+LaserSell offers four tiers. Each tier determines your rate limits for both the REST API and the Exit Intelligence Stream.
+
+| Tier | Name | Price |
+|------|------|-------|
+| 0 | Personal | Free |
+| 1 | Professional | $49/mo |
+| 2 | Advanced Exit Engine | $149/mo |
+| — | Enterprise | Custom |
+
+## Exit Intelligence Stream Limits by Tier
+
+| Limit | Personal (Free) | Professional | Advanced | Enterprise |
+|-------|-----------------|-------------|----------|------------|
+| Wallets per session | 1 | 5 | 200 | Custom |
+| Positions per wallet | 1 | 100 | 100 | Custom |
+| Positions per session | 1 | 500 | 20,000 | Custom |
+| Sessions per API key | 1 | 1 | 1 | Custom |
+| High priority buffer (`hi_capacity`) | 256 | 256 | 256 | Custom |
+| PnL flush interval (`pnl_flush_ms`) | 100 ms | 100 ms | 100 ms | Custom |
+| Inactivity timeout | 45 min | None | None | None |
+| Partner fees | No | No | Yes | Yes |
+
+## REST API Rate Limits
+
+The REST API (`/v1/sell`, `/v1/buy`) enforces a per key request limit using a sliding window.
+
+| Tier | Requests per minute |
+|------|-------------------|
+| Personal (Free) | 60 |
+| Professional | 60 |
+| Advanced | 60 |
+| Enterprise | Custom |
+
+## Reading Your Limits on Connect
 
 When you connect to the Exit Intelligence Stream, the `hello_ok` message includes a `limits` object that reflects your API key's tier:
 
@@ -13,12 +48,12 @@ When you connect to the Exit Intelligence Stream, the `hello_ok` message include
   "session_id": 42,
   "server_time_ms": 1706000000000,
   "limits": {
-    "hi_capacity": 1024,
-    "pnl_flush_ms": 1000,
-    "max_positions_per_session": 100,
-    "max_wallets_per_session": 10,
-    "max_positions_per_wallet": 20,
-    "max_sessions_per_api_key": 5
+    "hi_capacity": 256,
+    "pnl_flush_ms": 100,
+    "max_positions_per_session": 500,
+    "max_wallets_per_session": 5,
+    "max_positions_per_wallet": 100,
+    "max_sessions_per_api_key": 1
   }
 }
 ```
@@ -80,28 +115,15 @@ if err == nil {
 ```
 </CodeGroup>
 
-## REST API Rate Limits
+## Handling 429 Responses
 
-The REST API (`/v1/sell`, `/v1/buy`) is also subject to rate limits per API key. When you exceed the limit, the server responds with HTTP `429 Too Many Requests`.
-
-### Handling 429 Responses
-
-The SDKs automatically retry `429` responses using the built in retry policy. If you see persistent 429 errors:
+When you exceed the REST API rate limit, the server responds with HTTP `429 Too Many Requests`. The SDKs automatically retry `429` responses using the built in retry policy. If you see persistent 429 errors:
 
 1. **Check your request frequency.** Reduce the rate of API calls.
 2. **Batch requests.** If building multiple transactions, space them out.
 3. **Increase retry backoff.** Configure a longer backoff to give the server time to recover.
 
-```typescript
-const client = ExitApiClient.withOptions("YOUR_API_KEY", {
-  retry_policy: {
-    max_attempts: 4,
-    initial_backoff_ms: 100,
-    max_backoff_ms: 1000,
-    jitter_ms: 100,
-  },
-});
-```
+See [Error Handling](/api/exit-api/error-handling) for details on customizing the retry policy.
 
 ## Exit Intelligence Stream Capacity
 

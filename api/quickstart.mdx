@@ -166,6 +166,10 @@ func strPtr(v string) *string { return &v }
 
 Connect the Exit Intelligence Stream to monitor wallets and automatically execute exits when your strategy thresholds are reached.
 
+<Warning>
+**Connect the stream before you buy.** The stream detects positions by watching for on chain token arrivals. If you call `/v1/buy` before the stream is connected and configured, the position will not be tracked. Always start the stream first, then submit your buy transaction.
+</Warning>
+
 <CodeGroup>
 ```typescript TypeScript
 import { readFile } from "node:fs/promises";
@@ -238,6 +242,110 @@ async def main():
             print("Exit submitted:", sig)
 
 asyncio.run(main())
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::{StreamClient, StreamConfigure, strategy_config_from_optional};
+use lasersell_sdk::stream::session::{StreamSession, StreamEvent};
+use lasersell_sdk::stream::proto::ServerMessage;
+use lasersell_sdk::tx::{SendTarget, sign_unsigned_tx, send_transaction};
+use secrecy::SecretString;
+use solana_sdk::signature::read_keypair_file;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let api_key = std::env::var("LASERSELL_API_KEY")?;
+    let keypair = read_keypair_file("./keypair.json")?;
+    let http = reqwest::Client::new();
+
+    let client = StreamClient::new(SecretString::new(api_key));
+    let configure = StreamConfigure {
+        wallet_pubkeys: vec![keypair.pubkey().to_string()],
+        strategy: strategy_config_from_optional(
+            Some(5.0), Some(1.5), None, None,
+        ),
+        deadline_timeout_sec: 45,
+    };
+
+    let mut session = StreamSession::connect(&client, configure).await?;
+
+    while let Some(event) = session.recv().await {
+        if let StreamEvent::ExitSignalWithTx {
+            message: ServerMessage::ExitSignalWithTx {
+                unsigned_tx_b64, ..
+            },
+            ..
+        } = event
+        {
+            let signed = sign_unsigned_tx(&unsigned_tx_b64, &keypair)?;
+            let sig = send_transaction(&http, &SendTarget::HeliusSender, &signed).await?;
+            println!("Exit submitted: {sig}");
+        }
+    }
+    Ok(())
+}
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "errors"
+    "fmt"
+    "io"
+    "log"
+
+    "github.com/gagliardetto/solana-go"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+    "github.com/lasersell/lasersell-sdk/go/stream"
+)
+
+func main() {
+    ctx := context.Background()
+    apiKey := "YOUR_API_KEY"
+    privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("./keypair.json")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    client := stream.NewStreamClient(apiKey)
+    session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
+        WalletPubkeys: []string{privateKey.PublicKey().String()},
+        Strategy: stream.StrategyConfigMsg{
+            TargetProfitPct: 5.0,
+            StopLossPct:     1.5,
+        },
+        DeadlineTimeoutSec: 45,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for {
+        event, err := session.Recv(ctx)
+        if errors.Is(err, io.EOF) {
+            break
+        }
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        if msg, ok := event.Message.(stream.ExitSignalWithTxServerMessage); ok {
+            signedTx, err := lasersell.SignUnsignedTx(msg.UnsignedTxB64, privateKey)
+            if err != nil {
+                log.Printf("sign failed: %v", err)
+                continue
+            }
+            sig, err := lasersell.SendTransaction(ctx, nil, lasersell.SendTargetHeliusSender(), signedTx)
+            if err != nil {
+                log.Printf("send failed: %v", err)
+                continue
+            }
+            fmt.Println("Exit submitted:", sig)
+        }
+    }
+}
 ```
 </CodeGroup>
 

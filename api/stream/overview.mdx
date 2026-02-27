@@ -27,6 +27,10 @@ Authentication is handled via the `x-api-key` header, which the SDKs set automat
 
 Use the **Exit Intelligence Stream** when you want the server to watch your positions and deliver exit transactions automatically. Use the **REST API** when you need a single transaction built on demand.
 
+<Warning>
+**Connect the stream before you buy.** The Exit Intelligence Stream detects new positions by observing on chain token arrivals. If you call `/v1/buy` before the stream is connected and configured, the resulting position will not be tracked and no exit signals will fire. Always connect and configure the stream first, then submit your buy.
+</Warning>
+
 ## High Level Flow
 
 1. **Connect** to `wss://stream.lasersell.io/v1/ws` with your API key.
@@ -37,18 +41,20 @@ Use the **Exit Intelligence Stream** when you want the server to watch your posi
 6. When a position hits your target profit, stop loss, trailing stop, or deadline, the server sends an `exit_signal_with_tx`.
 7. **Sign locally** and submit the unsigned transaction.
 
-```
-Client                          Server
-  │                               │
-  │──── connect (x-api-key) ────► │
-  │◄──── hello_ok ────────────── │
-  │──── configure ──────────────► │
-  │◄──── balance_update ──────── │
-  │◄──── position_opened ─────── │
-  │◄──── pnl_update ──────────── │
-  │◄──── exit_signal_with_tx ─── │
-  │──── (sign + submit) ────────► │ (to Solana)
-  │                               │
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant Sol as Solana
+
+    C->>S: connect (x-api-key)
+    S->>C: hello_ok
+    C->>S: configure
+    S->>C: balance_update
+    S->>C: position_opened
+    S->>C: pnl_update
+    S->>C: exit_signal_with_tx
+    C->>Sol: sign + submit
 ```
 
 ## SDK Entry Points
