@@ -9,7 +9,7 @@ LaserSell includes an interactive setup wizard that runs automatically the first
 lasersell --setup
 ```
 
-This page is a walkthrough of **the wizard prompts in the exact order you’ll see them**, with explanations of what each choice means.
+This page is a walkthrough of **the wizard prompts in the exact order you'll see them**, with explanations of what each choice means.
 
 > **Scope:** This page covers **only** the interactive onboarding wizard flow. It does **not** cover manually editing the config file.
 
@@ -17,7 +17,7 @@ This page is a walkthrough of **the wizard prompts in the exact order you’ll s
 
 By the end of the wizard, LaserSell will create (or reuse) two local files:
 
-- **Config file** (YAML): stores your chosen RPC/WebSocket/strategy settings and points to your wallet file.
+- **Config file** (YAML): stores your RPC, API key, strategy settings, and points to your wallet file.
 - **Wallet keystore** (JSON): an **encrypted** wallet file that LaserSell uses to sign transactions.
 
 By default these live in:
@@ -31,14 +31,13 @@ By default these live in:
 
 Have these ready:
 
-- **RPC / WebSocket choice**
-  - Helius: your **Helius API key**
-  - Private providers: your **HTTPS RPC URL** and/or **WSS WebSocket URL**
+- **RPC URL** — a private HTTPS RPC endpoint (e.g. from [Helius](https://helius.dev) or [Chainstack](https://chainstack.com))
+- **LaserSell API key** — get one free at [app.lasersell.io](https://app.lasersell.io)
 - **Wallet plan**
   - Creating a new wallet: a safe place to store a new seed phrase
   - Importing: either your **seed phrase**, a **base58 secret key**, or a **Solana keypair JSON file**
 - An **interactive terminal**
-  - The wizard requires a real TTY. Don’t run it through a non-interactive service/pipe.
+  - The wizard requires a real TTY. Don't run it through a non-interactive service/pipe.
 
 ## How to answer wizard prompts
 
@@ -47,11 +46,11 @@ Have these ready:
 - Yes/No prompts appear as:
   - `[Y/n]` → default is **Yes** (Enter = yes)
   - `[y/N]` → default is **No** (Enter = no)
-- Some sensitive inputs (seed phrase, base58 secret key, passphrase) are **masked** (you won’t see what you type). That’s expected.
+- Some sensitive inputs (API key, seed phrase, base58 secret key, passphrase) are **masked** (you won't see what you type). That's expected.
 
 ## Step 0: Recommended settings
 
-You’ll first see:
+You'll first see:
 
 - `Use recommended settings? (skips strategy + file path questions) [Y/n]:`
 
@@ -59,81 +58,67 @@ You’ll first see:
 
 - Skips the **Strategy** input questions (applies defaults automatically)
 - Skips the **file path** questions (uses defaults)
-- Uses a **safer “confirm write” default** (it will default to writing the config)
+- Uses a **safer "confirm write" default** (it will default to writing the config)
 
 Recommended strategy defaults applied:
 
 - **Take Profit:** 6%
 - **Stop Loss:** 10%
+- **Trailing Stop:** 0% (disabled)
 - **Deadline:** 120 seconds
 - **Slippage:** 20.00%
+- **Sell on Graduation:** off
 
 ### If you choose **No**
 
-You’ll be prompted to enter:
+You'll be prompted to enter:
 
-- Strategy values (take profit, stop loss, deadline, slippage)
+- Strategy values (take profit, stop loss, trailing stop, deadline, slippage, sell on graduation)
 - Config and keystore file locations
 
-## Step 1: RPC selection
+## Step 1: Credentials & Network
+
+### RPC URL
 
 Prompt:
 
-- `Select RPC Provider (for sending transactions):`
-  1. `Helius (Recommended)`
-  2. `Private Node`
-  3. `Public Node`
+- `RPC URL (private recommended):`
 
-### 1) Helius (Recommended)
+Placeholder: `https://api.mainnet-beta.solana.com`
 
-- You’ll be prompted for: `Helius API key`
-- Best default for most users.
+What it means:
 
-### 2) Private Node
+- This is the Solana RPC endpoint LaserSell will use for all on-chain operations.
+- A private RPC (from Helius, Chainstack, QuickNode, etc.) is strongly recommended for speed and reliability.
+- Must start with `https://` (or `http://` only for localhost/local development).
 
-- You’ll be prompted for: `Private RPC URL (start with https://)`
-- **Must** start with `https://`
-- `http://` is rejected (insecure)
+You can leave it empty to use the default public endpoint, but this is **not recommended** for production trading.
 
-### 3) Public Node
-
-- No additional input
-- Typically the least reliable under load.
-
-## Step 2: WebSocket selection
+### LaserSell API key
 
 Prompt:
 
-- `Select Websocket Provider (for detecting tokens):`
-  1. `Helius Websocket (Standard, requires Dev plan)`
-  2. `Private Websocket (Chainstack/QuickNode/etc)`
-  3. `Public Websocket (Slowest)`
+- `LaserSell API key:`
 
-### 1) Helius WebSocket
+What it means:
 
-- Uses Helius for token detection / streaming.
-- If you didn’t enter a Helius API key in Step 1, it will ask for it here.
+- Required field — cannot be empty.
+- Get a free API key at [app.lasersell.io](https://app.lasersell.io).
+- Input is masked (won't echo).
 
-### 2) Private WebSocket
-
-- You’ll be prompted for: `Private Websocket URL (start with wss://)`
-- **Must** start with `wss://`
-- `ws://` and `http://` are rejected (insecure)
-
-### 3) Public WebSocket
-
-- No additional input
-- Slowest / least reliable for fast token detection.
-
-## Step 3: Strategy
+## Step 2: Strategy
 
 If you selected **recommended settings**, LaserSell applies defaults and moves on.
 
-If not, you’ll be asked these questions:
+If not, you'll be asked these questions:
 
 ### Target profit
 
 Prompt:
+
+- `Enable Target Profit? [Y/n]:`
+
+If **Yes**:
 
 - `Target Profit (% of buy) [6%]:`
 
@@ -153,9 +138,9 @@ Prompt:
 
 - `Enable Stop Loss? [Y/n]:`
 
-If **Yes**, you’ll be asked:
+If **Yes**:
 
-- `Stop Loss (% of buy) [0%]:`
+- `Stop Loss (% of buy) [10%]:`
 
 **Input format:** percent, like `5%`.
 
@@ -163,23 +148,45 @@ What it means:
 
 - LaserSell will sell if losses reach this percent of the detected buy cost.
 
-Important behavior:
+### Trailing stop
 
-- `0%` effectively disables stop loss (even if you answered “Yes”).
+Prompt:
+
+- `Enable Trailing Stop? [y/N]:`
+
+If **Yes**:
+
+- `Trailing Stop (% of buy) [5%]:`
+
+**Input format:** percent, like `5%`.
+
+What it means:
+
+- LaserSell tracks the peak profit of a position. If the price drops by this percent of entry from the peak, it triggers a sell.
+- Useful for letting winners run while still protecting gains.
+
+Constraints:
+
+- Must be **greater than 0%** when enabled.
 
 ### Deadline timeout
 
 Prompt:
 
-- `Deadline Timeout (seconds, 0 disables) [45]:`
+- `Enable Deadline Timeout? [Y/n]:`
+
+If **Yes**:
+
+- `Deadline Timeout (seconds) [45]:`
 
 What it means:
 
 - A hard time limit. If the position is still open when this time expires, LaserSell force-sells.
-
-Notes:
-
 - `0` disables the deadline entirely.
+
+### Important: at least one exit must be enabled
+
+At least one of target profit, stop loss, trailing stop, or deadline timeout must be enabled. If you disable all four, the wizard will loop and ask you to enable at least one.
 
 ### Slippage tolerance
 
@@ -194,13 +201,24 @@ What it means:
 - Caps how much slippage LaserSell will tolerate during sell execution.
 - Higher = more likely to execute quickly; worse prices are possible.
 
-## Step 4: Wallet
+### Sell on graduation
+
+Prompt:
+
+- `Auto-sell when token graduates to a new DEX? [y/N]:`
+
+What it means:
+
+- When enabled, LaserSell will automatically sell your position when the token migrates from a bonding curve to a DEX (e.g. Pump.fun → PumpSwap).
+- Default is **No**.
+
+## Step 3: Wallet
 
 This step decides what wallet LaserSell will use to monitor buys and execute sells.
 
 ### If an encrypted keystore is detected
 
-If LaserSell finds an existing encrypted keystore file, you’ll see something like:
+If LaserSell finds an existing encrypted keystore file, you'll see something like:
 
 - `Existing keystore detected: ...`
 - `Use existing wallet and keep the current keystore file? [Y/n]:`
@@ -208,15 +226,15 @@ If LaserSell finds an existing encrypted keystore file, you’ll see something l
 If you choose **Yes**:
 
 - LaserSell will **reuse** that wallet file (it will not rewrite it).
-- You’ll unlock it in **Step 5**.
+- You'll unlock it in **Step 4**.
 
 If you choose **No**:
 
-- You’ll proceed to create/import a different wallet.
+- You'll proceed to create/import a different wallet.
 
 ### If no keystore is detected (or you chose not to reuse it)
 
-You’ll be asked:
+You'll be asked:
 
 - `Import an existing wallet? [y/N]:`
 
@@ -236,7 +254,7 @@ You must confirm:
 
 #### If you choose **Yes** (import existing wallet)
 
-You’ll choose an import method:
+You'll choose an import method:
 
 1. **Private key (base58)**
 2. **Seed phrase**
@@ -258,7 +276,7 @@ Prompt:
 Notes:
 
 - This must be the **private key**, not the public address.
-- Input is masked (won’t echo).
+- Input is masked (won't echo).
 
 ##### Import method: Seed phrase
 
@@ -269,8 +287,8 @@ Prompt:
 Notes:
 
 - Uses the standard Solana derivation path: `m/44'/501'/0'/0'`
-- Input is masked (won’t echo)
-- If the derived pubkey doesn’t match what you expect, your wallet may be using a different derivation setup—use another import method.
+- Input is masked (won't echo)
+- If the derived pubkey doesn't match what you expect, your wallet may be using a different derivation setup—use another import method.
 
 ##### Import method: Solana keypair JSON file
 
@@ -288,21 +306,21 @@ If you answer **Yes**, LaserSell will attempt to delete that plaintext file afte
 
 > A plaintext keypair JSON file is a raw private key on disk. Treat it as compromised until deleted.
 
-## Step 5: Security
+## Step 4: Security
 
 This step controls wallet encryption access.
 
 ### If you are reusing an existing keystore
 
-You’ll be asked to unlock it:
+You'll be asked to unlock it:
 
 - `Keystore passphrase:`
 
-You’ll be re-prompted until the passphrase is correct.
+You'll be re-prompted until the passphrase is correct.
 
 ### If you are creating/importing a new wallet
 
-You’ll set a new keystore passphrase:
+You'll set a new keystore passphrase:
 
 - `Keystore passphrase:`
 - `Confirm passphrase:`
@@ -314,7 +332,7 @@ Rules:
 
 > If you forget this passphrase, LaserSell cannot decrypt the keystore. Your recovery path is re-importing the wallet (seed phrase/private key) and creating a new keystore.
 
-## Step 6: Files
+## Step 5: Files
 
 This step is about where LaserSell saves the two files.
 
@@ -322,7 +340,7 @@ This step is about where LaserSell saves the two files.
 
 - Uses the config path LaserSell is running with (default: `~/.lasersell/config.yml`)
 - Uses a keystore file next to it (default: `wallet.keystore.json`)
-- You won’t be prompted unless something must be resolved (like overwrite conflicts).
+- You won't be prompted unless something must be resolved (like overwrite conflicts).
 
 ### Custom mode
 
@@ -336,13 +354,13 @@ Defaults:
 - Config defaults to the path LaserSell is currently using.
 - Keystore defaults to `wallet.keystore.json` in the same directory as the config.
 
-## Step 7: Review and write
+## Step 6: Review and write
 
 LaserSell prints a summary like:
 
-- Strategy (take profit, stop loss, deadline)
-- RPC choice
-- WebSocket choice
+- Strategy (take profit, stop loss, trailing stop, deadline, sell on graduation)
+- RPC URL
+- API key (masked)
 - Wallet pubkey (shortened)
 - File names
 
@@ -350,14 +368,14 @@ LaserSell prints a summary like:
 
 If the target config or keystore already exists, LaserSell will ask before overwriting:
 
-- `Config file location ... exists. Overwrite? [y/N]:`
-- `Keystore file location ... exists. Overwrite? [y/N]:`
+- `Config file <path> exists. Overwrite? [y/N]:`
+- `Keystore file <path> exists. Overwrite? [y/N]:`
 
 Behavior to know:
 
 - Default is **No**.
 - If you answer **No**:
-  - In **custom mode**, you’ll be asked to enter a different path.
+  - In **custom mode**, you'll be asked to enter a different path.
   - In **recommended mode**, the wizard will stop and tell you to rerun without recommended settings if you want different file locations.
 
 ### Final prompt: write configuration
@@ -373,18 +391,18 @@ Defaults:
 
 If you do not write, the wizard exits without saving.
 
-## What happens after “Setup complete”
+## What happens after "Setup complete"
 
 After setup, LaserSell continues into normal startup:
 
 - If you created/imported a wallet, it will use the encrypted keystore going forward.
-- On future launches, LaserSell will require the **keystore passphrase** to unlock the wallet (unless you’ve set up an automated passphrase flow for headless runs).
+- On future launches, LaserSell will require the **keystore passphrase** to unlock the wallet (unless you've set up an automated passphrase flow for headless runs via the `LASERSELL_WALLET_PASSPHRASE` env var).
 
 ## Common issues
 
-### “config file not found; run --setup in an interactive terminal”
+### "config file not found; run --setup in an interactive terminal"
 
-You’re launching LaserSell without a config **in a non-interactive environment** (no TTY). Fix:
+You're launching LaserSell without a config **in a non-interactive environment** (no TTY). Fix:
 
 1. SSH into the machine (or open a local terminal)
 2. Run the wizard once:
@@ -394,6 +412,6 @@ You’re launching LaserSell without a config **in a non-interactive environment
    ```
 3. Then run headless/service mode using the generated config.
 
-### My imported seed phrase gives the “wrong” wallet address
+### My imported seed phrase gives the "wrong" wallet address
 
-LaserSell derives using Solana’s standard derivation path (`m/44'/501'/0'/0'`) and no additional BIP-39 passphrase. If your wallet uses a different setup, import via **base58 secret key** or **keypair JSON** instead.
+LaserSell derives using Solana's standard derivation path (`m/44'/501'/0'/0'`) and no additional BIP-39 passphrase. If your wallet uses a different setup, import via **base58 secret key** or **keypair JSON** instead.

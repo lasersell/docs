@@ -1,40 +1,49 @@
 ---
 title: "Built to Work with Your Favorite Tools"
-description: "Discover how to combine LaserSell with tools like Axiom, Photon, and BullX to add a layer of automated discipline to your manual entries without changing your trading setup."
+description: "LaserSell plugs into your existing workflow as an automated exit layer. Buy anywhere, and let LaserSell handle the sell."
 ---
 
-**LaserSell is not designed to replace your favorite trading terminal, wallet, or scanner.** Instead, it is built to be a specialized "Sidecar" for your existing workflow. Whether you are a "trench" trader or a developer launching projects, LaserSell plugs into your setup to handle the most critical part of the trade: the exit.
+**LaserSell is not designed to replace your favorite trading terminal, wallet, or scanner.** It is built to be a specialized execution layer for your existing workflow. Whether you are a trader or a developer building your own tools, LaserSell handles the most critical part of the trade: the exit.
 
-### Not a Replacement, but a Power-Up
+## Buy Anywhere, Exit with LaserSell
 
 Most trading platforms try to be all-in-one, which often leads to performance trade-offs. LaserSell focuses exclusively on being the fastest, most reliable way to automate your sells.
 
-- **Buy Anywhere, Sell Here:** You can execute your buys on high-speed terminals like [Axiom](https://axiom.trade/@x3n), [Photon](https://photon-sol.tinyastro.io/), [BullX](https://neo.bullx.io/), or [Terminal](https://trade.padre.gg/), and LaserSell will automatically detect the position and apply your pre-configured Auto-TP and Auto-SL rules.
-- **Workflow Continuity:** You can watch the charts on **Axiom** or **Terminal** and use [Phantom](https://phantom.com/) for manual adjustments while LaserSell runs in the background as your fail-safe automation.
+- **Works with any entry method.** Execute your buys on [Axiom](https://axiom.trade/@x3n), [Photon](https://photon-sol.tinyastro.io/), [BullX](https://neo.bullx.io/), [Terminal](https://trade.padre.gg/), or any other platform. LaserSell detects the position automatically and applies your exit strategy.
+- **No workflow changes.** Keep watching charts on Axiom or Terminal, use [Phantom](https://phantom.com/) for manual adjustments, and let LaserSell run in the background as your automated exit layer.
+- **On-chain results, visible everywhere.** When LaserSell executes a sell, the transaction appears on-chain instantly. You will see it in whatever dashboard or explorer you already use.
 
-### Invisible Background Performance
+## Background Execution
 
-LaserSell is designed to be **heard (on the blockchain), but not seen**. It runs passively in the background while you focus on the tools you normally use.
+LaserSell is designed to be heard on the blockchain, but not seen in your workflow. Once your strategy is configured, it runs passively:
 
-- **Zero Attention Required:** Once your config is set, you do not need to look at the LaserSell window at all. You can keep your eyes glued to the charts on Axiom or Photon.
-- **Watch the Sale Anywhere:** Because LaserSell executes on-chain, you will see the "Sell" transaction appear instantly on your Axiom or BullX dashboard the moment it happens. You don't need to check LaserSell to confirm it worked; the results show up where you are already looking.
-- **Optional Chrome Extension:** If you _do_ want a quick heads-up display of your active positions and targets, we offer a lightweight Chrome Extension. It sits quietly in your browser toolbar, giving you visibility without forcing you to switch tabs or windows.
+- Your take profit, stop loss, trailing stop, deadline, and sell-on-graduation rules are evaluated on every price update.
+- The moment a condition is met, the exit is constructed, signed, and broadcast automatically.
+- No manual attention, no confirmation popups, no switching windows.
 
-### The Deployer Advantage: Automating the Launch
+## For Deployers
 
-For serial deployers, finding new memes to create and preparing them to be a memecoin is a full-time job that makes manual trading nearly impossible. **LaserSell provides a "set and forget" solution for creators using deployment tools.**
+For serial deployers, preparing and launching memecoins is a full-time job that makes manual trading nearly impossible. LaserSell provides a "set and forget" exit solution.
 
-- **Focus on the Launch:** If you are using [RapidLaunch](https://rapidlaunch.io/), [Uxento](https://uxento.io/), or [J7 Tracker](https://j7tracker.com/) to deploy, you are likely juggling browser windows and Telegram/Discord groups. LaserSell handles your personal exit plan so you can focus on the community and deploying coins.
-- **Strategic Early Exits:** We recognize that a developer selling their supply early is often an essential part of a memecoin's lifecycle. Many coins do not experience significant growth until the developer supply has cleared, and LaserSell allows deployers to automate this step cleanly and instantly.
+- **Focus on the launch.** If you are using [RapidLaunch](https://rapidlaunch.io/), [Uxento](https://uxento.io/), or [J7 Tracker](https://j7tracker.com/) to deploy, you are likely juggling browser windows and community channels. LaserSell handles your exit plan so you can focus on the launch.
+- **Clean early exits.** Many coins do not experience significant growth until the developer supply has cleared. LaserSell allows deployers to automate this step cleanly and instantly.
 
-### Seamless Ecosystem Synergy
+## For Developers: The LaserSell SDK
 
-LaserSell is designed to sit alongside the best tools in the Solana ecosystem:
+The same Exit Intelligence engine that powers the LaserSell client is available as an [SDK and API](/api/overview) for developers building their own tools.
 
-- **Trading Terminals:** Pairs perfectly with **Axiom**, **Photon**, **BullX**, and **Terminal** to add a layer of automated discipline to your manual entries.
-- **Deployment Tools:** Complements **RapidLaunch**, **Uxento**, and **J7 Tracker** by providing an automated exit workflow for the chaotic launch window.
-- **Analysis & Tracking:** Keep your eyes on the charts via **Axiom**, **Terminal**, or [Dexscreener](https://dexscreener.com/), while LaserSell handles the execution logic in the background.
+- Integrate real-time exit strategy logic into your own trading bot, platform, or dashboard.
+- Full protocol coverage: Pump.fun, PumpSwap, Meteora DBC, Meteora DAMM V2, Raydium Launchpad, and Raydium CPMM.
+- Available in [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust), and [Go](/api/sdk/go).
 
-> **Core Concept:** You do not have to change your workflow to use LaserSell. You simply add LaserSell to your workflow to ensure your exits are as fast and disciplined as the rest of your strategy.
+If you are interested in enterprise integration, contact us at [sales@lasersell.io](mailto:sales@lasersell.io).
 
-> **Developer Focus:** We are currently finalizing the **LaserSell API**, which will allow developers to integrate our high-speed execution engine directly into their own custom dashboards and tools. If you are interested in early access or enterprise integration, join our Discord.
+## Ecosystem Compatibility
+
+LaserSell sits alongside the tools you already use:
+
+- **Trading terminals:** Axiom, Photon, BullX, Terminal
+- **Deployment tools:** RapidLaunch, Uxento, J7 Tracker
+- **Charts and tracking:** Axiom, Terminal, [Dexscreener](https://dexscreener.com/)
+
+> **Core Concept:** You do not have to change your workflow to use LaserSell. You add LaserSell to your workflow to ensure your exits are as fast and disciplined as the rest of your strategy.

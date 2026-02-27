@@ -7,64 +7,17 @@ Welcome to the official record of the **LaserSell** ecosystem's evolution.
 
 This page serves as a comprehensive archive of all version releases, feature updates, and critical patches. While this log is updated with every major release, we broadcast updates in real-time through our community channels.
 
+### GitHub Releases
+
+Full changelogs for every release are published on GitHub:
+
+- **LaserSell (Client):** [github.com/lasersell/lasersell/releases](https://github.com/lasersell/lasersell/releases)
+- **LaserSell SDK:** [github.com/lasersell/lasersell-sdk/releases](https://github.com/lasersell/lasersell-sdk/releases)
+
 ### Real-Time Announcements
 
 To get notified immediately when a new version or patch goes live, join our announcement channels:
 
 - **Telegram:** [t.me/lasersell](https://t.me/lasersell)
-- **Discord:** [discord.gg/lasersell](https://discord.gg/lasersell) (Check the `#announcements` channel)
+- **Discord:** [discord.gg/lasersell](https://discord.gg/lasersell) (Check the `#announcements` and `#github` channels)
 
-## Release History
-
-### v0.2.2 - February 1, 2026
-
-### Enhancements:
-
-- Change the default configuration settings to set 10% stop loss and 120s deadline timeout.
-
-### v0.2.1 - January 30, 2026
-
-### Bug Fixes:
-
-- Fix detection of buys made on trading platforms like Axiom
-
-### v0.2.0 - January 28, 2026
-
-#### **🚀 New Features & Protocol Support**
-
-- **Expanded DEX Support:** Full integration for DAMM v2, CPMM, PumpSwap, and [Bonk.fun](http://Bonk.fun).
-- **Launchpad Support:** Comprehensive support for all Raydium Launchpad coins (including USD1 & SOL tokens).
-- **Cross-Platform:** Added official support for macOS and Windows.
-- **Security Tools:** New CLI command `--export-private-key [path]` for easier key management.
-- **LaserSell is now FREE to download**: No more access passes and no monthly subscriptions.
-
-#### **📈 Trading & Logic Improvements**
-
-- **Smart Cost Basis:** Updated tracking logic to calculate counts and cost basis correctly across multiple buys.
-- **Simplified Strategies:** Consolidated Take Profit (TP) and Stop Loss (SL) strategies into a streamlined, percentage-only format.
-- **Flexible Timeouts:** You can now disable timeouts by setting the value to 0.
-- **Migration Support:** Added foundational support for token migrations.
-
-#### **🛠 UI & UX Enhancements**
-
-- **UI Redesign:** A fresh look and feel for a better user experience.
-- **Improved Onboarding:** Adjusted the first-time user flow for a smoother setup.
-- **Smart Keystores:** The system will no longer generate a new keystore if an existing one is detected, preventing accidental overwrites.
-
-#### **🔧 CLI & Configuration Changes**
-
-- **Option Consolidation:** Removed `-c` and `-l` flags. These have been merged for simplicity (Note: -m remains unchanged).
-- **Stream Cleanup:** Removed Helius Laserstream support. The config stream has been renamed to websocket for clarity.
-
-#### **🐞 Bug Fixes**
-
-- **PnL Accuracy:** Fixed an issue where manual buys would interfere with PnL calculations and accidentally trigger autosell.
-- **Tracking Fix:** Resolved a bug where secondary buys of the same coin were not being tracked by LaserSell.
-- **Zombie Websockets:** Fixed a bug preventing mint detection on the free tier websocket.
-
-### Previous Updates
-
-- v0.1.3: Changed slippage defaults and fixed slippage bugs.
-- v0.1.2: Onboarding improvements, slippage configuration options, and added CLI args.
-- v0.1.1: Fixed issues with Meteora DBC sells.
-- v0.1.0: Initial release.

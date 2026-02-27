@@ -27,11 +27,11 @@ No funds, tokens, or keys are ever stored or accessed by LaserSell infrastructur
 
 ```mermaid
 flowchart LR
-    A["Your Code\n(SDK)"] -->|REST| B["LaserSell API\napi.lasersell.io"]
-    A -->|WebSocket| C["Exit Intelligence Stream\nstream.lasersell.io"]
+    A["Your Code<br/>(SDK)"] -->|REST| B["LaserSell API<br/>api.lasersell.io"]
+    A -->|WebSocket| C["Exit Intelligence Stream<br/>stream.lasersell.io"]
     B -->|unsigned tx| A
     C -->|unsigned tx| A
-    A -->|sign locally\nthen submit| D["Solana RPC\nor Sender"]
+    A -->|"sign locally,<br/>then submit"| D["Solana RPC<br/>or Sender"]
 ```
 
 ## SDK Languages

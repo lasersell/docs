@@ -1,15 +1,15 @@
 ---
 title: "Escaping a Rug Pull"
-description: "Discover how a pre-commitment to an automated exit strategy ensures you protect your bankroll and live to trade the next setup."
+description: "How LaserSell's automated exit strategies protect your bankroll when a token dumps or rugs, so you survive to trade the next setup."
 ---
 
 In the Solana memecoin ecosystem, rug pulls and instant liquidity drains are inevitable. If you trade enough coins, you will eventually enter a project that dumps immediately.
 
-The difference between a professional trader and a gambler is not that the professional avoids every rug; it is that the professional survives them with their bankroll intact.
+The difference between a professional trader and a gambler is not that the professional avoids every rug. It is that the professional survives them with their bankroll intact.
 
-### The Panic Cascade
+## The Panic Cascade
 
-When a coin starts to dump or a rug pull executes, the price action moves faster than human reaction time. Manual traders often freeze, leading to a psychological failure loop known as the Panic Cascade:
+When a coin starts to dump or a rug pull executes, the price action moves faster than human reaction time. Manual traders often freeze, leading to a psychological failure loop:
 
 1. **Shock:** The chart turns vertical red.
 2. **Hesitation:** You think maybe it is just a dip and wait for a bounce.
@@ -17,24 +17,51 @@ When a coin starts to dump or a rug pull executes, the price action moves faster
 4. **Paralysis:** You feel it is too late to sell, so you hold.
 5. **Wipeout:** The position goes to near zero.
 
-### The Solution: Controlled Downside
+Every step in that sequence is time lost. LaserSell removes all five steps by acting before you have time to hesitate.
 
-LaserSell changes the fundamental equation of trading by turning uncontrolled downside into **controlled downside**.
+## Controlled Downside
 
-By setting an automated Stop Loss, you are making a pre commitment to the market: "I am willing to lose this much, but I refuse to lose everything".
+LaserSell turns uncontrolled downside into **controlled downside** through multiple layers of automated protection:
 
-- **Mechanical Execution:** When the price hits your stop, LaserSell triggers the exit immediately. It does not hope for a bounce. It simply saves your capital.
-- **Survival:** A 20% loss is a bad day. A 99% loss is a blown account. LaserSell ensures you live to trade the next setup.
+### Stop Loss
 
-### Flexible Protection
+By setting an automated stop loss, you make a pre-commitment: "I am willing to lose this much, but I refuse to lose everything." When the price hits your stop, LaserSell triggers the exit immediately. It does not hope for a bounce. It saves your capital.
 
-Your risk tolerance may change depending on the chart. LaserSell allows you to adjust your Auto-SL settings at any time, even while a trade is active.
+A 10% loss is recoverable. A 99% loss is a blown account.
 
-- **Tighten Up:** If a coin pumps, you can drag your stop loss up to Breakeven to ensure a risk free ride.
-- **Loosen Up:** If you are entering a high volatility play, you can widen your stop to avoid getting wicked out by normal noise.
+### Trailing Stop
 
-### The "Never Go Back" Reality
+A fixed stop loss protects against total wipeouts, but it does not help when a token pumps and then reverses. The trailing stop solves this.
 
-Once you experience the safety of an automated shield, manual trading feels structurally unsafe. Knowing that your downside is mathematically capped allows you to trade with a clearer head and less anxiety.
+It tracks the peak profit of your position. If the price reverses and drops a set percentage from that peak, LaserSell exits automatically. This means:
 
-> **Core Concept:** A stop loss isn't just a tool; it is survival. In a market designed to take everything, LaserSell ensures you only give up what is tolerable.
+- On a rug that happens after a pump, you lock in some of the upside instead of riding it back to zero.
+- On a slow bleed, the trailing stop tightens as profit grows, giving you better protection the higher the token goes.
+
+### Sell on Graduation
+
+Some tokens dump immediately after migrating from a bonding curve to a DEX (e.g. Pump.fun to PumpSwap). With sell-on-graduation enabled, LaserSell exits automatically at the moment of migration before the post-graduation dump can play out.
+
+### Deadline Timeout
+
+If a position goes sideways and no other exit condition fires, the deadline forces an exit after a set number of seconds. This prevents capital from being locked in a stagnant position while you could be deploying it elsewhere.
+
+## Adjust on the Fly
+
+Your risk tolerance may change depending on the setup. LaserSell lets you adjust settings at any time through the TUI, even while a trade is active:
+
+```
+set sl 5%
+set ts 3%
+set graduation on
+```
+
+- **Tighten up:** If a coin pumps, raise your stop loss to breakeven for a risk-free ride.
+- **Loosen up:** If you are entering a high-volatility play, widen your stop to avoid getting wicked out by normal noise.
+- **Layer protections:** Combine a stop loss, trailing stop, and deadline together. Whichever triggers first executes the exit.
+
+## Survival is the Strategy
+
+In a market where a single bad trade can erase a week of gains, automated downside protection is not optional. It is the foundation that every other strategy is built on.
+
+> **Core Concept:** A rug pull is only a wipeout if you are still holding when it finishes. LaserSell's layered exit strategies (stop loss, trailing stop, sell on graduation, deadline) ensure you exit early, preserve capital, and live to trade the next setup.

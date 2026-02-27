@@ -1,0 +1,101 @@
+---
+title: "Integrate LaserSell Into Your Product"
+description: "Add LaserSell's Exit Intelligence engine to your trading bot, Telegram bot, platform, or app with the LaserSell SDK and API."
+---
+
+If your product touches Solana token trading in any way, LaserSell can power the execution layer behind it.
+
+The same Exit Intelligence engine that runs in the LaserSell client is available through the [LaserSell SDK and API](/api/overview). Telegram bots, web platforms, mobile apps, browser extensions, CLI tools, portfolio managers, launchpad services, copy-trading systems, signal groups, analytics dashboards. If your users are buying or selling tokens on Solana, LaserSell gives you the infrastructure to automate that with real-time strategy evaluation, multi-protocol transaction building, and built-in monetization.
+
+You do not need to build an exit engine. You do not need to track AMM state or handle protocol-specific instructions. You integrate once and get coverage across every major Solana launchpad and DEX.
+
+## Real-Time Exit Intelligence
+
+The Exit Intelligence Stream is a persistent WebSocket connection that watches wallets, tracks positions, evaluates strategy in real time, and delivers pre-built exit transactions the moment thresholds are met.
+
+Instead of building your own PnL tracking, price monitoring, and exit logic from scratch, you connect to the stream and receive pre-built transactions. Your application defines the strategy (take profit, stop loss, trailing stop, deadline, sell on graduation) and LaserSell handles the rest.
+
+This means you can ship automated exit features to your users without building or maintaining the execution engine yourself.
+
+## Buy and Sell Transaction Builder
+
+The REST API builds unsigned swap transactions on demand via `/v1/buy` and `/v1/sell`. Full protocol coverage across Pump.fun, PumpSwap, Meteora DBC, Meteora DAMM V2, Raydium Launchpad, and Raydium CPMM.
+
+You do not need to track AMM state, compute routes, or handle protocol-specific instruction formats. Send a request with the mint and amount, and the API returns an optimized unsigned transaction ready to sign and submit.
+
+## Your Keys, Your Signing
+
+Every transaction the API returns is unsigned. You handle signing however your architecture requires. No keys ever touch LaserSell infrastructure.
+
+Whether your application manages wallets on behalf of users or has users sign directly, LaserSell fits into your existing key management setup without imposing any constraints on how you handle signing.
+
+## Built-In Monetization
+
+Every transaction your users execute through LaserSell can include a partner fee routed directly to your wallet. You set the fee (basis points or flat lamports) on each request, and it is enforced atomically on-chain as part of the swap.
+
+No invoicing, no reconciliation, no off-chain payment flows. Your revenue arrives in your wallet in the same transaction as the trade.
+
+See [Partner Fees](/api/reference/partner-fees) for implementation details. Enterprise partners can work with us on custom monetization arrangements.
+
+## Multi-Protocol Coverage
+
+A single integration gives your product coverage across the major Solana trading protocols:
+
+- **Pump.fun** bonding curves and **PumpSwap** markets
+- **Meteora** Dynamic Bonding Curve (DBC) and Dynamic AMM V2
+- **Raydium** Launchpad and CPMM pools
+
+As new protocols launch on Solana, LaserSell adds support and your integration picks it up automatically. No code changes on your end.
+
+## Four SDKs
+
+Integrate in the language that fits your stack:
+
+- [TypeScript](/api/sdk/typescript)
+- [Python](/api/sdk/python)
+- [Rust](/api/sdk/rust)
+- [Go](/api/sdk/go)
+
+All four SDKs share the same request/response schemas, error types, and retry behavior.
+
+## Where LaserSell Fits
+
+Any product where users hold Solana tokens and need to sell them can benefit from LaserSell. Here are some examples, but this is not an exhaustive list. If your product involves token trading on Solana, there is likely a place for Exit Intelligence in your stack.
+
+### Bots (Telegram, Discord, CLI, or Custom)
+
+Give your bot users automated TP, SL, and trailing stop on every trade. Connect to the Exit Intelligence Stream per user wallet, and deliver exit notifications or auto-execute sells when conditions are met. Partner fees let you monetize every trade your bot processes.
+
+### Web and Mobile Trading Platforms
+
+Add one-click buy/sell and automated exit strategies to your trading UI. The transaction builder handles protocol routing and the Exit Intelligence Stream provides real-time PnL updates to power live dashboards.
+
+### Launchpad and Deployer Tools
+
+Automate post-launch exit workflows for token creators. When a deployer launches through your tool, LaserSell can monitor the position and execute the creator's exit plan automatically.
+
+### Copy Trading and Signal Groups
+
+When a signal fires or a leader enters a position, LaserSell can manage the exit for every follower automatically. Each wallet gets its own strategy evaluation and exit execution without any manual intervention.
+
+### Portfolio Trackers, Analytics, and Alerting
+
+Connect to the Exit Intelligence Stream for real-time position tracking, PnL updates, and exit event data across all supported protocols. Power analytics dashboards, alerting systems, or risk management tools.
+
+### Browser Extensions and Wallet Add-Ons
+
+Embed automated exit functionality directly into the browsing experience. Users buy on any platform and your extension uses LaserSell to manage the sell in the background.
+
+### Anything Else
+
+If your users are trading tokens on Solana, LaserSell's exit engine and transaction builder are designed to plug in. The API is protocol-agnostic from your perspective. You send a mint and an amount, and get back an optimized transaction. The Exit Intelligence Stream watches wallets and delivers exit signals in real time. How you surface that to your users is entirely up to you.
+
+## Getting Started
+
+1. **Get an API key** at [app.lasersell.io](https://app.lasersell.io) (free, instant).
+2. **Read the API overview** at [API and SDK Overview](/api/overview).
+3. **Build your first transaction** with the [Quickstart](/api/quickstart).
+4. **Connect the Exit Intelligence Stream** with the [Stream Overview](/api/stream/overview).
+5. **See plans and limits** at [Rate Limits and Tiers](/api/reference/rate-limits).
+
+For enterprise integrations and custom arrangements, contact [sales@lasersell.io](mailto:sales@lasersell.io).

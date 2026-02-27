@@ -1,6 +1,6 @@
 ---
 title: "Comparison: LaserSell vs. Standard Market/Limit Orders"
-description: "Understand the mechanical differences between LaserSell’s deterministic execution and traditional web-based orders to optimize your exit strategy."
+description: "Understand the mechanical differences between LaserSell's deterministic execution and traditional web-based orders to optimize your exit strategy."
 ---
 
 A common question for new users is: "Why should I use LaserSell when I can just click 'Market Sell' or set a 'Limit Order' on a trading website?"
@@ -17,7 +17,7 @@ When you look at a trading website, you are not looking at the blockchain; you a
 
 **LaserSell:**
 
-LaserSell bypasses the middleman. It maintains a direct, high-speed connection to the Solana network. It receives price updates the instant they are propagated to the network, allowing it to calculate your profit and loss based on the absolute latest block data, not a delayed website refresh.
+LaserSell bypasses the middleman. It maintains a direct, high-speed connection to the Solana network via your private RPC. It receives price updates the instant they are propagated to the network, allowing it to calculate your profit and loss based on the latest block data, not a delayed website refresh.
 
 ### 2. The Reaction Trigger (Human vs. Machine)
 
@@ -31,25 +31,43 @@ Execution relies on human reflexes. You must:
 4. Click "Sell".
 5. Confirm the transaction in your wallet popup.
 
-This process introduces seconds of latency. In volatile "PvP" rounds, seconds are often the difference between profit and loss.
+This process introduces seconds of latency. In volatile markets, seconds are often the difference between profit and loss.
 
 **LaserSell:**
 
-LaserSell removes the biological bottleneck. You pre-define your Take Profit and Stop Loss targets. The software evaluates every single price update against your rules. The millisecond a block arrives that satisfies your criteria, the exit transaction is constructed and signed immediately. Zero reaction time, zero hesitation.
+LaserSell removes the biological bottleneck. You pre-define your Take Profit, Stop Loss, and Trailing Stop targets. The software evaluates every single price update against your rules. The moment a block arrives that satisfies your criteria, the exit transaction is constructed and signed immediately. Zero reaction time, zero hesitation.
 
-### 3. LaserSell vs Traditional Take Profit / Stop Loss Methods
+### 3. LaserSell vs. Traditional Take Profit / Stop Loss Methods
 
 **Standard TP/SL (Limit Orders):**
 
-Most traders attempt to secure profits using limit orders or off-chain aggregators. These are passive and dangerous in high-volatility environments (like memecoins). If a coin "rugs" or dumps rapidly, the price often gaps right past your limit order. Because no buyer exists at your exact specific price, your order remains unfilled while the value goes to zero. You are left "holding the bag" waiting for a fill that never comes.\
-\
-Limit orders typically fail to execute in a highly volatile environment. Source: https://support.jup.ag/hc/en-us/articles/22628213363484-Why-was-my-Limit-order-not-executed
+Most traders attempt to secure profits using limit orders or off-chain aggregators. These are passive and unreliable in high-volatility environments (like memecoins). If a coin "rugs" or dumps rapidly, the price often gaps right past your limit order. Because no buyer exists at your exact specified price, your order remains unfilled while the value goes to zero. You are left "holding the bag" waiting for a fill that never comes.
+
+Limit orders frequently fail to execute in highly volatile environments. Source: https://support.jup.ag/hc/en-us/articles/22628213363484-Why-was-my-Limit-order-not-executed
 
 **LaserSell (True Auto-Exit):**
 
-LaserSell uses a proactive, deterministic approach. It does not place passive limit orders that can be skipped. Instead, it monitors the chain for your target value. The moment your Profit or Loss threshold is triggered, LaserSell fires a high-priority **market swap** (utilizing Jito tips for speed). It prioritizes _getting you out_ over waiting for a perfect price match, ensuring you actually exit the position before the price collapses further.
+LaserSell uses a proactive, deterministic approach. It does not place passive limit orders that can be skipped. Instead, it monitors the chain for your target value. The moment your Profit or Loss threshold is triggered, LaserSell fires a high-priority **market swap** with optimized priority fees. It prioritizes _getting you out_ over waiting for a perfect price match, ensuring you actually exit the position before the price collapses further.
 
-### 4. The Outcome (Reactive vs. Deterministic)
+### 4. Trailing Stop: Letting Winners Run
+
+**Standard Methods:**
+
+Most trading interfaces offer no trailing stop functionality at all, especially for on-chain Solana tokens. You are forced to choose a fixed take profit target and hope you picked the right number. If the token pumps well past your target, you miss the upside. If you remove your target to "let it ride," you have no downside protection.
+
+**LaserSell:**
+
+LaserSell includes a built-in **trailing stop** that solves this problem. Instead of exiting at a fixed profit target, the trailing stop tracks the peak profit of your position. If the price reverses and drops by a configurable percentage from that peak, LaserSell triggers the exit automatically.
+
+This means:
+
+- If a token pumps 50% and your trailing stop is set to 5%, LaserSell will hold through the pump and only exit if it drops back to ~45% profit from entry.
+- You capture more upside on strong runs without manually watching the chart.
+- You still have automatic downside protection if the price reverses.
+
+You can combine trailing stop with a fixed take profit and stop loss for layered protection. Whichever condition is hit first triggers the exit.
+
+### 5. The Outcome (Reactive vs. Deterministic)
 
 **Standard Market Order:**
 
@@ -57,17 +75,18 @@ A market order is a reactive panic tool. You are often chasing the price down. I
 
 **LaserSell:**
 
-LaserSell is a deterministic tool. Because it executes on the _same_ block that the price movement is detected, it competes for liquidity at the triggering price level, rather than reacting to it after the fact. This helps protect your exit price and adhere closer to your planned strategy.
+LaserSell is a deterministic tool. Because it executes the moment the price movement is detected, it competes for liquidity at the triggering price level, rather than reacting to it after the fact. This helps protect your exit price and keeps execution closer to your planned strategy.
 
 ### Summary
 
-| **Aspect**                    | **Traditional TP/SL Methods (Limit Orders & Manual Monitoring)**                                                                                      | **LaserSell Auto-Exit (True TP/SL)**                                                                                                       |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Data Feed**                 | Relies on delayed API polling or off-chain price oracles; prices shown can be seconds old                                                             | Real-time on-chain blockchain streams; detects price changes in the exact block they occur                                                 |
-| **Trigger Mechanism**         | Off-chain keepers, bots, or manual human reaction; prone to lag or missed signals                                                                     | Fully algorithmic and automated; triggers instantly when user-defined price or percentage target is reached                                |
-| **Execution Speed**           | Dependent on third-party fillers, normal fees, or manual wallet confirmation; transactions often land in later blocks                                 | Automated market swap with optimized priority fees (e.g., Jito tips); executes in the same block as the trigger for near-instant exit      |
-| **Reliability in Volatility** | Frequently misses targets due to delays, partial fills, or failed transactions during congestion/rugs; limit orders may never fill if price gaps past | Deterministic execution even in extreme volatility; sells before price can collapse further, minimizing slippage                           |
-| **Suitability for Memecoins** | Poor for rapid pumps/dumps; limit orders can leave you holding the bag or selling too late                                                            | Purpose-built for high-speed scenarios; supports percentage-based or absolute price targets for both TP (lock profits) and SL (cut losses) |
-| **Overall Outcome**           | Reactive, inconsistent fills; higher risk of emotional decisions or bot failures                                                                      | Proactive, hands-off protection; achieves "true" TP/SL by combining precise triggers with lightning-fast market execution                  |
+| **Aspect** | **Traditional TP/SL Methods** | **LaserSell Exit Intelligence** |
+| :--- | :--- | :--- |
+| **Data Feed** | Relies on delayed API polling or off-chain price oracles; prices shown can be seconds old | Real-time on-chain streams via your private RPC; detects price changes as blocks are produced |
+| **Trigger Mechanism** | Off-chain keepers, bots, or manual human reaction; prone to lag or missed signals | Fully algorithmic and automated; triggers instantly when user-defined targets are reached |
+| **Execution Speed** | Dependent on third-party fillers, normal fees, or manual wallet confirmation; transactions often land in later blocks | Automated market swap with optimized priority fees; executes immediately upon trigger |
+| **Reliability in Volatility** | Frequently misses targets due to delays, partial fills, or failed transactions during congestion; limit orders may never fill if price gaps past | Deterministic execution even in extreme volatility; sells before price can collapse further |
+| **Trailing Stop** | Rarely available for on-chain Solana tokens; forces fixed targets that leave upside on the table | Built-in trailing stop tracks peak profit and exits on configurable drawdown from peak |
+| **Suitability for Memecoins** | Poor for rapid pumps/dumps; limit orders can leave you holding the bag or selling too late | Purpose-built for high-speed scenarios; supports TP, SL, trailing stop, deadline, and sell-on-graduation |
+| **Overall Outcome** | Reactive, inconsistent fills; higher risk of emotional decisions or bot failures | Proactive, hands-off protection with layered exit strategies and fast market execution |
 
-> **Core Concept:** Standard market and limit orders rely on human reflexes or third party keepers that introduce significant execution lag. LaserSell acts as your own private, dedicated keeper to ensure your precise plan is triggered and broadcast the millisecond your conditions are met.
+> **Core Concept:** Standard market and limit orders rely on human reflexes or third-party keepers that introduce significant execution lag. LaserSell acts as your own private, dedicated execution engine that ensures your precise plan is triggered and broadcast the moment your conditions are met.

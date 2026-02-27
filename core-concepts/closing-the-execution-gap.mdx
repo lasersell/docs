@@ -1,37 +1,53 @@
 ---
 title: "Closing the Execution Gap"
-description: "Learn how to eliminate the structural liability of human reaction time by replacing manual trading friction with real-time on-chain automation."
+description: "How LaserSell eliminates the structural delay between a market move and your exit, using real-time on-chain automation and layered exit strategies."
 ---
 
-In high volatility environments like [Pump.fun](http://Pump.fun), Meteora, and Raydium launches, the greatest threat to a trader’s PnL is the Execution Gap. This is the physical and technical window between a market move happening and a human being able to react to it.
+In high-volatility environments like [Pump.fun](http://Pump.fun), Meteora, and Raydium launches, the greatest threat to a trader's PnL is the **Execution Gap**. This is the physical and technical window between a market move happening and being able to react to it.
 
-### The Human Reaction Limit
+## The Human Reaction Limit
 
-In the trenches, price action moves at a speed that makes manual trading structurally disadvantaged. When you trade manually, your execution relies on a multi step chain:
+In the trenches, price action moves at a speed that makes manual trading structurally disadvantaged. When you trade manually, your execution relies on a multi-step chain:
 
-- **Perceive:** Seeing the price move on a chart.
-- **Decide:** Determining whether to exit or hold.
-- **Act:** Moving the mouse, selecting Max, and clicking sell.
-- **Confirm:** Waiting for the wallet popup and clicking confirm.
+1. **Perceive:** See the price move on a chart.
+2. **Decide:** Determine whether to exit or hold.
+3. **Act:** Move the mouse, select max, and click sell.
+4. **Confirm:** Wait for the wallet popup and click confirm.
 
-In a 2 to 5 second window, a **\+100%** gain can become a **-50%** loss on low liquidity moves. By the time a human completes the steps above, the opportunity has often already vanished.
+In a 2 to 5 second window, a **+100%** gain can become a **-50%** loss on low-liquidity moves. By the time a human completes the steps above, the opportunity has often already vanished.
 
-### The Stale Data Problem
+## The Stale Data Problem
 
 Most manual traders react to UI charts and trading interfaces. These interfaces must fetch, process, and render data before you see it. By the time the red or green candle appears on your screen, the market has often already moved or reversed.
 
-**LaserSell does not wait for the chart to catch up.** It tracks moves in real time directly from the blockchain, acting on the data as it hits the ledger rather than waiting for a visual representation.
+LaserSell does not wait for the chart to catch up. It tracks moves in real time directly from the blockchain, acting on data as it hits the ledger rather than waiting for a visual representation.
 
-### Always On Automation
+## Layered Exit Strategies
 
-LaserSell replaces human hesitation and the reaction gap with **always on automation**.
+Closing the execution gap is not just about speed. It is about having the right exit trigger fire at the right time. LaserSell evaluates multiple conditions simultaneously on every price update:
 
-- **Instant Detection:** The tool watches the market continuously.
-- **Immediate Execution:** Once your pre set conditions are met, the tool exits immediately without human steps.
-- **No Manual Friction:** No UI, no mouse, and no confirmation popups stand between your trigger and the blockchain.
+- **Take Profit:** Lock in gains the moment your target percentage is reached.
+- **Stop Loss:** Cut losses automatically before they compound.
+- **Trailing Stop:** Track peak profit and exit only when the price pulls back by a set percentage from the high. This lets winning trades run while still protecting gains on reversals.
+- **Deadline Timeout:** Force an exit after a set number of seconds if no other condition has fired. A safety net for positions that go sideways.
+- **Sell on Graduation:** Automatically exit when a token migrates from a bonding curve to a DEX (e.g. Pump.fun to PumpSwap), where price dynamics shift.
 
-### The Outcome: Secure Profit on the Blink
+These strategies run together. Whichever condition triggers first executes the exit. No manual monitoring required.
 
-**Profit in memecoins is often a blink**; it exists for a fraction of a second before liquidity shifts. LaserSell allows you to secure profit the moment it exists, rather than trying to catch the top with manual reflexes.
+## Optimized Transaction Delivery
 
-> **Core Concept:** Manual trading is for environments with slow timeframes. **LaserSell is for environments where a human clicking a UI is a structural liability.**
+Getting the exit signal right is only half the problem. The transaction still needs to land on-chain fast. LaserSell supports multiple transaction submission backends to minimize landing time:
+
+- **Helius Sender** (default): Optimized transaction delivery through Helius.
+- **Astralane**: Alternative submission service for users who want routing diversity.
+- **Direct RPC**: Send transactions straight through your own RPC endpoint.
+
+## Beyond the Client
+
+The same Exit Intelligence engine that powers the LaserSell client is available through the [LaserSell SDK](/api/overview). Developers building trading bots, platforms, or custom strategies can integrate the same real-time exit logic, multi-protocol support, and transaction building into their own applications.
+
+## The Outcome
+
+Profit in memecoins is often a blink. It exists for a fraction of a second before liquidity shifts. LaserSell closes the execution gap by combining real-time on-chain detection, layered exit strategies, and optimized transaction delivery so exits happen the moment conditions are met, not when a human finishes clicking through a UI.
+
+> **Core Concept:** The execution gap is the delay between a market move and your reaction. LaserSell eliminates it with always-on automation, multiple exit strategies running in parallel, and fast transaction delivery.

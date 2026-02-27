@@ -88,10 +88,12 @@ This panel shows the **currently active strategy settings** LaserSell is using:
 
 - **TP**: Target Profit (percent)
 - **SL**: Stop Loss (percent)
+- **TS**: Trailing Stop (percent), or `OFF` if disabled
 - **DEADLINE**:
   - `OFF` if disabled
   - otherwise shows the configured deadline timeout in seconds
 - **SLIPPAGE**: max slippage allowed for sells (displayed as percent)
+- **GRAD**: Sell on Graduation — `ON` or `OFF`
 
 These values update immediately if you change them via the `set …` command (see below).
 
@@ -292,51 +294,39 @@ y
 
 If no session is selected, it warns you.
 
-### `extension code`
-
-Requests a new pairing code (for telemetry/extension pairing) **only if telemetry is enabled in your config**.
-
-Example:
-
-```shellscript
-extension code
-```
-
-What you’ll see:
-
-- An info line that it’s requesting a code
-- Then output lines like:
-  - `Pairing code: …`
-  - `Expires at: …`
-
-If telemetry is disabled, it will warn you.
-
 ### `set …` (live settings)
 
 Updates strategy/sell settings **and writes them to your config file automatically**, then applies them live (no restart required).
 
 Supported forms:
 
-- `set tp <percent>`
-- `set sl <percent>`
-- `set slippage <percent>`
-- `set timeout <seconds>`
+- `set tp <percent>` — target profit
+- `set sl <percent>` — stop loss
+- `set ts <percent>` — trailing stop (alias: `set trailing <percent>`)
+- `set slippage <percent>` — max slippage (alias: `set slip <percent>`)
+- `set timeout <seconds>` — deadline timeout (alias: `set to <seconds>`)
+- `set graduation <on|off>` — sell on graduation
 
 Examples:
 
 ```shellscript
 set tp 6%
 set sl 0%
+set ts 5%
 set slippage 20%
 set timeout 45
+set graduation on
 ```
 
 Notes:
 
-- `tp` and `sl` require a percent string like `6%` (include the `%`).
+- `tp`, `sl`, and `ts` require a percent string like `6%` (include the `%`).
 - `slippage` accepts percent input and is converted internally (1% = 100 bps).
 - `timeout` is whole seconds:
   - `0` disables the deadline timeout.
+- `graduation` accepts `on`/`true` or `off`/`false`.
+
+All `set` commands write to your config file automatically and apply live — no restart required.
 
 If LaserSell can’t load or write the config, it will print an error.
 

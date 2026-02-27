@@ -1,46 +1,89 @@
 ---
 title: "Example Configuration"
-description: "View a commented example of the config.yml file to understand how to link your keystore, set API keys, and manage telemetry settings."
+description: "View a commented example of the config.yml file to understand how to link your keystore, set API keys, configure strategy, and tune sell settings."
 ---
 
 ```yaml
 account:
-  # Optional env overrides:
-  # - LASERSELL_KEYPAIR_PATH
-  keypair_path: "/abs/path/wallet.keystore.json" # default: ~/.lasersell/wallet.keystore.json; encrypted Lasersell keystore (recommended); legacy Solana keypair JSON also supported
+  # Path to your encrypted LaserSell keystore (recommended) or legacy Solana keypair JSON.
+  # Default: ~/.lasersell/wallet.keystore.json
+  # Override: LASERSELL_KEYPAIR_PATH env var
+  keypair_path: "~/.lasersell/wallet.keystore.json"
 
-rpc:
-  mode: "helius"                 # helius (default), public, or private
-  # Optional env override: LASERSELL_PRIVATE_RPC_URL
-  # private_url: "https://example-rpc.yourdomain.com"
+  # LaserSell API key (get one free at https://app.lasersell.io)
+  # Override: LASERSELL_API_KEY env var
+  api_key: "your-lasersell-api-key"
 
-helius:
-  # Optional env override: LASERSELL_HELIUS_API_KEY
-  api_key: "HELIUS_API_KEY"       # used for Helius RPC + Websocket (optional in public mode)
+  # Private RPC endpoint (https:// required for production).
+  # Free tiers available from Helius (helius.dev) and Chainstack (chainstack.com).
+  # Override: LASERSELL_RPC_URL or LASERSELL_PRIVATE_RPC_URL env var
+  rpc_url: "https://your-private-rpc.example.com"
+
+  # Transaction submission target: "helius_sender" (default), "astralane", or "rpc".
+  # Override: LASERSELL_SEND_TARGET env var
+  # send_target: "helius_sender"
+
+  # Required when send_target is "astralane".
+  # Override: LASERSELL_ASTRALANE_API_KEY env var
+  # astralane_api_key: "your-astralane-api-key"
+
+  # Set to true for local development (uses ws://localhost endpoints).
+  local: false
 
 strategy:
-  # Use a percent string based on the detected buy amount.
-  # Examples: target_profit: "10%"; stop_loss: "0.5%".
-  # Set stop_loss to 0% to disable it.
-  target_profit: "10%"        # take profit as percent of buy
-  stop_loss: "10%"             # stop loss as percent of buy (0% disables)
-  deadline_timeout: 120        # force sell-all after N seconds (0 disables)
+  # All values are percent of detected buy amount. Use "0%" to disable.
+  # At least one of target_profit, stop_loss, trailing_stop, or deadline_timeout must be > 0.
 
-websocket:
-  mode: "helius"              # helius (default), public, or private
-  # Optional env override: LASERSELL_PRIVATE_WS_URL
-  # private_url: "wss://example-ws.yourdomain.com"
+  target_profit: "20%"       # take profit — exit when profit reaches this % of entry
+  stop_loss: "10%"           # stop loss — exit when loss reaches this % of entry
+  trailing_stop: "5%"        # trailing stop — track peak profit, exit when it drops this % of entry from peak
+  deadline_timeout: 120      # force exit after N seconds (0 disables)
+  sell_on_graduation: false   # auto-sell when token graduates to a new DEX (e.g. Pump.fun -> PumpSwap)
 
 sell:
-  slippage_pad_bps: 2000               # extra slippage added on top of computed value
-  slippage_retry_bump_bps_first: 20    # extra pad added after first slippage error
-  slippage_retry_bump_bps_next: 40     # extra pad added after subsequent slippage errors
-  slippage_max_bps: 2500               # max slippage in basis points
-  confirm_timeout_sec: 25              # devnet default (mainnet default is 10)
+  slippage_pad_bps: 2000               # extra slippage added on top of computed value (bps)
+  slippage_retry_bump_bps_first: 20    # extra pad after first slippage error
+  slippage_retry_bump_bps_next: 40     # extra pad after subsequent slippage errors
+  slippage_max_bps: 2500               # max slippage cap (bps)
+  confirm_timeout_sec: 10              # tx confirmation timeout (25 on devnet)
   max_retries: 2                       # retry count for failed sells
+```
 
-telemetry:
-  # Optional env overrides:
-  # - LASERSELL_TELEMETRY_DISABLED
-  enabled: true
+## Environment variable overrides
+
+Any config field can be overridden by its corresponding environment variable. This is useful for CI, Docker, or secret management without putting credentials in the YAML file.
+
+| Config field | Env var | Example |
+| :--- | :--- | :--- |
+| `account.keypair_path` | `LASERSELL_KEYPAIR_PATH` | `/home/user/.lasersell/wallet.keystore.json` |
+| `account.api_key` | `LASERSELL_API_KEY` | `ls_abc123...` |
+| `account.rpc_url` | `LASERSELL_RPC_URL` or `LASERSELL_PRIVATE_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
+| `account.send_target` | `LASERSELL_SEND_TARGET` | `helius_sender`, `astralane`, or `rpc` |
+| `account.astralane_api_key` | `LASERSELL_ASTRALANE_API_KEY` | `ast_xyz789...` |
+
+## Advanced: Transaction submission
+
+LaserSell supports three transaction submission backends ("send targets"). You only need to change this if you want to experiment with different submission strategies.
+
+### `helius_sender` (default)
+
+Uses Helius's optimized transaction sender. This is the default and recommended for most users. Your `rpc_url` must be a Helius RPC endpoint.
+
+### `astralane`
+
+Uses Astralane's transaction submission service. Requires an Astralane API key:
+
+```yaml
+account:
+  send_target: "astralane"
+  astralane_api_key: "your-astralane-api-key"
+```
+
+### `rpc`
+
+Sends transactions directly via your configured RPC endpoint. This is the simplest option and works with any RPC provider, but may have slower landing times compared to the specialized senders above.
+
+```yaml
+account:
+  send_target: "rpc"
 ```

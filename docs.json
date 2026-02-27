@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "maple",
   "name": "LaserSell Documentation",
   "colors": {
     "primary": "#0D9373"
@@ -14,6 +14,51 @@
             "group": "Start Here",
             "pages": [
               "start-here/what-is-lasersell",
+              "start-here/integrate-lasersell"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "core-concepts/comparison-laser-sell-vs-standard-market-orders",
+              "core-concepts/non-custodial-by-design",
+              "core-concepts/closing-the-execution-gap",
+              "core-concepts/the-modular-execution-layer",
+              "core-concepts/escaping-a-rug-pull"
+            ]
+          },
+          {
+            "group": "Fees & Policies",
+            "pages": [
+              "pricing/fee-structure",
+              "how-to-win/risk-disclosures-and-responsible-trading",
+              "security/privacy"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/key-safety",
+              "getting-support/report-a-bug"
+            ]
+          },
+          {
+            "group": "Getting Support",
+            "pages": [
+              "getting-support/support",
+              "glossary",
+              "community",
+              "getting-support/changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Client",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
               "start-here/quickstart"
             ]
           },
@@ -36,58 +81,21 @@
             ]
           },
           {
-            "group": "Operations",
-            "pages": [
-              "onboarding/running-laser-sell-24-7"
-            ]
-          },
-          {
-            "group": "Core Concepts",
-            "pages": [
-              "core-concepts/comparison-laser-sell-vs-standard-market-orders",
-              "core-concepts/non-custodial-by-design",
-              "core-concepts/why-local-execution-wins",
-              "core-concepts/closing-the-execution-gap",
-              "core-concepts/replacing-emotion-with-execution",
-              "core-concepts/the-modular-execution-layer",
-              "core-concepts/escaping-a-rug-pull"
-            ]
-          },
-          {
             "group": "Supported Platforms",
             "pages": [
               "onboarding/platform-and-coin-support"
             ]
           },
           {
-            "group": "Fees & Policies",
-            "pages": [
-              "pricing/fee-structure",
-              "how-to-win/risk-disclosures-and-responsible-trading"
-            ]
-          },
-          {
             "group": "Security",
             "pages": [
-              "security/wallet-encryption",
-              "security/key-safety",
-              "security/privacy"
-            ]
-          },
-          {
-            "group": "Getting Support",
-            "pages": [
-              "getting-support/support",
-              "glossary",
-              "community",
-              "getting-support/report-a-bug",
-              "getting-support/changelog"
+              "security/wallet-encryption"
             ]
           }
         ]
       },
       {
-        "tab": "API Docs",
+        "tab": "API",
         "groups": [
           {
             "group": "Getting Started",
@@ -160,7 +168,17 @@
     "href": "https://www.lasersell.io"
   },
   "navbar": {
-    "links": []
+    "primary": {
+      "type": "button",
+      "label": "Get API Key",
+      "href": "https://app.lasersell.io"
+    },
+    "links": [
+      {
+        "label": "Discord",
+        "href": "https://discord.gg/lasersell"
+      }
+    ]
   },
   "fonts": {
     "family": "Inter"

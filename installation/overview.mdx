@@ -31,3 +31,20 @@ curl -fsSL https://dl.lasersell.io/migrate.sh | bash
 - APT: `sudo apt update && sudo apt install lasersell`
 - Homebrew: `brew upgrade lasersell`
 - Tarball install: rerun `install.sh` (overwrites the binary)
+
+### CLI flags
+
+| Flag | Short | Description |
+| :--- | :--- | :--- |
+| `--setup` | | Force-run the onboarding wizard (even if a config already exists) |
+| `--config <path>` | `-f` | Path to a custom config file (required for `--no-tui` and `--verbose` modes) |
+| `--verbose` | `-v` | Disable the TUI and output plain log lines instead (headless mode) |
+| `--no-tui` | | Disable the TUI (requires `-f`). Equivalent to `--verbose` |
+| `--smoke` | | Run a connectivity health check (RPC + exit API) and exit. Prints `SMOKE OK` or `SMOKE FAIL <step>` |
+| `--export-private-key` | | Export your wallet's base58 private key to stdout. Optionally accepts a keystore path after `=` |
+
+Notes:
+
+- `--smoke`, `--setup`, and `--export-private-key` are mutually exclusive.
+- `--no-tui` and `--verbose` both require `-f <path>` to specify the config file.
+- In non-TUI mode, the keystore passphrase is read from the `LASERSELL_WALLET_PASSPHRASE` env var, falling back to an interactive stdin prompt.
