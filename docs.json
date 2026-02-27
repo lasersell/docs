@@ -18,6 +18,14 @@
             ]
           },
           {
+            "group": "AI Agents",
+            "pages": [
+              "ai-agents/overview",
+              "ai-agents/build-a-trading-agent",
+              "ai-agents/mcp-server"
+            ]
+          },
+          {
             "group": "Core Concepts",
             "pages": [
               "core-concepts/comparison-laser-sell-vs-standard-market-orders",
@@ -59,17 +67,8 @@
           {
             "group": "Getting Started",
             "pages": [
-              "start-here/quickstart"
-            ]
-          },
-          {
-            "group": "Installation",
-            "pages": [
-              "installation/overview",
-              "installation/linux-installation",
-              "installation/mac-os-installation",
-              "installation/windows-installation",
-              "installation/docker-installation"
+              "start-here/quickstart",
+              "installation/installation"
             ]
           },
           {

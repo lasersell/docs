@@ -1,89 +1,70 @@
 ---
 title: "Example Configuration"
-description: "View a commented example of the config.yml file to understand how to link your keystore, set API keys, configure strategy, and tune sell settings."
+description: "Annotated config.yml reference with all available fields, defaults, and environment variable overrides."
 ---
+
+The setup wizard generates `~/.lasersell/config.yml`. You can edit it directly or use [TUI commands](/onboarding/lasersell-ui) to change strategy settings live.
 
 ```yaml
 account:
-  # Path to your encrypted LaserSell keystore (recommended) or legacy Solana keypair JSON.
+  # Encrypted keystore or legacy Solana keypair JSON.
   # Default: ~/.lasersell/wallet.keystore.json
-  # Override: LASERSELL_KEYPAIR_PATH env var
+  # Env: LASERSELL_KEYPAIR_PATH
   keypair_path: "~/.lasersell/wallet.keystore.json"
 
-  # LaserSell API key (get one free at https://app.lasersell.io)
-  # Override: LASERSELL_API_KEY env var
+  # LaserSell API key (free at https://app.lasersell.io)
+  # Env: LASERSELL_API_KEY
   api_key: "your-lasersell-api-key"
 
-  # Private RPC endpoint (https:// required for production).
-  # Free tiers available from Helius (helius.dev) and Chainstack (chainstack.com).
-  # Override: LASERSELL_RPC_URL or LASERSELL_PRIVATE_RPC_URL env var
+  # Private Solana RPC endpoint (https:// required).
+  # Env: LASERSELL_RPC_URL or LASERSELL_PRIVATE_RPC_URL
   rpc_url: "https://your-private-rpc.example.com"
 
-  # Transaction submission target: "helius_sender" (default), "astralane", or "rpc".
-  # Override: LASERSELL_SEND_TARGET env var
+  # Transaction submission backend: "helius_sender" (default), "astralane", or "rpc".
+  # Env: LASERSELL_SEND_TARGET
   # send_target: "helius_sender"
 
-  # Required when send_target is "astralane".
-  # Override: LASERSELL_ASTRALANE_API_KEY env var
+  # Required only when send_target is "astralane".
+  # Env: LASERSELL_ASTRALANE_API_KEY
   # astralane_api_key: "your-astralane-api-key"
 
-  # Set to true for local development (uses ws://localhost endpoints).
-  local: false
-
 strategy:
-  # All values are percent of detected buy amount. Use "0%" to disable.
-  # At least one of target_profit, stop_loss, trailing_stop, or deadline_timeout must be > 0.
+  # Percentages are relative to your detected buy amount. Use "0%" to disable.
+  # At least one exit condition must be enabled.
 
-  target_profit: "20%"       # take profit — exit when profit reaches this % of entry
-  stop_loss: "10%"           # stop loss — exit when loss reaches this % of entry
-  trailing_stop: "5%"        # trailing stop — track peak profit, exit when it drops this % of entry from peak
-  deadline_timeout: 120      # force exit after N seconds (0 disables)
-  sell_on_graduation: false   # auto-sell when token graduates to a new DEX (e.g. Pump.fun -> PumpSwap)
+  target_profit: "20%"       # exit when profit reaches this %
+  stop_loss: "10%"           # exit when loss reaches this %
+  trailing_stop: "5%"        # exit when profit drops this % from its peak
+  deadline_timeout: 120      # force exit after N seconds (0 to disable)
+  sell_on_graduation: false  # auto-sell when token migrates to a new DEX
 
 sell:
-  slippage_pad_bps: 2000               # extra slippage added on top of computed value (bps)
-  slippage_retry_bump_bps_first: 20    # extra pad after first slippage error
-  slippage_retry_bump_bps_next: 40     # extra pad after subsequent slippage errors
-  slippage_max_bps: 2500               # max slippage cap (bps)
-  confirm_timeout_sec: 10              # tx confirmation timeout (25 on devnet)
-  max_retries: 2                       # retry count for failed sells
+  slippage_pad_bps: 2000              # extra slippage on top of computed value (bps)
+  slippage_retry_bump_bps_first: 20   # extra pad after first slippage error
+  slippage_retry_bump_bps_next: 40    # extra pad after subsequent slippage errors
+  slippage_max_bps: 2500              # max slippage cap (bps)
+  confirm_timeout_sec: 10             # tx confirmation timeout
+  max_retries: 2                      # retry count for failed sells
 ```
 
 ## Environment variable overrides
 
-Any config field can be overridden by its corresponding environment variable. This is useful for CI, Docker, or secret management without putting credentials in the YAML file.
+Override any config field with its corresponding env var. Useful for Docker, CI, or secret management.
 
 | Config field | Env var | Example |
-| :--- | :--- | :--- |
+|---|---|---|
 | `account.keypair_path` | `LASERSELL_KEYPAIR_PATH` | `/home/user/.lasersell/wallet.keystore.json` |
 | `account.api_key` | `LASERSELL_API_KEY` | `ls_abc123...` |
-| `account.rpc_url` | `LASERSELL_RPC_URL` or `LASERSELL_PRIVATE_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
+| `account.rpc_url` | `LASERSELL_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
 | `account.send_target` | `LASERSELL_SEND_TARGET` | `helius_sender`, `astralane`, or `rpc` |
 | `account.astralane_api_key` | `LASERSELL_ASTRALANE_API_KEY` | `ast_xyz789...` |
 
-## Advanced: Transaction submission
+## Transaction submission targets
 
-LaserSell supports three transaction submission backends ("send targets"). You only need to change this if you want to experiment with different submission strategies.
+LaserSell supports three backends for submitting sell transactions. Most users should stick with the default.
 
-### `helius_sender` (default)
-
-Uses Helius's optimized transaction sender. This is the default and recommended for most users. Your `rpc_url` must be a Helius RPC endpoint.
-
-### `astralane`
-
-Uses Astralane's transaction submission service. Requires an Astralane API key:
-
-```yaml
-account:
-  send_target: "astralane"
-  astralane_api_key: "your-astralane-api-key"
-```
-
-### `rpc`
-
-Sends transactions directly via your configured RPC endpoint. This is the simplest option and works with any RPC provider, but may have slower landing times compared to the specialized senders above.
-
-```yaml
-account:
-  send_target: "rpc"
-```
+| Target | Description |
+|---|---|
+| `helius_sender` | Default. Uses Helius's optimized sender. Requires a Helius RPC URL. |
+| `astralane` | Uses Astralane's submission service. Requires an `astralane_api_key`. |
+| `rpc` | Sends directly via your RPC endpoint. Works with any provider but may land slower. |

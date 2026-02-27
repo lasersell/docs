@@ -12,7 +12,7 @@ LaserSell offers four tiers. Each tier determines your rate limits for both the 
 | 0 | Personal | Free |
 | 1 | Professional | $49/mo |
 | 2 | Advanced Exit Engine | $149/mo |
-| — | Enterprise | Custom |
+| 3 | Enterprise | Custom |
 
 ## Exit Intelligence Stream Limits by Tier
 
@@ -71,14 +71,17 @@ When you connect to the Exit Intelligence Stream, the `hello_ok` message include
 
 ## Reading Limits in Code
 
+`StreamSession.connect()` consumes the `hello_ok` message internally during the handshake. To read the limits, use the low-level `StreamClient` directly:
+
 <CodeGroup>
 ```typescript TypeScript
-const session = await StreamSession.connect(client, configure);
+const client = new StreamClient(apiKey);
+const connection = await client.connect(configure);
+const [sender, receiver] = connection.split();
 
-// The hello_ok message is the first event
-const event = await session.recv();
-if (event?.type === "message" && event.message.type === "hello_ok") {
-  const limits = event.message.limits;
+const helloOk = await receiver.recv();
+if (helloOk?.type === "hello_ok") {
+  const limits = helloOk.limits;
   console.log("Max positions:", limits.max_positions_per_session);
   console.log("Max wallets:", limits.max_wallets_per_session);
   console.log("PnL interval:", limits.pnl_flush_ms, "ms");
@@ -86,30 +89,40 @@ if (event?.type === "message" && event.message.type === "hello_ok") {
 ```
 
 ```python Python
-event = await session.recv()
-if event and event.message.get("type") == "hello_ok":
-    limits = event.message["limits"]
+client = StreamClient("YOUR_API_KEY")
+connection = await client.connect(configure)
+sender, receiver = connection.split()
+
+msg = await receiver.recv()
+if msg and msg.get("type") == "hello_ok":
+    limits = msg["limits"]
     print("Max positions:", limits["max_positions_per_session"])
     print("Max wallets:", limits["max_wallets_per_session"])
 ```
 
 ```rust Rust
-if let Some(event) = session.recv().await {
-    if let ServerMessage::HelloOk { limits, .. } = &event.message {
-        println!("Max positions: {}", limits.max_positions_per_session);
-        println!("Max wallets: {}", limits.max_wallets_per_session);
-        println!("PnL interval: {} ms", limits.pnl_flush_ms);
-    }
+let client = StreamClient::new(SecretString::new(api_key));
+let connection = client.connect(configure).await?;
+let (sender, mut receiver) = connection.split();
+
+if let Some(ServerMessage::HelloOk { limits, .. }) = receiver.recv().await {
+    println!("Max positions: {}", limits.max_positions_per_session);
+    println!("Max wallets: {}", limits.max_wallets_per_session);
+    println!("PnL interval: {} ms", limits.pnl_flush_ms);
 }
 ```
 
 ```go Go
-event, err := session.Recv(ctx)
+client := stream.NewStreamClient(apiKey)
+connection, err := client.Connect(ctx, configure)
+sender, receiver := connection.Split()
+
+msg, err := receiver.Recv(ctx)
 if err == nil {
-    if msg, ok := event.Message.(stream.HelloOkServerMessage); ok {
-        fmt.Println("Max positions:", msg.Limits.MaxPositionsPerSession)
-        fmt.Println("Max wallets:", msg.Limits.MaxWalletsPerSession)
-        fmt.Println("PnL interval:", msg.Limits.PnlFlushMs, "ms")
+    if helloOk, ok := msg.(stream.HelloOkServerMessage); ok {
+        fmt.Println("Max positions:", helloOk.Limits.MaxPositionsPerSession)
+        fmt.Println("Max wallets:", helloOk.Limits.MaxWalletsPerSession)
+        fmt.Println("PnL interval:", helloOk.Limits.PnlFlushMs, "ms")
     }
 }
 ```
@@ -143,5 +156,5 @@ The stream connection remains open. Remove positions with `close_position` or re
 
 - **Read limits on connect.** Use the `limits` object to validate your configuration before sending positions.
 - **Monitor for capacity errors.** Log and alert on `error` messages with capacity related codes.
-- **Use lane splitting.** For high position counts, use `connectLanes()` to prevent `pnl_update` messages from blocking time sensitive events.
+- **Use lane splitting (TypeScript).** For high position counts, use `connectLanes()` to prevent `pnl_update` messages from blocking time sensitive events.
 - **Respect 429 responses.** Do not retry immediately; use exponential backoff.

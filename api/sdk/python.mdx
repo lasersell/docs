@@ -94,6 +94,8 @@ client = ExitApiClient.with_options(
 
 ## Exit Intelligence Stream Session
 
+`event.message` is a `TypedDict` union. At runtime, access fields using dict syntax (e.g. `msg["unsigned_tx_b64"]`).
+
 ```python
 import asyncio
 from lasersell_sdk.stream.client import StreamClient, StreamConfigure
@@ -123,7 +125,7 @@ async def main():
             print(f"New position: {event.handle.mint}")
 
         if event.type == "exit_signal_with_tx":
-            msg = event.message
+            msg = event.message  # TypedDict, use dict access
             signed = sign_unsigned_tx(str(msg["unsigned_tx_b64"]), signer)
             sig = await send_transaction(SendTargetHeliusSender(), signed)
             print(f"Exit submitted: {sig}")

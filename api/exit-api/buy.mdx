@@ -20,22 +20,22 @@ POST https://api.lasersell.io/v1/buy
 | `Content-Type` | Yes      | Must be `application/json`      |
 | `x-api-key`    | Yes      | Your LaserSell API key          |
 
-## Request Body — `BuildBuyTxRequest`
+## Request Body: `BuildBuyTxRequest`
 
 | Field                   | Type     | Required | Description                                                                 |
 |-------------------------|----------|----------|-----------------------------------------------------------------------------|
 | `mint`                  | `string` | Yes      | Token mint address to buy (base58).                                         |
 | `user_pubkey`           | `string` | Yes      | Your wallet public key (base58).                                            |
-| `amount_quote_units`    | `number` | Yes      | Amount to spend in quote asset atomic units (lamports for SOL).             |
+| `amount_quote_units`    | `number` | Yes      | Amount to spend in lamports (SOL only). The buy endpoint only accepts SOL as the input asset. |
 | `slippage_bps`          | `number` | No       | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
-| `mode`                  | `string` | No       | Routing mode hint.                                                          |
+| `mode`                  | `string` | No       | Routing mode hint. Valid values: `"fast"`, `"secure"`. Defaults to `"fast"`. |
 | `send_mode`             | `string` | No       | Transaction send mode: `"helius_sender"`, `"astralane"`, or `"rpc"`.        |
 | `tip_lamports`          | `number` | No       | Optional priority fee tip in lamports.                                      |
 | `partner_fee_recipient` | `string` | No       | Partner fee recipient wallet (base58 pubkey).                               |
 | `partner_fee_bps`       | `number` | No       | Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`. |
 | `partner_fee_lamports`  | `number` | No       | Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`. |
 
-## Response — `BuildTxResponse`
+## Response: `BuildTxResponse`
 
 | Field   | Type     | Description                                     |
 |---------|----------|-------------------------------------------------|

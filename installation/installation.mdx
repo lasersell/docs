@@ -1,0 +1,136 @@
+---
+title: "Installation"
+description: "Install LaserSell on Linux, macOS, Windows (WSL), or Docker."
+---
+
+## Quick Install
+
+The fastest way to install on any platform:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+If that works, skip to the [Quickstart](/start-here/quickstart). Platform-specific options are below.
+
+## Platform Guides
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh (recommended)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### Manual APT setup
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh (recommended)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+Supports both Intel and Apple Silicon (M-series).
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### Tarball (no Homebrew)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+LaserSell runs on Windows through WSL (Windows Subsystem for Linux).
+
+### 1. Install WSL
+
+Open PowerShell as Administrator:
+
+```shellscript
+wsl --install
+```
+
+Restart your computer.
+
+### 2. Install LaserSell
+
+Open your WSL distro (e.g. Ubuntu) and run:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. Prepare
+
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and create an empty folder named `lasersell`.
+
+### 2. Run
+
+Open a terminal, `cd` into the folder, then run:
+
+**macOS / Linux:**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+On first run, the setup wizard launches inside the container. Config files are written to your mounted folder and persist across runs.
+
+</Tab>
+</Tabs>
+
+## Upgrading
+
+| Method | Command |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / Tarball | Rerun `curl -fsSL https://dl.lasersell.io/install.sh \| bash` |
+| Docker | `docker pull lasersell/lasersell` |
+
+## CLI Flags
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--setup` | | Force-run the onboarding wizard |
+| `--config <path>` | `-f` | Path to a custom config file |
+| `--verbose` | `-v` | Disable the TUI and output plain log lines |
+| `--no-tui` | | Disable the TUI (requires `-f`) |
+| `--smoke` | | Run a connectivity health check and exit |
+| `--export-private-key` | | Export your wallet's base58 private key to stdout |
+
+`--smoke`, `--setup`, and `--export-private-key` are mutually exclusive. `--no-tui` and `--verbose` both require `-f` to specify the config file.

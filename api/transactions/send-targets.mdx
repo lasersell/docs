@@ -89,7 +89,7 @@ target := lasersell.SendTargetHeliusSender()
 ```
 </CodeGroup>
 
-**Connection Warming**: For the best latency, you can warm the Helius Sender connection:
+**Connection Warming (TypeScript only)**: For the best latency, the TypeScript SDK provides helpers to keep the Helius Sender connection warm:
 
 ```typescript
 import { startHeliusSenderWarmLoop, pingHeliusSender } from "@lasersell/lasersell-sdk";
@@ -101,6 +101,8 @@ const ok = await pingHeliusSender();
 const { stop } = startHeliusSenderWarmLoop({ intervalMs: 30_000 });
 // Call stop() when done
 ```
+
+The Rust SDK sends a single ping on first use. The Python and Go SDKs do not require connection warming.
 
 ### Astralane Iris
 

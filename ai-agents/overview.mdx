@@ -1,0 +1,67 @@
+---
+title: "AI Agents and LaserSell"
+description: "Connect AI agents to LaserSell's Exit Intelligence engine for automated Solana token trading, strategy management, and real-time position monitoring."
+---
+
+AI agents that interact with Solana tokens can use LaserSell as their execution and exit management layer. Instead of building swap routing, protocol handling, and exit logic from scratch, an agent connects to LaserSell and gets pre-built transactions, real-time PnL tracking, and automated exits out of the box.
+
+## What Agents Can Do with LaserSell
+
+**Build and execute trades.** The [REST API](/api/overview) returns unsigned swap transactions for any supported Solana DEX or launchpad. An agent sends a mint and amount, gets back a transaction, signs it, and submits. No protocol-specific logic required.
+
+**Automate exits with strategy.** The [Exit Intelligence Stream](/api/stream/overview) watches wallets in real time and delivers pre-built exit transactions when configurable thresholds are met: target profit, stop loss, trailing stop, sell on graduation, and deadline timeout. An agent connects once and receives exit signals automatically.
+
+**Monitor positions.** The stream provides continuous PnL updates, balance changes, position opens, and position closes. Agents can use this data to make decisions, surface information to users, or feed into other systems.
+
+**Cover every major Solana protocol.** A single integration covers Pump.fun, PumpSwap, Meteora DBC, Meteora DAMM V2, Raydium Launchpad, and Raydium CPMM. The agent does not need to know which protocol a token is on.
+
+## How to Connect
+
+There are two ways for AI agents to work with LaserSell:
+
+### 1. MCP Server (Documentation Access)
+
+The LaserSell MCP server gives any MCP-compatible AI client (Claude, Cursor, Windsurf, and others) the ability to search and retrieve LaserSell documentation in real time. This is useful for agents that need to look up API schemas, SDK patterns, code examples, or integration details while working.
+
+See [MCP Server](/ai-agents/mcp-server) for setup instructions.
+
+### 2. SDK and API (Direct Integration)
+
+For agents that need to build transactions, manage positions, or execute trades programmatically, integrate using the LaserSell SDK or API directly.
+
+- [API Overview](/api/overview) for the full API surface.
+- [Quickstart](/api/quickstart) to build your first transaction.
+- SDKs available in [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust), and [Go](/api/sdk/go).
+
+## Why Agents Should Use LaserSell
+
+### The agent integration problem
+
+An AI agent that wants to trade Solana tokens today has to solve a stack of hard problems: identify which DEX protocol a token is on, deserialize on-chain pool state, compute swap amounts using protocol-specific math, construct the right instruction set, manage priority fees, handle slippage retries, and poll for price changes to know when to exit. Each protocol (Pump.fun, PumpSwap, Raydium, Meteora) has a different program, different account layouts, and different swap logic. This is hundreds of hours of integration work, and it breaks every time a new launchpad ships.
+
+LaserSell collapses all of that into two API calls: one to build a transaction, one WebSocket to receive exit signals.
+
+### Technical advantages
+
+| Capability | Without LaserSell | With LaserSell |
+|---|---|---|
+| **Protocol routing** | Agent must detect which DEX a token is on, deserialize pool state, and build protocol-specific instructions for each of 6+ programs | Single API call. Send a mint address, get back a signed-ready transaction. LaserSell resolves the protocol, pool, and route server-side |
+| **Exit logic** | Agent must poll RPC for price data, calculate PnL, track peak profit for trailing stops, manage timers for deadlines, and build sell transactions manually | Connect once to the Exit Intelligence Stream. Receive `exit_signal_with_tx` events with pre-built unsigned transactions when strategy conditions fire |
+| **PnL tracking** | Agent must fetch token balances, resolve decimals, query pool reserves, compute spot price, and derive PnL at regular intervals | Stream delivers `pnl_update` events continuously. No polling, no RPC calls, no price math |
+| **New position detection** | Agent must monitor wallet transaction history or subscribe to on-chain logs and parse each transaction to identify buys | Stream fires `position_opened` with full context (cost basis, mint, market context) the moment a purchase lands |
+| **Multi-protocol coverage** | Separate integration for Pump.fun bonding curves, PumpSwap AMM, Raydium Launchpad, Raydium CPMM, Meteora DBC, Meteora DAMM V2 | One integration covers all six. Agent code does not change when a new protocol is added |
+| **Transaction signing** | N/A | All transactions returned unsigned. Agent signs locally. No private key ever leaves the agent's environment |
+| **Slippage handling** | Agent must estimate slippage, retry on failure, and bump tolerance incrementally | Server computes slippage. Client retries are automatic in the SDK with configurable bump logic |
+| **New launchpad support** | Agent must reverse-engineer each new program, build instructions from scratch, and maintain ongoing compatibility | LaserSell adds protocol support server-side. Agent gets coverage with zero code changes |
+
+### What this means in practice
+
+**Fewer RPC calls.** An agent without LaserSell needs to poll price data, fetch balances, and read pool state constantly. With the Exit Intelligence Stream, the server pushes everything. The agent's RPC usage drops to transaction submission only.
+
+**Deterministic exit execution.** Strategy conditions (TP, SL, trailing stop, deadline, graduation) are evaluated server-side on every price tick. The agent does not need to stay online continuously or worry about missing a price spike. When a threshold is met, the exit transaction is already built and waiting.
+
+**No protocol-specific code.** The agent sends `{ mint, user_pubkey, amount }` to `/v1/sell` or `/v1/buy`. Whether that token is on a Pump.fun bonding curve, a PumpSwap AMM, or a Raydium CPMM pool, the returned transaction just works.
+
+**Event-driven architecture.** The stream is a natural fit for agents. Instead of running poll loops, the agent subscribes and reacts: `position_opened` to log a new trade, `pnl_update` to surface data, `exit_signal_with_tx` to sign and submit. Clean async patterns with no wasted compute.
+
+**SDK parity across 4 languages.** TypeScript, Python, Rust, and Go SDKs expose identical schemas, method names, and behavior. An agent built in Python works the same way as one built in Rust. No SDK is a second-class citizen.

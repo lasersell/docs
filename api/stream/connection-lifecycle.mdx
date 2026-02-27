@@ -118,10 +118,10 @@ The low level client manages the raw WebSocket connection:
 
 The high level session wraps `StreamClient` with:
 
-- **Position tracking** — Automatically maintains a map of open positions by ID and token account.
-- **Typed events** — Returns `StreamEvent` objects with a `PositionHandle` attached.
-- **Deadline timers** — Automatically requests exit signals after `deadline_timeout_sec`.
-- **Strategy updates** — `updateStrategy()` and `updateStrategyOptional()` methods.
+- **Position tracking**: Automatically maintains a map of open positions by ID and token account.
+- **Typed events**: Returns `StreamEvent` objects with a `PositionHandle` attached.
+- **Deadline timers**: Automatically requests exit signals after `deadline_timeout_sec`.
+- **Strategy updates**: `updateStrategy()` and `updateStrategyOptional()` methods.
 
 For most integrations, use `StreamSession`.
 
@@ -129,10 +129,12 @@ For most integrations, use `StreamSession`.
 
 Lane splitting separates the message stream into two receivers:
 
-- **High priority lane** — `hello_ok`, `error`, `balance_update`, `position_opened`, `position_closed`, `exit_signal_with_tx`
-- **Low priority lane** — `pnl_update`
+- **High priority lane**: `hello_ok`, `error`, `balance_update`, `position_opened`, `position_closed`, `exit_signal_with_tx`
+- **Low priority lane**: `pnl_update`
 
 This prevents high frequency PnL updates from blocking time sensitive exit signals.
+
+Lane splitting is currently available in the **TypeScript SDK only** via `connectLanes()`:
 
 ```typescript
 const client = new StreamClient("YOUR_API_KEY");

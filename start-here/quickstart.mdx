@@ -1,144 +1,61 @@
 ---
 title: "Quickstart"
-description: "Install LaserSell, run the setup wizard, and start trading."
+description: "Install LaserSell and start auto-selling in under 5 minutes."
 ---
 
-LaserSell runs on your machine and automatically executes sells when it detects new positions you buy. It is non-custodial: your keys stay on your machine.
+## Prerequisites
 
-If you are brand new, read [What Is LaserSell](https://docs.lasersell.io/start-here/what-is-lasersell) first.
+- **RPC URL** from [Helius](https://helius.dev), [Chainstack](https://chainstack.com), or any Solana RPC provider
+- **LaserSell API key** from [app.lasersell.io](https://app.lasersell.io) (free)
 
-## What you'll do
-
-By the end of this page, you will have:
-
-- LaserSell installed
-- A config file and encrypted wallet keystore created by the onboarding wizard
-- LaserSell running and connected to your RPC
-
-## 0) Before you start
-
-You need two things.
-
-### 1) RPC endpoint and API key
-
-- **RPC URL** — a private HTTPS endpoint from [Helius](https://helius.dev), [Chainstack](https://chainstack.com), or any other Solana RPC provider
-- **LaserSell API key** — get one free at [app.lasersell.io](https://app.lasersell.io)
-
-### 2) Wallet plan
-
-Treat LaserSell as a **hot wallet**. Only fund it with what you intend to actively trade.
-
-Helpful pages:
-
-- [Prerequisites Overview](https://docs.lasersell.io/prerequisites/overview)
-- [Choosing a Private RPC](https://docs.lasersell.io/start-here/choosing-a-private-rpc)
-
-## 1) Install LaserSell
-
-LaserSell is distributed as a proprietary precompiled binary.
-
-Run:
+## Install
 
 ```shellscript
 curl -fsSL https://dl.lasersell.io/install.sh | bash
 ```
 
-Then verify:
+Verify it worked:
 
 ```shellscript
 lasersell --version
 ```
 
-Platform-specific guides (use these if you want the "official" per-OS steps):
+Need platform-specific instructions? See [Installation Overview](/installation/overview).
 
-- [Installation Overview](https://docs.lasersell.io/installation/overview)
-- [Linux Installation](https://docs.lasersell.io/installation/linux-installation)
-- [macOS Installation](https://docs.lasersell.io/installation/mac-os-installation)
-- [Windows Installation (WSL)](https://docs.lasersell.io/installation/windows-installation)
-- [Docker Installation](https://docs.lasersell.io/installation/docker-installation)
+## Setup
 
-## 2) Run the onboarding wizard (creates config + encrypted wallet)
-
-Start LaserSell:
+Run LaserSell. The setup wizard starts automatically on first launch:
 
 ```shellscript
 lasersell
 ```
 
-If no config exists, the wizard runs automatically on first launch. You can run it any time with:
+The wizard will ask for your RPC URL, API key, wallet (create new or import existing), and a passphrase to encrypt your keystore. Select **Yes** when asked to use recommended settings.
 
-```shellscript
-lasersell --setup
-```
+<Warning>
+There is no "forgot password." If you lose your passphrase, the keystore cannot be recovered.
+</Warning>
 
-### What it creates
+For a detailed walkthrough of every prompt, see [Initial Setup](/onboarding/initial-setup).
 
-By default, the wizard creates:
+## Verify
 
-- `~/.lasersell/config.yml`
-- `~/.lasersell/wallet.keystore.json`
-
-### Important: use a real interactive terminal
-
-The wizard requires a real TTY. Don't run the wizard through a non-interactive service/pipe.
-
-### Recommended "fast path" answers
-
-When prompted:
-
-1. **Use recommended settings?** → **Yes**
-   (This applies defaults and skips extra questions.)
-
-2. **RPC URL** → enter your private `https://...` RPC URL
-   (Leave empty for the public endpoint — not recommended for production.)
-
-3. **LaserSell API key** → enter your API key from [app.lasersell.io](https://app.lasersell.io)
-
-4. **Wallet**
-   - Create a new wallet (you'll be shown a seed phrase once) **or**
-   - Import an existing wallet (seed phrase / base58 secret key / Solana keypair JSON)
-
-5. **Security / passphrase**
-   Set a strong passphrase. There is no "forgot password". If you lose it, the keystore is not recoverable.
-
-Full walkthrough of every prompt:
-
-- **Initial Setup**
-
-## 3) Start LaserSell and verify it's "ready"
-
-After the wizard completes, run:
-
-```shellscript
-lasersell
-```
-
-You can also do a quick health check first:
+Run a health check to confirm everything is connected:
 
 ```shellscript
 lasersell --smoke
 ```
 
-This verifies RPC connectivity and the exit API, printing `SMOKE OK` on success.
+You should see `SMOKE OK`. Then start LaserSell:
 
-Sanity checks:
+```shellscript
+lasersell
+```
 
-- No obvious RPC connection errors
-- Your wallet pubkey matches what you intended
-- You understand your default strategy (take profit / stop loss / trailing stop / deadline / slippage)
+LaserSell is now monitoring your wallet. Buy a token on any platform and LaserSell will detect it, track your PnL, and sell automatically when your strategy conditions are met.
 
-If you want to inspect/edit settings manually:
+## Next Steps
 
-- **LaserSell UI**
-- **Example Configuration**
-
-## Security and risk (don't skip)
-
-- LaserSell is non-custodial, but you are responsible for your keys and the results of your trades.
-- Treat the trading wallet as a hot wallet. Don't keep your entire stack in it. Sweep profits regularly.
-
-Read:
-
-- [Key Safety](https://docs.lasersell.io/security/key-safety)
-- [Wallet Encryption](https://docs.lasersell.io/security/wallet-encryption)
-- [Risk Disclosures and Responsible Trading](https://docs.lasersell.io/how-to-win/risk-disclosures-and-responsible-trading)
+- [LaserSell UI](/onboarding/lasersell-ui): Learn the TUI commands
+- [Example Configuration](/onboarding/example-configuration): Customize your strategy
+- [Key Safety](/security/key-safety): Protect your keys

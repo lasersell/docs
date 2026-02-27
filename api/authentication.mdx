@@ -71,8 +71,9 @@ client = StreamClient("YOUR_API_KEY")
 
 ```rust Rust
 use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
 
-let client = StreamClient::new("YOUR_API_KEY");
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
 ```
 
 ```go Go

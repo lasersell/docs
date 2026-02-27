@@ -21,15 +21,15 @@ These never leave your machine:
 
 ### Authentication & accounts
 
-- **Email and credentials** — stored in Supabase for account authentication on [app.lasersell.io](https://app.lasersell.io).
-- **OAuth profile data** — if you sign in via GitHub, X/Twitter, or Google, we receive limited profile info (no passwords).
-- **MFA** — TOTP-based. We do not collect phone numbers.
+- **Email and credentials**:stored in Supabase for account authentication on [app.lasersell.io](https://app.lasersell.io).
+- **OAuth profile data**:if you sign in via GitHub, X/Twitter, or Google, we receive limited profile info (no passwords).
+- **MFA**:TOTP-based. We do not collect phone numbers.
 
 ### API & trading activity
 
-- **Wallet public keys** — sent to the LaserSell API for authentication and session identification.
-- **API keys** — stored encrypted for endpoint authentication.
-- **Trading activity** — as the platform evolves, we plan to log activity tied to your API keys (PnL, configuration, trading frequency, wallet addresses) to improve the product and provide analytics.
+- **Wallet public keys**:sent to the LaserSell API for authentication and session identification.
+- **API keys**:stored encrypted for endpoint authentication.
+- **Trading activity**:as the platform evolves, we plan to log activity tied to your API keys (PnL, configuration, trading frequency, wallet addresses) to improve the product and provide analytics.
 
 ### Payments
 
@@ -37,9 +37,9 @@ These never leave your machine:
 
 ### Technical data
 
-- **IP addresses, user-agents, timestamps, and error traces** — collected in server logs for infrastructure monitoring and abuse prevention.
-- **Google Analytics** — used on marketing and documentation sites only, not on the authenticated dashboard.
-- **Essential cookies and local storage** — used on app.lasersell.io for session management.
+- **IP addresses, user-agents, timestamps, and error traces**:collected in server logs for infrastructure monitoring and abuse prevention.
+- **Google Analytics**:used on marketing and documentation sites only, not on the authenticated dashboard.
+- **Essential cookies and local storage**:used on app.lasersell.io for session management.
 
 ## Network connections
 
@@ -53,7 +53,7 @@ When the LaserSell client is running, it establishes outbound connections to:
 
 ### 2. Transaction sender (if applicable)
 
-- **Destination:** Depends on your `send_target` setting — Helius sender, Astralane, or direct RPC.
+- **Destination:** Depends on your `send_target` setting:Helius sender, Astralane, or direct RPC.
 - **Purpose:** Broadcasting your locally-signed transactions for fast on-chain landing.
 - **Note:** The sender sees the signed transaction payload.
 

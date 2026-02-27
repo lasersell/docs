@@ -7,9 +7,9 @@ description: "Non custodial signing flow, signing functions per language, and lo
 
 LaserSell never touches your private key. Every transaction follows this pattern:
 
-1. **Build** — The API returns a base64 encoded unsigned `VersionedTransaction`.
-2. **Sign** — You decode, sign, and re encode locally using your keypair.
-3. **Submit** — You send the signed transaction to the Solana network via a [send target](/api/transactions/send-targets).
+1. **Build**: The API returns a base64 encoded unsigned `VersionedTransaction`.
+2. **Sign**: You decode, sign, and re encode locally using your keypair.
+3. **Submit**: You send the signed transaction to the Solana network via a [send target](/api/transactions/send-targets).
 
 ```mermaid
 flowchart LR
@@ -131,7 +131,8 @@ signature = await send_transaction(SendTargetHeliusSender(), signed_tx)
 ```rust Rust
 use lasersell_sdk::tx::{SendTarget, send_transaction};
 
-let signature = send_transaction(&SendTarget::HeliusSender, &signed_tx).await?;
+let http = reqwest::Client::new();
+let signature = send_transaction(&http, &SendTarget::HeliusSender, &signed_tx).await?;
 ```
 
 ```go Go

@@ -61,8 +61,8 @@ sequenceDiagram
 
 The SDKs provide two abstraction levels:
 
-- **`StreamClient`** — Low level client. Manages the WebSocket connection, reconnection, and message framing. Returns raw `ServerMessage` objects.
-- **`StreamSession`** — High level wrapper. Wraps `StreamClient` with position tracking, deadline timers, and typed `StreamEvent` objects that include a `PositionHandle`.
+- **`StreamClient`**: Low level client. Manages the WebSocket connection, reconnection, and message framing. Returns raw `ServerMessage` objects.
+- **`StreamSession`**: High level wrapper. Wraps `StreamClient` with position tracking, deadline timers, and typed `StreamEvent` objects that include a `PositionHandle`.
 
 For most use cases, start with `StreamSession`.
 
@@ -106,10 +106,12 @@ while True:
 ```
 
 ```rust Rust
-use lasersell_sdk::stream::client::StreamClient;
+use lasersell_sdk::stream::client::{StreamClient, StreamConfigure};
 use lasersell_sdk::stream::session::StreamSession;
+use lasersell_sdk::stream::proto::StrategyConfigMsg;
+use secrecy::SecretString;
 
-let client = StreamClient::new("YOUR_API_KEY");
+let client = StreamClient::new(SecretString::new(std::env::var("LASERSELL_API_KEY")?));
 let session = StreamSession::connect(&client, StreamConfigure {
     wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
     strategy: StrategyConfigMsg {
@@ -157,7 +159,7 @@ for {
 
 ## Next Steps
 
-- [Connection Lifecycle](/api/stream/connection-lifecycle) — Detailed handshake, reconnection, and lane splitting.
-- [Strategy Configuration](/api/stream/strategy-configuration) — Configure profit targets, stop losses, and trailing stops.
-- [Server Events](/api/stream/server-events) — Complete schema for all 8 server message types.
-- [Client Messages](/api/stream/client-messages) — All 6 client message types and their schemas.
+- [Connection Lifecycle](/api/stream/connection-lifecycle): Detailed handshake, reconnection, and lane splitting.
+- [Strategy Configuration](/api/stream/strategy-configuration): Configure profit targets, stop losses, and trailing stops.
+- [Server Events](/api/stream/server-events): Complete schema for all 8 server message types.
+- [Client Messages](/api/stream/client-messages): All 6 client message types and their schemas.

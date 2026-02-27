@@ -1,49 +1,44 @@
 ---
-title: "Risk Disclosures and Responsible Trading"
-description: "Important warnings and legal information regarding the volatility and risks inherent in cryptocurrency trading."
+title: "Risk Disclosures"
+description: "Risks, responsible configuration, and legal disclosures for using LaserSell."
 ---
 
-## ⚠️ Critical Warning
+<Warning>
+LaserSell is an automated trading tool for experienced cryptocurrency users. You are solely responsible for the custody of your private keys and the financial outcomes of your trades.
+</Warning>
 
-**LaserSell is a high-frequency trading automation tool designed for experienced cryptocurrency users.** By using this software, you acknowledge that you are interacting with the Solana blockchain, a permissionless and highly volatile environment. You are solely responsible for the custody of your private keys and the financial outcomes of your trades.
+## Software and network risks
 
-## 1. Operational & Software Risks
+- **RPC / network failures**: LaserSell depends on third-party RPC providers and the Solana network. Congestion or downtime can delay or fail sell orders, leaving you in a position longer than intended.
+- **Execution slippage**: The fill price may differ from the trigger price during high volatility. The `slippage_pad_bps` setting helps, but cannot eliminate slippage entirely.
+- **No warranty**: This software is provided "as is." Bugs or future Solana protocol changes could affect performance.
 
-LaserSell is engineered for speed, but it operates within a complex stack of dependencies.
+## Market risks
 
-- **Network Latency & RPC Failure:** LaserSell relies on third-party RPC providers (e.g., Helius) and the Solana network status. Network congestion or RPC downtime can result in failed sell orders, meaning you may be stuck in a position longer than intended.
-- **Execution Slippage:** High-frequency trading often involves "slippage," where the execution price differs from the trigger price. While LaserSell includes a `slippage_pad_bps` setting to help mitigate this, extreme volatility can still result in unexpected fill prices.
-- **"As Is" Software:** This software is provided "as is" without warranty of any kind. While rigorous testing is performed, undetected bugs or compatibility issues with future Solana protocol updates could impact performance.
+New token markets are the highest-risk sector in crypto.
 
-## 2. Market Risks
+- **Liquidity risk**: Tokens can become unsellable if liquidity is withdrawn (rug pull) or the bonding curve stalls.
+- **Total loss**: Memecoin values commonly drop to zero within minutes. Never deploy capital you cannot afford to lose.
+- **Scams**: LaserSell cannot predict whether a developer will dump supply or whether token metadata is malicious.
 
-The specific niche LaserSell targets (new token deployments) is the riskiest sector of the cryptocurrency market.
+## Wallet security
 
-- **Liquidity Risk:** New tokens often have shallow liquidity. It is possible to hold a token that becomes impossible to sell because the liquidity pool has been withdrawn ("rugged") or the bonding curve has stalled.
-- **Total Loss:** In the memecoin market, it is common for asset values to drop to zero within minutes. **Never deploy capital you cannot afford to lose entirely.**
-- **Scams & Exploits:** LaserSell’s detection filters verify the creator match, but it cannot predict if a developer will dump their own supply or if the token metadata contains malicious content.
+LaserSell creates a hot wallet on your machine, encrypted with Argon2id + XChaCha20-Poly1305.
 
-## 3. Security & Wallet Custody
+- Encryption strength depends entirely on your passphrase.
+- If your machine is compromised, your keystore and passphrase can be stolen.
+- Run LaserSell on a dedicated, clean machine.
+- Do not keep large balances in your trading wallet. Sweep profits to a hardware wallet regularly.
 
-Your private keys are your identity and your bank vault. LaserSell creates a "hot wallet" environment on your machine.
+## Responsible configuration
 
-- **Keystore Encryption:** LaserSell uses industry-standard **Argon2id** hashing and **XChaCha20-Poly1305** encryption to secure your keystore files. However, this security depends entirely on the strength of your chosen passphrase.
-- **Local Security:** If your computer is compromised (malware, screen loggers), your encrypted keystore and passphrase can be stolen.
-  - **Recommendation:** Run LaserSell on a dedicated, clean machine or a secure VPS.
-  - **Recommendation:** Do not keep your life savings in the "hot wallet" used for trading. Regularly sweep profits to a hardware wallet (Cold Storage).
+- **Always set a stop loss.** Relying on manual intervention is too slow for this market.
+- **Use a deadline timeout.** If a trade has not worked out in a set number of seconds, exiting preserves capital.
+- **Start small.** Verify LaserSell executes as expected with minimal amounts before increasing position sizes.
 
-## 4. Responsible Configuration
+## Regulatory compliance
 
-Using the software responsibly means configuring "Safety Gates" that protect you from emotional decision-making.
+- You are responsible for ensuring your trading activities comply with local laws and regulations.
+- Automated trading generates a high volume of taxable events. You are responsible for tracking and reporting transactions.
 
-- **Mandatory Stop Losses:** A responsible configuration _always_ includes a `stop_loss`. Relying on manual intervention is too slow for this ecosystem.
-  - _Example:_ Set `stop_loss: "30%"` to automatically exit if a trade turns against you.
-- **Timeout Safeguards:** Markets can stagnate. Use the `deadline_timeout` feature to enforce a "time limit" on exposure. If a trade hasn't worked out in 120 seconds, it is often safer to exit and preserve capital.
-- **Start Small:** When first using LaserSell, configure your `target_profit` and `stop_loss` with minimal amounts. Verify that the tool executes trades as you expect before increasing your position sizes.
-
-## 5. Regulatory Compliance
-
-- **Jurisdiction:** You are responsible for ensuring your trading activities comply with the laws and regulations of your local jurisdiction.
-- **Taxes:** High-frequency trading generates a large volume of taxable events. You are solely responsible for tracking and reporting your transaction history for tax purposes.
-
-_By running the LaserSell executable, you affirm that you have read this disclosure and accept these risks._
+*By running LaserSell, you affirm that you have read this disclosure and accept these risks.*

@@ -16,7 +16,7 @@ cargo add tokio --features full
 |-------------------------------|----------------------------------------|
 | `lasersell_sdk::exit_api`     | `ExitApiClient`, request/response types, `ExitApiError` |
 | `lasersell_sdk::tx`           | `SendTarget`, `sign_unsigned_tx`, `send_transaction` |
-| `lasersell_sdk::stream::client` | `StreamClient`, `StreamConnection`, `StreamSender` |
+| `lasersell_sdk::stream::client` | `StreamClient`, `StreamConfigure`, `StreamConnection`, `StreamSender` |
 | `lasersell_sdk::stream::session` | `StreamSession`, position tracking |
 | `lasersell_sdk::stream::proto`  | Message types (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
 | `lasersell_sdk::retry`        | `RetryPolicy` configuration            |
@@ -83,17 +83,18 @@ let client = ExitApiClient::with_options(Some("YOUR_API_KEY"), options);
 ## Exit Intelligence Stream Session
 
 ```rust
-use lasersell_sdk::stream::client::StreamClient;
-use lasersell_sdk::stream::session::StreamSession;
+use lasersell_sdk::stream::client::{StreamClient, StreamConfigure};
+use lasersell_sdk::stream::session::{StreamSession, StreamEvent};
 use lasersell_sdk::stream::proto::StrategyConfigMsg;
 use lasersell_sdk::tx::{SendTarget, sign_unsigned_tx, send_transaction};
+use secrecy::SecretString;
 use solana_sdk::signature::read_keypair_file;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let keypair = read_keypair_file("./keypair.json")?;
 
-    let client = StreamClient::new("YOUR_API_KEY");
+    let client = StreamClient::new(SecretString::new(std::env::var("LASERSELL_API_KEY")?));
     let session = StreamSession::connect(&client, StreamConfigure {
         wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
         strategy: StrategyConfigMsg {
@@ -113,8 +114,9 @@ async fn main() -> anyhow::Result<()> {
 
         match &event {
             StreamEvent::ExitSignalWithTx { message, .. } => {
+                let http = reqwest::Client::new();
                 let signed = sign_unsigned_tx(&message.unsigned_tx_b64, &keypair)?;
-                let sig = send_transaction(&SendTarget::HeliusSender, &signed).await?;
+                let sig = send_transaction(&http, &SendTarget::HeliusSender, &signed).await?;
                 println!("Exit submitted: {sig}");
             }
             StreamEvent::PositionOpened { handle, .. } => {
@@ -142,17 +144,22 @@ use lasersell_sdk::tx::{
 // Sign
 let signed_tx = sign_unsigned_tx(&unsigned_tx_b64, &keypair)?;
 
+// Create an HTTP client (reuse across calls)
+let http = reqwest::Client::new();
+
 // Send via Helius Sender
-let sig = send_transaction(&SendTarget::HeliusSender, &signed_tx).await?;
+let sig = send_transaction(&http, &SendTarget::HeliusSender, &signed_tx).await?;
 
 // Send via custom RPC
 let sig = send_transaction(
+    &http,
     &SendTarget::Rpc { url: "https://rpc.example.com".into() },
     &signed_tx,
 ).await?;
 
 // Send via Astralane
 let sig = send_transaction(
+    &http,
     &SendTarget::Astralane {
         api_key: "KEY".into(),
         region: Some("fr".into()),

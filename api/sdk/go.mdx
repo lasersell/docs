@@ -14,7 +14,7 @@ go get github.com/lasersell/lasersell-sdk/go
 | Package                                   | Purpose                                |
 |-------------------------------------------|----------------------------------------|
 | `github.com/lasersell/lasersell-sdk/go`   | `ExitAPIClient`, `SendTarget`, `SignUnsignedTx`, `SendTransaction` |
-| `github.com/lasersell/lasersell-sdk/go/stream` | `StreamClient`, `Session`, `StreamConfigure`, message types |
+| `github.com/lasersell/lasersell-sdk/go/stream` | `StreamClient`, `StreamSession`, `StreamConfigure`, message types |
 
 ## API Client
 
@@ -61,9 +61,12 @@ func main() {
     fmt.Println("Buy tx:", buyResp.Tx)
 }
 
+// Helper functions for pointer fields (not part of the SDK)
 func intPtr(v int) *int       { return &v }
 func strPtr(v string) *string { return &v }
 ```
+
+Optional fields in the Go SDK use pointer types (`*int`, `*string`). The `intPtr` and `strPtr` helpers above are not part of the SDK. Define them in your own code or use inline expressions like `&[]int{2000}[0]`.
 
 ### Custom Options
 
@@ -156,13 +159,15 @@ func main() {
 
 ## Transaction Helpers
 
+The second parameter to `SendTransaction` is an `*http.Client`. Pass `nil` to use the SDK's default HTTP client.
+
 ```go
 import lasersell "github.com/lasersell/lasersell-sdk/go"
 
 // Sign
 signedTx, err := lasersell.SignUnsignedTx(unsignedTxB64, privateKey)
 
-// Send via Helius Sender
+// Send via Helius Sender (nil = use default HTTP client)
 sig, err := lasersell.SendTransaction(ctx, nil, lasersell.SendTargetHeliusSender(), signedTx)
 
 // Send via custom RPC
@@ -172,6 +177,11 @@ sig, err = lasersell.SendTransaction(ctx, nil,
 // Send via Astralane
 sig, err = lasersell.SendTransaction(ctx, nil,
     lasersell.SendTargetAstralane("KEY", "fr"), signedTx)
+
+// With a custom HTTP client
+customClient := &http.Client{Timeout: 5 * time.Second}
+sig, err = lasersell.SendTransaction(ctx, customClient,
+    lasersell.SendTargetHeliusSender(), signedTx)
 ```
 
 ## Error Handling
