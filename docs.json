@@ -161,8 +161,8 @@
     }
   },
   "favicon": {
-    "light": "/images/favicon2.ico",
-    "dark": "/images/favicon2.ico"
+    "light": "/images/favicon.ico",
+    "dark": "/images/favicon.ico"
   },
   "logo": {
     "light": "/images/lasersell-light-full-2.png",
