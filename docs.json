@@ -164,6 +164,9 @@
     "light": "/images/favicon.ico",
     "dark": "/images/favicon.ico"
   },
+  "metatags": {
+    "og:image": "/images/lasersell-solana-exit-intelligence.png"
+  },
   "logo": {
     "light": "/images/lasersell-light-full-2.png",
     "dark": "/images/lasersell-dark-full-1.png",
