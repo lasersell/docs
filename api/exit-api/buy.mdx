@@ -26,8 +26,9 @@ POST https://api.lasersell.io/v1/buy
 |-------------------------|----------|----------|-----------------------------------------------------------------------------|
 | `mint`                  | `string` | Yes      | Token mint address to buy (base58).                                         |
 | `user_pubkey`           | `string` | Yes      | Your wallet public key (base58).                                            |
-| `amount_quote_units`    | `number` | Yes      | Amount to spend in lamports (SOL only). The buy endpoint only accepts SOL as the input asset. |
-| `slippage_bps`          | `number` | No       | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
+| `amount_in_total`       | `number` | Yes      | Amount to spend in input-asset atomic units (e.g., lamports for SOL).       |
+| `slippage_bps`          | `number` | Yes      | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
+| `input`                 | `string` | No       | Input asset: `"SOL"` (default) or `"USD1"`.                                 |
 | `mode`                  | `string` | No       | Routing mode hint. Valid values: `"fast"`, `"secure"`. Defaults to `"fast"`. |
 | `send_mode`             | `string` | No       | Transaction send mode: `"helius_sender"`, `"astralane"`, or `"rpc"`.        |
 | `tip_lamports`          | `number` | No       | Optional priority fee tip in lamports.                                      |
@@ -52,8 +53,9 @@ curl -X POST https://api.lasersell.io/v1/buy \
   -d '{
     "mint": "TOKEN_MINT_ADDRESS",
     "user_pubkey": "YOUR_WALLET_PUBKEY",
-    "amount_quote_units": 100000000,
-    "slippage_bps": 2000
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
   }'
 ```
 
@@ -68,7 +70,7 @@ const client = ExitApiClient.withApiKey("YOUR_API_KEY");
 const request: BuildBuyTxRequest = {
   mint: "TOKEN_MINT_ADDRESS",
   user_pubkey: "YOUR_WALLET_PUBKEY",
-  amount_quote_units: 100_000_000, // 0.1 SOL in lamports
+  amount_in_total: 100_000_000, // 0.1 SOL in lamports
   slippage_bps: 2_000,
 };
 
@@ -84,7 +86,7 @@ client = ExitApiClient.with_api_key("YOUR_API_KEY")
 request = BuildBuyTxRequest(
     mint="TOKEN_MINT_ADDRESS",
     user_pubkey="YOUR_WALLET_PUBKEY",
-    amount_quote_units=100_000_000,
+    amount_in_total=100_000_000,
     slippage_bps=2_000,
 )
 
@@ -100,8 +102,8 @@ let client = ExitApiClient::with_api_key("YOUR_API_KEY");
 let request = BuildBuyTxRequest {
     mint: "TOKEN_MINT_ADDRESS".into(),
     user_pubkey: "YOUR_WALLET_PUBKEY".into(),
-    amount_quote_units: 100_000_000,
-    slippage_bps: Some(2_000),
+    amount_in_total: 100_000_000,
+    slippage_bps: 2_000,
     ..Default::default()
 };
 
@@ -115,10 +117,10 @@ import lasersell "github.com/lasersell/lasersell-sdk/go"
 client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
 
 resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
-    Mint:             "TOKEN_MINT_ADDRESS",
-    UserPubkey:       "YOUR_WALLET_PUBKEY",
-    AmountQuoteUnits: 100_000_000,
-    SlippageBps:      intPtr(2_000),
+    Mint:          "TOKEN_MINT_ADDRESS",
+    UserPubkey:    "YOUR_WALLET_PUBKEY",
+    AmountInTotal: 100_000_000,
+    SlippageBps:   2_000,
 })
 if err != nil {
     log.Fatal(err)

@@ -101,8 +101,8 @@ async fn main() -> anyhow::Result<()> {
         mint: "So11111111111111111111111111111111111111112".into(),
         user_pubkey: keypair.pubkey().to_string(),
         amount_tokens: 1_000_000,
-        slippage_bps: Some(2_000),
-        output: Some("SOL".into()),
+        output: SellOutput::Sol,
+        slippage_bps: 2_000,
         ..Default::default()
     };
 
@@ -139,8 +139,8 @@ func main() {
         Mint:         "So11111111111111111111111111111111111111112",
         UserPubkey:   privateKey.PublicKey().String(),
         AmountTokens: 1_000_000,
-        SlippageBps:  intPtr(2_000),
-        Output:       strPtr("SOL"),
+        Output:       lasersell.SellOutputSOL,
+        SlippageBps:  2_000,
     })
     if err != nil {
         log.Fatal(err)

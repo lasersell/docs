@@ -186,7 +186,8 @@ let request = BuildSellTxRequest {
     mint: "TOKEN_MINT".into(),
     user_pubkey: "WALLET".into(),
     amount_tokens: 1_000_000,
-    slippage_bps: Some(2_000),
+    output: SellOutput::Sol,
+    slippage_bps: 2_000,
     market_context: Some(MarketContextMsg {
         market_type: "pump_swap".into(),
         pumpswap: Some(PumpSwapContextMsg { pool: "PoolAddr...".into(), ..Default::default() }),
@@ -201,7 +202,8 @@ resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
     Mint:         "TOKEN_MINT",
     UserPubkey:   "WALLET",
     AmountTokens: 1_000_000,
-    SlippageBps:  intPtr(2_000),
+    Output:       lasersell.SellOutputSOL,
+    SlippageBps:  2_000,
     MarketContext: &stream.MarketContextMsg{
         MarketType: "pump_swap",
         PumpSwap:   &stream.PumpSwapContextMsg{Pool: "PoolAddr..."},

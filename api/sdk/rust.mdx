@@ -37,8 +37,8 @@ async fn main() -> anyhow::Result<()> {
         mint: "TOKEN_MINT".into(),
         user_pubkey: "WALLET".into(),
         amount_tokens: 1_000_000,
-        slippage_bps: Some(2_000),
-        output: Some("SOL".into()),
+        output: SellOutput::Sol,
+        slippage_bps: 2_000,
         ..Default::default()
     };
     let sell_response = client.build_sell_tx(&sell_request).await?;
@@ -48,8 +48,8 @@ async fn main() -> anyhow::Result<()> {
     let buy_request = BuildBuyTxRequest {
         mint: "TOKEN_MINT".into(),
         user_pubkey: "WALLET".into(),
-        amount_quote_units: 100_000_000,
-        slippage_bps: Some(2_000),
+        amount_in_total: 100_000_000,
+        slippage_bps: 2_000,
         ..Default::default()
     };
     let buy_response = client.build_buy_tx(&buy_request).await?;

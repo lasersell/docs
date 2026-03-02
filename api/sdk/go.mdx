@@ -40,8 +40,8 @@ func main() {
         Mint:         "TOKEN_MINT",
         UserPubkey:   "WALLET",
         AmountTokens: 1_000_000,
-        SlippageBps:  intPtr(2_000),
-        Output:       strPtr("SOL"),
+        Output:       lasersell.SellOutputSOL,
+        SlippageBps:  2_000,
     })
     if err != nil {
         log.Fatal(err)
@@ -50,10 +50,10 @@ func main() {
 
     // Build buy
     buyResp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
-        Mint:             "TOKEN_MINT",
-        UserPubkey:       "WALLET",
-        AmountQuoteUnits: 100_000_000,
-        SlippageBps:      intPtr(2_000),
+        Mint:          "TOKEN_MINT",
+        UserPubkey:    "WALLET",
+        AmountInTotal: 100_000_000,
+        SlippageBps:   2_000,
     })
     if err != nil {
         log.Fatal(err)

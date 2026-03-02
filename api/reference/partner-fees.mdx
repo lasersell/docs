@@ -80,8 +80,8 @@ let request = BuildSellTxRequest {
     mint: "TOKEN_MINT".into(),
     user_pubkey: "WALLET".into(),
     amount_tokens: 1_000_000,
-    slippage_bps: Some(2_000),
-    output: Some("SOL".into()),
+    output: SellOutput::Sol,
+    slippage_bps: 2_000,
     partner_fee_recipient: Some("FEE_WALLET_PUBKEY".into()),
     partner_fee_bps: Some(25),
     ..Default::default()
@@ -95,10 +95,10 @@ resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
     Mint:                "TOKEN_MINT",
     UserPubkey:          "WALLET",
     AmountTokens:        1_000_000,
-    SlippageBps:         intPtr(2_000),
-    Output:              strPtr("SOL"),
-    PartnerFeeRecipient: strPtr("FEE_WALLET_PUBKEY"),
-    PartnerFeeBps:       intPtr(25),
+    Output:              lasersell.SellOutputSOL,
+    SlippageBps:         2_000,
+    PartnerFeeRecipient: lasersell.Ptr("FEE_WALLET_PUBKEY"),
+    PartnerFeeBps:       lasersell.Ptr(uint16(25)),
 })
 ```
 </CodeGroup>
@@ -110,7 +110,7 @@ resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
 const request: BuildBuyTxRequest = {
   mint: "TOKEN_MINT",
   user_pubkey: "WALLET",
-  amount_quote_units: 100_000_000,
+  amount_in_total: 100_000_000,
   slippage_bps: 2_000,
   partner_fee_recipient: "FEE_WALLET_PUBKEY",
   partner_fee_lamports: 5_000_000, // 0.005 SOL
@@ -123,7 +123,7 @@ const response = await client.buildBuyTx(request);
 request = BuildBuyTxRequest(
     mint="TOKEN_MINT",
     user_pubkey="WALLET",
-    amount_quote_units=100_000_000,
+    amount_in_total=100_000_000,
     slippage_bps=2_000,
     partner_fee_recipient="FEE_WALLET_PUBKEY",
     partner_fee_lamports=5_000_000,
@@ -136,8 +136,8 @@ response = await client.build_buy_tx(request)
 let request = BuildBuyTxRequest {
     mint: "TOKEN_MINT".into(),
     user_pubkey: "WALLET".into(),
-    amount_quote_units: 100_000_000,
-    slippage_bps: Some(2_000),
+    amount_in_total: 100_000_000,
+    slippage_bps: 2_000,
     partner_fee_recipient: Some("FEE_WALLET_PUBKEY".into()),
     partner_fee_lamports: Some(5_000_000),
     ..Default::default()
@@ -150,10 +150,10 @@ let response = client.build_buy_tx(&request).await?;
 resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
     Mint:                "TOKEN_MINT",
     UserPubkey:          "WALLET",
-    AmountQuoteUnits:    100_000_000,
-    SlippageBps:         intPtr(2_000),
-    PartnerFeeRecipient: strPtr("FEE_WALLET_PUBKEY"),
-    PartnerFeeLamports:  intPtr(5_000_000),
+    AmountInTotal:       100_000_000,
+    SlippageBps:         2_000,
+    PartnerFeeRecipient: lasersell.Ptr("FEE_WALLET_PUBKEY"),
+    PartnerFeeLamports:  lasersell.Ptr(uint64(5_000_000)),
 })
 ```
 </CodeGroup>
