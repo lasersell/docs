@@ -26,7 +26,8 @@ POST https://api.lasersell.io/v1/buy
 |-------------------------|----------|----------|-----------------------------------------------------------------------------|
 | `mint`                  | `string` | Yes      | Token mint address to buy (base58).                                         |
 | `user_pubkey`           | `string` | Yes      | Your wallet public key (base58).                                            |
-| `amount_in_total`       | `number` | Yes      | Amount to spend in input-asset atomic units (e.g., lamports for SOL).       |
+| `amount`                | `number` | No*      | Human-readable amount to spend (e.g., `0.1` for 0.1 SOL, `10.0` for 10 USD1). Mutually exclusive with `amount_in_total`. |
+| `amount_in_total`       | `number` | No*      | Amount to spend in input-asset atomic units (e.g., lamports for SOL). Mutually exclusive with `amount`. |
 | `slippage_bps`          | `number` | Yes      | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
 | `input`                 | `string` | No       | Input asset: `"SOL"` (default) or `"USD1"`.                                 |
 | `mode`                  | `string` | No       | Routing mode hint. Valid values: `"fast"`, `"secure"`. Defaults to `"fast"`. |
@@ -36,6 +37,10 @@ POST https://api.lasersell.io/v1/buy
 | `partner_fee_bps`       | `number` | No       | Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`. |
 | `partner_fee_lamports`  | `number` | No       | Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`. |
 
+<Note>
+**\*** Exactly one of `amount` or `amount_in_total` must be provided. `amount` is automatically converted to atomic units based on the `input` asset (SOL: 10^9, USD1: 10^6).
+</Note>
+
 ## Response: `BuildTxResponse`
 
 | Field   | Type     | Description                                     |
@@ -44,7 +49,24 @@ POST https://api.lasersell.io/v1/buy
 | `route` | `object` | Optional routing metadata.                      |
 | `debug` | `object` | Optional debug information.                     |
 
-## curl Example
+## curl Examples
+
+Using human-readable `amount`:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+Using atomic `amount_in_total`:
 
 ```bash
 curl -X POST https://api.lasersell.io/v1/buy \
@@ -70,7 +92,7 @@ const client = ExitApiClient.withApiKey("YOUR_API_KEY");
 const request: BuildBuyTxRequest = {
   mint: "TOKEN_MINT_ADDRESS",
   user_pubkey: "YOUR_WALLET_PUBKEY",
-  amount_in_total: 100_000_000, // 0.1 SOL in lamports
+  amount: 0.1, // 0.1 SOL
   slippage_bps: 2_000,
 };
 
@@ -86,7 +108,7 @@ client = ExitApiClient.with_api_key("YOUR_API_KEY")
 request = BuildBuyTxRequest(
     mint="TOKEN_MINT_ADDRESS",
     user_pubkey="YOUR_WALLET_PUBKEY",
-    amount_in_total=100_000_000,
+    amount=0.1,  # 0.1 SOL
     slippage_bps=2_000,
 )
 
@@ -102,7 +124,7 @@ let client = ExitApiClient::with_api_key("YOUR_API_KEY");
 let request = BuildBuyTxRequest {
     mint: "TOKEN_MINT_ADDRESS".into(),
     user_pubkey: "YOUR_WALLET_PUBKEY".into(),
-    amount_in_total: 100_000_000,
+    amount: Some(0.1), // 0.1 SOL
     slippage_bps: 2_000,
     ..Default::default()
 };
@@ -116,11 +138,12 @@ import lasersell "github.com/lasersell/lasersell-sdk/go"
 
 client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
 
+amount := 0.1 // 0.1 SOL
 resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
-    Mint:          "TOKEN_MINT_ADDRESS",
-    UserPubkey:    "YOUR_WALLET_PUBKEY",
-    AmountInTotal: 100_000_000,
-    SlippageBps:   2_000,
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
 })
 if err != nil {
     log.Fatal(err)
