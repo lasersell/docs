@@ -110,7 +110,7 @@ api_client = ExitApiClient.with_api_key(api_key)
 buy_request = BuildBuyTxRequest(
     mint="TOKEN_MINT_ADDRESS",
     user_pubkey=wallet_pubkey,
-    amount_in_total=100_000_000,  # 0.1 SOL in lamports
+    amount=0.1,  # 0.1 SOL
     slippage_bps=2_000,              # 20% slippage tolerance
 )
 response = await api_client.build_buy_tx(buy_request)
@@ -200,7 +200,7 @@ from lasersell_sdk.stream.session import StreamSession
 from lasersell_sdk.tx import SendTargetHeliusSender, send_transaction, sign_unsigned_tx
 
 
-async def run_agent(mint: str, amount_lamports: int):
+async def run_agent(mint: str, amount_sol: float):
     api_key = os.environ["LASERSELL_API_KEY"]
     signer = Keypair.from_bytes(
         bytes(json.loads(Path("./keypair.json").read_text()))
@@ -228,7 +228,7 @@ async def run_agent(mint: str, amount_lamports: int):
     buy_request = BuildBuyTxRequest(
         mint=mint,
         user_pubkey=wallet_pubkey,
-        amount_in_total=amount_lamports,
+        amount=amount_sol,
         slippage_bps=2_000,
     )
     response = await api_client.build_buy_tx(buy_request)
@@ -261,7 +261,7 @@ async def run_agent(mint: str, amount_lamports: int):
 
 asyncio.run(run_agent(
     mint="TOKEN_MINT_ADDRESS",
-    amount_lamports=100_000_000,  # 0.1 SOL
+    amount_sol=0.1,  # 0.1 SOL
 ))
 ```
 

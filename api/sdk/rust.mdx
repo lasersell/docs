@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
     let buy_request = BuildBuyTxRequest {
         mint: "TOKEN_MINT".into(),
         user_pubkey: "WALLET".into(),
-        amount_in_total: 100_000_000,
+        amount: Some(0.1), // 0.1 SOL
         slippage_bps: 2_000,
         ..Default::default()
     };

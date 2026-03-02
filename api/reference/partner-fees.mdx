@@ -110,7 +110,7 @@ resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
 const request: BuildBuyTxRequest = {
   mint: "TOKEN_MINT",
   user_pubkey: "WALLET",
-  amount_in_total: 100_000_000,
+  amount: 0.1, // 0.1 SOL
   slippage_bps: 2_000,
   partner_fee_recipient: "FEE_WALLET_PUBKEY",
   partner_fee_lamports: 5_000_000, // 0.005 SOL
@@ -123,7 +123,7 @@ const response = await client.buildBuyTx(request);
 request = BuildBuyTxRequest(
     mint="TOKEN_MINT",
     user_pubkey="WALLET",
-    amount_in_total=100_000_000,
+    amount=0.1,  # 0.1 SOL
     slippage_bps=2_000,
     partner_fee_recipient="FEE_WALLET_PUBKEY",
     partner_fee_lamports=5_000_000,
@@ -136,7 +136,7 @@ response = await client.build_buy_tx(request)
 let request = BuildBuyTxRequest {
     mint: "TOKEN_MINT".into(),
     user_pubkey: "WALLET".into(),
-    amount_in_total: 100_000_000,
+    amount: Some(0.1), // 0.1 SOL
     slippage_bps: 2_000,
     partner_fee_recipient: Some("FEE_WALLET_PUBKEY".into()),
     partner_fee_lamports: Some(5_000_000),
@@ -150,7 +150,7 @@ let response = client.build_buy_tx(&request).await?;
 resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
     Mint:                "TOKEN_MINT",
     UserPubkey:          "WALLET",
-    AmountInTotal:       100_000_000,
+    Amount:              lasersell.Ptr(0.1), // 0.1 SOL
     SlippageBps:         2_000,
     PartnerFeeRecipient: lasersell.Ptr("FEE_WALLET_PUBKEY"),
     PartnerFeeLamports:  lasersell.Ptr(uint64(5_000_000)),

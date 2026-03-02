@@ -49,7 +49,7 @@ const txB64 = sellResponse.tx;
 const buyRequest: BuildBuyTxRequest = {
   mint: "TOKEN_MINT",
   user_pubkey: "WALLET",
-  amount_in_total: 100_000_000,
+  amount: 0.1, // 0.1 SOL
   slippage_bps: 2_000,
 };
 const buyResponse = await client.buildBuyTx(buyRequest);
