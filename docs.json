@@ -22,7 +22,8 @@
             "pages": [
               "ai-agents/overview",
               "ai-agents/build-a-trading-agent",
-              "ai-agents/mcp-server"
+              "ai-agents/mcp-server",
+              "ai-agents/coding-skills"
             ]
           },
           {

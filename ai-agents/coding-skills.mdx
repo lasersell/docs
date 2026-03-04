@@ -1,0 +1,85 @@
+---
+title: "Coding Skills"
+description: "Install pre-packaged SDK knowledge into your AI coding assistant so it can write LaserSell integrations with full context on patterns, method signatures, examples, and troubleshooting."
+---
+
+Coding skills give your AI coding assistant deep, embedded knowledge of the LaserSell SDK. Instead of searching documentation on demand, the assistant loads SDK patterns, method signatures, working examples, strategy configurations, and troubleshooting guidance directly into its context window. This means it can write correct LaserSell code from the start, without needing to look anything up.
+
+## Skills vs MCP
+
+LaserSell offers two AI integration paths. They serve different purposes and work best together.
+
+| | MCP Server | Coding Skills |
+|---|---|---|
+| **How it works** | Searches LaserSell documentation on demand when the assistant needs to look something up | Loads deep SDK knowledge directly into the assistant's context before it starts writing code |
+| **Best for** | Looking up API schemas, finding specific docs pages, answering questions about LaserSell | Writing SDK integrations, building transactions, connecting to the stream, handling errors |
+| **When knowledge is available** | On demand (the assistant must ask for it) | Immediately (the assistant already has it in context) |
+| **Setup** | Add MCP server config to your editor | Install the skill package |
+
+The MCP server is great for discovery and reference lookups. Coding skills are great for writing code that integrates with the SDK. Use both for the best experience.
+
+## What's Included
+
+The LaserSell coding skill ships a structured knowledge tree that the assistant loads when working on LaserSell code:
+
+- **SKILL.md** — root skill file with an overview of the SDK, key concepts, and pointers to detailed references
+- **Working examples in 4 languages** — TypeScript, Python, Rust, and Go examples covering buy/sell transactions, stream connections, strategy configuration, and transaction submission
+- **Strategy guide** — detailed reference for target profit, stop loss, trailing stop, sell on graduation, and deadline timeout configuration
+- **Troubleshooting guide** — common errors, their causes, and fixes
+- **API and type references** — request/response schemas, enum values, and field descriptions for every endpoint
+- **Stream protocol reference** — the full Exit Intelligence Stream message format, event types, and connection lifecycle
+- **Templates** — starter code templates for common integration patterns
+
+## Install
+
+### Option 1: npx (Recommended)
+
+```bash
+npx @anthropic-ai/skills add lasersell
+```
+
+This downloads and installs the LaserSell coding skill into your project. The assistant picks it up automatically on the next session.
+
+### Option 2: Claude Code CLI
+
+```bash
+claude install-skill lasersell
+```
+
+### Option 3: Manual
+
+Copy the `.claude/skills/lasersell/` directory from the [LaserSell SDK repository](https://github.com/lasersell/lasersell-sdk) into your project's `.claude/skills/` folder:
+
+```bash
+mkdir -p .claude/skills
+cp -r path/to/lasersell-sdk/.claude/skills/lasersell .claude/skills/
+```
+
+The assistant will detect the skill files and load them into context when you work on LaserSell code.
+
+## What the Skill Covers
+
+Once installed, your AI assistant has full context on these topics:
+
+**Building buy and sell transactions.** The assistant knows how to construct `BuildBuyTxRequest` and `BuildSellTxRequest` objects, call the LaserSell API, and handle the response across all four SDK languages. It understands output types (SOL vs USD1), slippage configuration, and partial sells.
+
+**Exit Intelligence Stream.** The assistant can write stream connection code, configure strategy parameters, handle all server event types (`pnl_update`, `exit_signal_with_tx`, `position_opened`, `position_closed`, `liquidity_snapshot`), and process exit signals end to end.
+
+**Partial and multi-leg sells.** The assistant understands how to query slippage bands, determine the maximum sellable amount at a given slippage threshold, and build partial sell transactions. It can also construct multi-leg sell sequences for large positions.
+
+**Liquidity snapshots.** The assistant knows how to read slippage bands, interpret liquidity trends (`growing`, `stable`, `draining`), and use snapshot data to size sells optimally.
+
+**Transaction signing and submission.** The assistant can write code for local transaction signing, and understands all send targets: default RPC, custom RPC, and Helius Sender. It knows when to use each and how to configure them.
+
+**Error handling.** The assistant has context on common error codes, retry patterns, slippage failures, and connection recovery for both the REST API and the stream.
+
+## Combining Skills and MCP
+
+For the best AI coding experience, use both the coding skill and the MCP server together:
+
+1. **Install the coding skill** so your assistant has deep SDK knowledge loaded into context whenever you write LaserSell code.
+2. **Connect the MCP server** so your assistant can search the full documentation when it needs to look up something outside the skill's scope, like partner fee details, rate limit tiers, or changelog entries.
+
+With both active, the assistant can write correct SDK code immediately (from the skill) and look up supplementary information on demand (from MCP).
+
+See [MCP Server](/ai-agents/mcp-server) for MCP setup instructions.
