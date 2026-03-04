@@ -35,7 +35,7 @@ The LaserSell coding skill ships a structured knowledge tree that the assistant 
 ### Option 1: npx (Recommended)
 
 ```bash
-npx @anthropic-ai/skills add lasersell
+npx skills add lasersell/skills
 ```
 
 This downloads and installs the LaserSell coding skill into your project. The assistant picks it up automatically on the next session.
@@ -43,16 +43,16 @@ This downloads and installs the LaserSell coding skill into your project. The as
 ### Option 2: Claude Code CLI
 
 ```bash
-claude install-skill lasersell
+claude install-skill https://github.com/lasersell/skills/tree/main/skills/lasersell
 ```
 
 ### Option 3: Manual
 
-Copy the `.claude/skills/lasersell/` directory from the [LaserSell SDK repository](https://github.com/lasersell/lasersell-sdk) into your project's `.claude/skills/` folder:
+Copy the `skills/lasersell/` directory from the [LaserSell skills repository](https://github.com/lasersell/skills) into your project's `.claude/skills/` folder:
 
 ```bash
 mkdir -p .claude/skills
-cp -r path/to/lasersell-sdk/.claude/skills/lasersell .claude/skills/
+cp -r path/to/skills/lasersell .claude/skills/
 ```
 
 The assistant will detect the skill files and load them into context when you work on LaserSell code.
