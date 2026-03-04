@@ -93,14 +93,14 @@ Emitted when a token balance changes in a tracked wallet (new arrivals, transfer
 }
 ```
 
-| Field            | Type     | Required | Description                                          |
-|------------------|----------|----------|------------------------------------------------------|
-| `wallet_pubkey`  | `string` | Yes      | Wallet that owns the token account.                  |
-| `mint`           | `string` | Yes      | Token mint address.                                  |
-| `token_account`  | `string` | No       | Associated token account address.                    |
-| `token_program`  | `string` | No       | Token program ID (SPL Token or Token 2022).          |
-| `tokens`         | `number` | Yes      | Current balance in atomic units.                     |
-| `slot`           | `number` | Yes      | Solana slot at which the balance was observed.        |
+| Field            | Type     | Description                                          |
+|------------------|----------|------------------------------------------------------|
+| `wallet_pubkey`  | `string` | Wallet that owns the token account.                  |
+| `mint`           | `string` | Token mint address.                                  |
+| `token_account`  | `string` | Associated token account address. May be absent.     |
+| `token_program`  | `string` | Token program ID (SPL Token or Token 2022). May be absent. |
+| `tokens`         | `number` | Current balance in atomic units.                     |
+| `slot`           | `number` | Solana slot at which the balance was observed.        |
 
 ## `position_opened`
 
@@ -126,17 +126,17 @@ A new position has been detected and tracking has begun.
 }
 ```
 
-| Field               | Type     | Required | Description                                    |
-|---------------------|----------|----------|------------------------------------------------|
-| `position_id`       | `number` | Yes      | Server assigned position identifier.           |
-| `wallet_pubkey`     | `string` | Yes      | Wallet holding the position.                   |
-| `mint`              | `string` | Yes      | Token mint address.                            |
-| `token_account`     | `string` | Yes      | Associated token account.                      |
-| `token_program`     | `string` | No       | Token program ID.                              |
-| `tokens`            | `number` | Yes      | Token balance at entry.                        |
-| `entry_quote_units` | `number` | Yes      | Entry value in quote asset atomic units.       |
-| `market_context`    | `object` | No       | Market/pool context. See [Market Context](/api/reference/market-context). |
-| `slot`              | `number` | Yes      | Solana slot at detection.                      |
+| Field               | Type     | Description                                    |
+|---------------------|----------|------------------------------------------------|
+| `position_id`       | `number` | Server assigned position identifier.           |
+| `wallet_pubkey`     | `string` | Wallet holding the position.                   |
+| `mint`              | `string` | Token mint address.                            |
+| `token_account`     | `string` | Associated token account.                      |
+| `token_program`     | `string` | Token program ID. May be absent.               |
+| `tokens`            | `number` | Token balance at entry.                        |
+| `entry_quote_units` | `number` | Entry value in quote asset atomic units.       |
+| `market_context`    | `object` | Market/pool context. May be absent. See [Market Context](/api/reference/market-context). |
+| `slot`              | `number` | Solana slot at detection.                      |
 
 ## `position_closed`
 
@@ -154,14 +154,14 @@ A position has been removed from tracking.
 }
 ```
 
-| Field            | Type     | Required | Description                                |
-|------------------|----------|----------|--------------------------------------------|
-| `position_id`    | `number` | Yes      | Position identifier.                       |
-| `wallet_pubkey`  | `string` | Yes      | Wallet that held the position.             |
-| `mint`           | `string` | Yes      | Token mint address.                        |
-| `token_account`  | `string` | No       | Associated token account.                  |
-| `reason`         | `string` | Yes      | Why the position was closed (e.g., `"stop_loss"`, `"target_profit"`, `"trailing_stop"`, `"deadline"`, `"manual"`). |
-| `slot`           | `number` | Yes      | Solana slot at close.                      |
+| Field            | Type     | Description                                |
+|------------------|----------|--------------------------------------------|
+| `position_id`    | `number` | Position identifier.                       |
+| `wallet_pubkey`  | `string` | Wallet that held the position.             |
+| `mint`           | `string` | Token mint address.                        |
+| `token_account`  | `string` | Associated token account. May be absent.   |
+| `reason`         | `string` | Why the position was closed (e.g., `"stop_loss"`, `"target_profit"`, `"trailing_stop"`, `"deadline"`, `"manual"`). |
+| `slot`           | `number` | Solana slot at close.                      |
 
 ## `exit_signal_with_tx`
 
@@ -188,20 +188,20 @@ The most important event. Sent when a position meets your exit criteria. Include
 }
 ```
 
-| Field              | Type     | Required | Description                                       |
-|--------------------|----------|----------|---------------------------------------------------|
-| `session_id`       | `number` | Yes      | Session that generated this signal.               |
-| `position_id`      | `number` | Yes      | Position identifier.                              |
-| `wallet_pubkey`    | `string` | Yes      | Wallet holding the position.                      |
-| `mint`             | `string` | Yes      | Token mint address.                               |
-| `token_account`    | `string` | No       | Associated token account.                         |
-| `token_program`    | `string` | No       | Token program ID.                                 |
-| `position_tokens`  | `number` | Yes      | Tokens held at signal time.                       |
-| `profit_units`     | `number` | Yes      | Estimated profit in quote asset atomic units.     |
-| `reason`           | `string` | Yes      | Trigger reason (e.g., `"target_profit"`, `"stop_loss"`, `"trailing_stop"`, `"deadline"`). |
-| `triggered_at_ms`  | `number` | Yes      | Millisecond timestamp when the signal was generated. |
-| `market_context`   | `object` | No       | Market/pool context for the sell route.           |
-| `unsigned_tx_b64`  | `string` | Yes      | Base64 encoded unsigned `VersionedTransaction`.    |
+| Field              | Type     | Description                                       |
+|--------------------|----------|---------------------------------------------------|
+| `session_id`       | `number` | Session that generated this signal.               |
+| `position_id`      | `number` | Position identifier.                              |
+| `wallet_pubkey`    | `string` | Wallet holding the position.                      |
+| `mint`             | `string` | Token mint address.                               |
+| `token_account`    | `string` | Associated token account. May be absent.          |
+| `token_program`    | `string` | Token program ID. May be absent.                  |
+| `position_tokens`  | `number` | Tokens held at signal time.                       |
+| `profit_units`     | `number` | Estimated profit in quote asset atomic units.     |
+| `reason`           | `string` | Trigger reason (e.g., `"target_profit"`, `"stop_loss"`, `"trailing_stop"`, `"deadline"`). |
+| `triggered_at_ms`  | `number` | Millisecond timestamp when the signal was generated. |
+| `market_context`   | `object` | Market/pool context for the sell route. May be absent. |
+| `unsigned_tx_b64`  | `string` | Base64 encoded unsigned `VersionedTransaction`.    |
 
 ## `pnl_update`
 
