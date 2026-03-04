@@ -18,25 +18,6 @@ The setup wizard runs automatically on first launch. Run it again any time with 
 
 ## Wizard walkthrough
 
-### Recommended settings
-
-```
-Use recommended settings? (skips strategy + file path questions) [Y/n]:
-```
-
-Select **Yes** to use defaults and skip strategy questions:
-
-| Setting | Default |
-|---------|---------|
-| Target Profit | 6% |
-| Stop Loss | 10% |
-| Trailing Stop | 5% |
-| Deadline | off |
-| Slippage | 25% (max 30%) |
-| Sell on Graduation | off |
-
-Select **No** to configure each value manually.
-
 ### Credentials
 
 ```
@@ -46,18 +27,18 @@ LaserSell API key: ********
 
 The API key input is masked. A private RPC is strongly recommended for production.
 
-### Strategy (custom mode only)
+### Strategy
 
-If you selected No for recommended settings, you'll be prompted for each strategy value:
+The wizard prompts you to configure each exit condition. Set values that match your trading style and risk tolerance.
 
 - **Target Profit**: sell when profit reaches this % (e.g. `6%`)
 - **Stop Loss**: sell when loss reaches this % (e.g. `10%`)
-- **Trailing Stop**: sell when profit drops this % of entry from its peak (e.g. `5%`)
+- **Trailing Stop**: sell when profit drops this % from its peak (e.g. `5%`)
 - **Deadline Timeout**: force sell after N seconds (e.g. `120`)
 - **Slippage Tolerance**: max slippage for sells (e.g. `20%`)
 - **Sell on Graduation**: auto-sell when token migrates to an AMM (`y/N`)
 
-At least one exit condition (target profit, stop loss, trailing stop, or deadline) must be enabled.
+At least one exit condition (target profit, stop loss, trailing stop, or deadline) must be enabled. You can change any of these later from the TUI or by editing `~/.lasersell/config.yml`.
 
 ### Wallet
 

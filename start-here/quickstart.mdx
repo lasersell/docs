@@ -5,8 +5,8 @@ description: "Install LaserSell and start auto-selling in under 5 minutes."
 
 ## Prerequisites
 
-- **RPC URL** from [Helius](https://helius.dev), [Chainstack](https://chainstack.com), or any Solana RPC provider
-- **LaserSell API key** from [app.lasersell.io](https://app.lasersell.io) (free)
+- **Private RPC endpoint.** We recommend signing up for a free tier RPC from [Helius](https://helius.dev), [Shyft](https://shyft.to), or [Chainstack](https://chainstack.com). A private RPC gives you faster balance updates and more reliable transaction confirmations than the public Solana RPC.
+- **LaserSell API key.** Sign up at [app.lasersell.io](https://app.lasersell.io) to create a free API key. The free tier is enough for most users.
 
 ## Install
 
@@ -30,7 +30,7 @@ Run LaserSell. The setup wizard starts automatically on first launch:
 lasersell
 ```
 
-The wizard will ask for your RPC URL, API key, wallet (create new or import existing), and a passphrase to encrypt your keystore. Select **Yes** when asked to use recommended settings.
+The wizard will ask for your RPC URL, API key, strategy settings, wallet (create new or import existing), and a passphrase to encrypt your keystore.
 
 <Warning>
 There is no "forgot password." If you lose your passphrase, the keystore cannot be recovered.
@@ -52,10 +52,46 @@ You should see `SMOKE OK`. Then start LaserSell:
 lasersell
 ```
 
-LaserSell is now monitoring your wallet. Buy a token on any platform and LaserSell will detect it, track your PnL, and sell automatically when your strategy conditions are met.
+LaserSell is now monitoring your wallet.
+
+## What Happens Now
+
+LaserSell is a **passive monitor**. It does not place trades for you. Instead, it watches your wallet for new token purchases and handles the sell side automatically.
+
+1. You buy tokens using whatever platform you already trade on (Photon, BullX, Phantom, Jupiter, etc.)
+2. LaserSell detects the buy automatically within seconds
+3. The TUI shows the position as `ACTIVE` with live PnL
+4. When any exit condition fires (take profit, stop loss, trailing stop, deadline, or graduation), LaserSell builds and signs the sell transaction automatically
+5. You keep trading. LaserSell keeps selling.
+
+## Your First Automated Exit
+
+Walk through the full loop to see LaserSell in action:
+
+1. **LaserSell is running.** You see the TUI with the Sessions pane on the left and Strategy settings on the right.
+2. **Buy a small position** on any supported platform. Start small so you can watch the mechanics without risking real capital.
+3. **Watch the TUI.** Within seconds, the token appears in the Sessions pane as `DETECTED`, then transitions to `ACTIVE`.
+4. **PnL updates live.** Select the position to see cost basis, current value, and profit/loss in the Selected panel.
+5. **The exit fires.** When your take profit, stop loss, trailing stop, or deadline condition triggers, the position moves through `SELL SCHED` → `SELLING` → `CLOSED`. The Output panel logs the exit event and the Selected panel shows final proceeds.
+
+That is the entire loop. You trade normally, and LaserSell handles every exit.
+
+## Adjust Your Strategy
+
+You can tune your strategy live from the TUI command bar without restarting:
+
+```
+set tp 10%
+set sl 5%
+set ts 3%
+```
+
+Changes apply immediately to all future sessions and are saved to your config file. For the full list of commands, see [LaserSell UI](/onboarding/lasersell-ui).
 
 ## Next Steps
 
-- [LaserSell UI](/onboarding/lasersell-ui): Learn the TUI commands
-- [Example Configuration](/onboarding/example-configuration): Customize your strategy
+- [LaserSell UI](/onboarding/lasersell-ui): Learn every TUI command and keyboard shortcut
+- [Escaping a Rug Pull](/core-concepts/escaping-a-rug-pull): Understand how layered exit strategies protect your bankroll
+- [Example Configuration](/onboarding/example-configuration): Full config reference with all available fields
+- [Initial Setup](/onboarding/initial-setup): Re-run the setup wizard with `lasersell --setup`
 - [Key Safety](/security/key-safety): Protect your keys
