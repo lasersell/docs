@@ -1,6 +1,6 @@
 ---
 title: "Server Events"
-description: "Complete schema and JSON examples for all 8 server message types sent by the Exit Intelligence Stream."
+description: "Complete schema and JSON examples for all 9 server message types sent by the Exit Intelligence Stream."
 ---
 
 ## Message Types
@@ -17,6 +17,7 @@ The server sends messages with a `type` discriminator. All SDKs parse these into
 | `position_closed`       | High     | Position tracking ended.                       |
 | `exit_signal_with_tx`   | High     | Exit threshold met; unsigned tx included.      |
 | `pnl_update`            | Low      | Periodic profit and loss snapshot.             |
+| `liquidity_snapshot`    | Low      | Slippage bands and liquidity trend (Tier 1+).  |
 
 ## `hello_ok`
 
@@ -224,3 +225,59 @@ Periodic profit and loss snapshot for a tracked position.
 | `server_time_ms` | `number` | Server timestamp in milliseconds.                  |
 
 `pnl_update` messages are delivered at the interval defined by `limits.pnl_flush_ms`. When using lane splitting, they flow through the low priority channel.
+
+## `liquidity_snapshot`
+
+<Note>
+**Tier 1+ only.** Liquidity snapshots are delivered to Professional and Advanced tier subscribers. Free tier sessions receive `pnl_update` messages only.
+</Note>
+
+Real time slippage bands and liquidity trend for a tracked position. Delivered alongside `pnl_update` at the same flush interval. Use this data to understand how much of a position can be sold at a given slippage threshold and whether pool liquidity is growing, stable, or draining. See the [announcement blog post](https://www.lasersell.io/blog/liquidity-snapshots-and-sdk-0-3) for background and examples.
+
+```json
+{
+  "type": "liquidity_snapshot",
+  "position_id": 1,
+  "bands": [
+    { "slippage_bps": 100, "max_tokens": 500000, "coverage_pct": 10.0 },
+    { "slippage_bps": 200, "max_tokens": 1200000, "coverage_pct": 24.0 },
+    { "slippage_bps": 500, "max_tokens": 3000000, "coverage_pct": 60.0 },
+    { "slippage_bps": 1000, "max_tokens": 5000000, "coverage_pct": 100.0 }
+  ],
+  "liquidity_trend": "stable",
+  "server_time_ms": 1706000003000
+}
+```
+
+| Field             | Type       | Description                                                     |
+|-------------------|------------|-----------------------------------------------------------------|
+| `position_id`     | `number`   | Position identifier.                                            |
+| `bands`           | `array`    | Slippage bands, each describing how many tokens are sellable within that slippage threshold. |
+| `liquidity_trend` | `string`   | Current liquidity direction: `"growing"`, `"stable"`, or `"draining"`. |
+| `server_time_ms`  | `number`   | Server timestamp in milliseconds.                               |
+
+### `SlippageBandMsg`
+
+Each entry in the `bands` array:
+
+| Field          | Type     | Description                                                        |
+|----------------|----------|--------------------------------------------------------------------|
+| `slippage_bps` | `number` | Slippage threshold in basis points (e.g. `100` = 1%).              |
+| `max_tokens`   | `number` | Maximum tokens sellable within this slippage band (atomic units).  |
+| `coverage_pct` | `number` | Percentage of the full position covered by this band (0 to 100).   |
+
+### Interpreting slippage bands
+
+Slippage bands answer the question: "How much can I sell without exceeding X% slippage?" For example, if the 500 bps band shows `max_tokens: 3000000` and `coverage_pct: 60.0`, you can sell up to 3,000,000 tokens (60% of your position) with no more than 5% price impact.
+
+Use `session.getSlippageBands(positionId)` or `session.getMaxSellAtSlippage(positionId, slippageBps)` in any SDK to query the latest snapshot.
+
+### Liquidity trend
+
+The `liquidity_trend` field tracks how pool liquidity is changing over recent observations:
+
+- **`"growing"`**: Liquidity is increasing. Sell conditions are improving.
+- **`"stable"`**: Liquidity is steady. No significant change.
+- **`"draining"`**: Liquidity is decreasing. Consider exiting sooner if selling a large position.
+
+Use `session.getLiquidityTrend(positionId)` in any SDK to read the trend.

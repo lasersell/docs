@@ -157,6 +157,29 @@ func main() {
 }
 ```
 
+## Liquidity Snapshots and Partial Sells
+
+<Note>
+**Tier 1+ only.** Requires a Professional or Advanced subscription. See the [announcement](https://www.lasersell.io/blog/liquidity-snapshots-and-sdk-0-3) for full details.
+</Note>
+
+`StreamSession` caches the latest liquidity snapshot per position. Query slippage bands, maximum sellable amounts, and liquidity trends:
+
+```go
+bands := session.GetSlippageBands(positionID)
+maxTokens := session.GetMaxSellAtSlippage(positionID, 500) // 5% slippage
+trend := session.GetLiquidityTrend(positionID) // "growing" | "stable" | "draining"
+```
+
+Use `BuildPartialSellTx()` to sell a portion of a position based on slippage data:
+
+```go
+maxTokens := session.GetMaxSellAtSlippage(positionID, 500)
+if maxTokens != nil {
+    response, err := client.BuildPartialSellTx(ctx, handle, *maxTokens, 500, lasersell.SellOutputSOL)
+}
+```
+
 ## Transaction Helpers
 
 The second parameter to `SendTransaction` is an `*http.Client`. Pass `nil` to use the SDK's default HTTP client.

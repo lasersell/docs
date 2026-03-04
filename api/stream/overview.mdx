@@ -7,6 +7,8 @@ description: "Introduction to the LaserSell Exit Intelligence Stream for real ti
 
 The Exit Intelligence Stream is a persistent WebSocket connection that monitors your wallets on chain, tracks token positions, evaluates your profit and loss strategy in real time, and delivers pre built unsigned exit transactions when your thresholds are met.
 
+**Professional and Advanced tier** subscribers also receive real time [liquidity snapshots](/api/stream/server-events#liquidity_snapshot) with slippage bands and liquidity trend data, giving you visibility into how much of a position can be sold at a given price impact and whether pool liquidity is growing, stable, or draining. Read the [full announcement](https://www.lasersell.io/blog/liquidity-snapshots-and-sdk-0-3) for details.
+
 ## Endpoint
 
 ```
@@ -62,7 +64,7 @@ sequenceDiagram
 The SDKs provide two abstraction levels:
 
 - **`StreamClient`**: Low level client. Manages the WebSocket connection, reconnection, and message framing. Returns raw `ServerMessage` objects.
-- **`StreamSession`**: High level wrapper. Wraps `StreamClient` with position tracking, deadline timers, and typed `StreamEvent` objects that include a `PositionHandle`.
+- **`StreamSession`**: High level wrapper. Wraps `StreamClient` with position tracking, deadline timers, liquidity snapshot caching, and typed `StreamEvent` objects that include a `PositionHandle`.
 
 For most use cases, start with `StreamSession`.
 
@@ -161,5 +163,5 @@ for {
 
 - [Connection Lifecycle](/api/stream/connection-lifecycle): Detailed handshake, reconnection, and lane splitting.
 - [Strategy Configuration](/api/stream/strategy-configuration): Configure profit targets, stop losses, and trailing stops.
-- [Server Events](/api/stream/server-events): Complete schema for all 8 server message types.
+- [Server Events](/api/stream/server-events): Complete schema for all 9 server message types, including liquidity snapshots.
 - [Client Messages](/api/stream/client-messages): All 6 client message types and their schemas.

@@ -136,6 +136,29 @@ for await (const msg of highRx) {
 }
 ```
 
+## Liquidity Snapshots and Partial Sells
+
+<Note>
+**Tier 1+ only.** Requires a Professional or Advanced subscription. See the [announcement](https://www.lasersell.io/blog/liquidity-snapshots-and-sdk-0-3) for full details.
+</Note>
+
+`StreamSession` caches the latest liquidity snapshot per position. Query slippage bands, maximum sellable amounts, and liquidity trends:
+
+```typescript
+const bands = session.getSlippageBands(positionId);
+const maxTokens = session.getMaxSellAtSlippage(positionId, 500); // 5% slippage
+const trend = session.getLiquidityTrend(positionId); // "growing" | "stable" | "draining"
+```
+
+Use `buildPartialSellTx()` to sell a portion of a position based on slippage data:
+
+```typescript
+const maxTokens = session.getMaxSellAtSlippage(positionId, 500);
+if (maxTokens !== undefined) {
+  const response = await client.buildPartialSellTx(handle, maxTokens, 500, "SOL");
+}
+```
+
 ## Transaction Helpers
 
 ```typescript
