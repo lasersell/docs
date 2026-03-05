@@ -199,6 +199,8 @@ const session = await StreamSession.connect(client, {
     stop_loss_pct: 1.5,
   },
   deadline_timeout_sec: 45,
+  send_mode: "helius_sender",
+  tip_lamports: 1000,
 });
 
 while (true) {
@@ -230,6 +232,8 @@ async def main():
             wallet_pubkeys=[str(signer.pubkey())],
             strategy={"target_profit_pct": 5.0, "stop_loss_pct": 1.5},
             deadline_timeout_sec=45,
+            send_mode="helius_sender",
+            tip_lamports=1000,
         ),
     )
 
@@ -267,6 +271,8 @@ async fn main() -> anyhow::Result<()> {
             Some(5.0), Some(1.5), None, None,
         ),
         deadline_timeout_sec: 45,
+        send_mode: Some("helius_sender".to_string()),
+        tip_lamports: Some(1000),
     };
 
     let mut session = StreamSession::connect(&client, configure).await?;
@@ -312,6 +318,8 @@ func main() {
     }
 
     client := stream.NewStreamClient(apiKey)
+    sendMode := "helius_sender"
+    tipLamports := uint64(1000)
     session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
         WalletPubkeys: []string{privateKey.PublicKey().String()},
         Strategy: stream.StrategyConfigMsg{
@@ -319,6 +327,8 @@ func main() {
             StopLossPct:     1.5,
         },
         DeadlineTimeoutSec: 45,
+        SendMode:           &sendMode,
+        TipLamports:        &tipLamports,
     })
     if err != nil {
         log.Fatal(err)

@@ -77,6 +77,8 @@ const session = await StreamSession.connect(client, {
   wallet_pubkeys: ["WALLET_PUBKEY"],
   strategy: { target_profit_pct: 5, stop_loss_pct: 1.5 },
   deadline_timeout_sec: 45,
+  send_mode: "helius_sender",
+  tip_lamports: 1000,
 });
 
 while (true) {

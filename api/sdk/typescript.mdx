@@ -90,6 +90,8 @@ const session = await StreamSession.connect(client, {
     trailing_stop_pct: 3,
   },
   deadline_timeout_sec: 45,
+  send_mode: "helius_sender",
+  tip_lamports: 1000,
 });
 
 while (true) {

@@ -44,7 +44,9 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
     "trailing_stop_pct": 3.0,
     "sell_on_graduation": false
   },
-  "deadline_timeout_sec": 45
+  "deadline_timeout_sec": 45,
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000
 }
 ```
 
@@ -53,6 +55,8 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
 | `wallet_pubkeys`       | `string[]` | Yes      | One or more wallet public keys to monitor.      |
 | `strategy`             | `object`   | Yes      | Strategy configuration. See [Strategy Configuration](/api/stream/strategy-configuration). |
 | `deadline_timeout_sec` | `number`   | No       | Seconds of inactivity before the server auto-generates an exit signal. Omit or set to `0` to disable. |
+| `send_mode`            | `string`   | No       | Transaction submission mode: `"rpc"`, `"helius_sender"`, or `"astralane"`. Default: `"rpc"`. |
+| `tip_lamports`         | `number`   | No       | Priority fee tip in lamports. Default: `1000` (0.001 SOL). |
 
 The SDKs send `configure` automatically when you call `StreamClient.connect()` or `StreamSession.connect()`.
 

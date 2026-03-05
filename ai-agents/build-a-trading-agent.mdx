@@ -80,6 +80,8 @@ session = await StreamSession.connect(
             "sell_on_graduation": True,
         },
         deadline_timeout_sec=120,
+        send_mode="helius_sender",
+        tip_lamports=1000,
     ),
 )
 ```

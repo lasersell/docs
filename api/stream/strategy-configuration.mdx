@@ -29,6 +29,8 @@ const session = await StreamSession.connect(client, {
     sell_on_graduation: true,
   },
   deadline_timeout_sec: 60,
+  send_mode: "helius_sender",
+  tip_lamports: 1000,
 });
 ```
 
@@ -44,6 +46,8 @@ session = await StreamSession.connect(
             "sell_on_graduation": True,
         },
         deadline_timeout_sec=60,
+        send_mode="helius_sender",
+        tip_lamports=1000,
     ),
 )
 ```
@@ -58,10 +62,14 @@ let session = StreamSession::connect(&client, StreamConfigure {
         sell_on_graduation: Some(true),
     },
     deadline_timeout_sec: Some(60),
+    send_mode: Some("helius_sender".to_string()),
+    tip_lamports: Some(1000),
 }).await?;
 ```
 
 ```go Go
+sendMode := "helius_sender"
+tipLamports := uint64(1000)
 session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
     WalletPubkeys: []string{"WALLET_PUBKEY"},
     Strategy: stream.StrategyConfigMsg{
@@ -71,6 +79,8 @@ session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
         SellOnGraduation:   true,
     },
     DeadlineTimeoutSec: 60,
+    SendMode:           &sendMode,
+    TipLamports:        &tipLamports,
 })
 ```
 </CodeGroup>

@@ -104,6 +104,8 @@ async fn main() -> anyhow::Result<()> {
             sell_on_graduation: None,
         },
         deadline_timeout_sec: Some(45),
+        send_mode: Some("helius_sender".to_string()),
+        tip_lamports: Some(1000),
     }).await?;
 
     loop {
