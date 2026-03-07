@@ -7,7 +7,7 @@ description: "High level introduction to the LaserSell API, Exit Intelligence St
 
 The LaserSell API lets you build, sign, and submit Solana swap transactions programmatically. It exposes two surfaces:
 
-- **LaserSell API** (REST): Build unsigned buy and sell transactions on demand via `POST /v1/sell` and `POST /v1/buy`.
+- **LaserSell API** (REST): Build unsigned buy and sell transactions on demand via `POST /v1/sell` and `POST /v1/buy`. Retrieve your account details with `GET /v1/account` and query your trade history with `GET /v1/history`.
 - **Exit Intelligence Stream** (WebSocket): Connect a persistent session that watches your wallets, tracks positions, evaluates your strategy in real time, and delivers pre built exit transactions when thresholds are met.
 
 Both surfaces return **unsigned transactions**. Your private key never leaves your machine. You sign locally, then submit through the send target of your choice.

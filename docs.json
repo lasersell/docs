@@ -110,6 +110,8 @@
             "pages": [
               "api/exit-api/sell",
               "api/exit-api/buy",
+              "api/exit-api/account",
+              "api/exit-api/history",
               "api/exit-api/error-handling"
             ]
           },
