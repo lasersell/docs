@@ -1,6 +1,6 @@
 ---
 title: "Client Messages"
-description: "Complete schema and JSON examples for all 6 client message types sent to the Exit Intelligence Stream."
+description: "Complete schema and JSON examples for all 8 client message types sent to the Exit Intelligence Stream."
 ---
 
 ## Message Types
@@ -13,6 +13,8 @@ description: "Complete schema and JSON examples for all 6 client message types s
 | `close_position`       | Remove a position from tracking.                   |
 | `request_exit_signal`  | Manually request an exit transaction.              |
 | `update_wallets`       | Add or remove wallets mid session.                 |
+| `update_position_strategy` | Override strategy for a single position.    |
+| `update_watch_wallets`     | Add or update watch wallets for copy trading.|
 
 ## `ping`
 
@@ -46,7 +48,11 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
   },
   "deadline_timeout_sec": 45,
   "send_mode": "helius_sender",
-  "tip_lamports": 1000
+  "tip_lamports": 1000,
+  "watch_wallets": [
+    { "pubkey": "WatchWalletPubkey1..." },
+    { "pubkey": "WatchWalletPubkey2...", "auto_buy": { "wallet_pubkey": "YourBuyWallet...", "amount_quote_units": 100000000 } }
+  ]
 }
 ```
 
@@ -57,8 +63,13 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
 | `deadline_timeout_sec` | `number`   | No       | Seconds of inactivity before the server auto-generates an exit signal. Omit or set to `0` to disable. |
 | `send_mode`            | `string`   | No       | Transaction submission mode: `"rpc"`, `"helius_sender"`, or `"astralane"`. Default: `"rpc"`. |
 | `tip_lamports`         | `number`   | No       | Priority fee tip in lamports. Default: `1000` (0.001 SOL). |
+| `watch_wallets`        | `WatchWalletEntryMsg[]` | No       | Optional list of external wallets to mirror for copy trading. Each entry has `pubkey` (string) and optional `auto_buy` (AutoBuyConfigMsg). |
 
 The SDKs send `configure` automatically when you call `StreamClient.connect()` or `StreamSession.connect()`.
+
+<Note>
+All wallets in `wallet_pubkeys` must be [registered](/api/exit-api/wallets) to your account before connecting. The stream will reject unregistered wallets with error code `wallet_not_registered`.
+</Note>
 
 ## `update_strategy`
 
@@ -287,6 +298,134 @@ session.sender().update_wallets(vec![
 sender.UpdateWallets([]string{
     "WalletPubkey1...",
     "WalletPubkey3...",
+})
+```
+</CodeGroup>
+
+## `update_position_strategy`
+
+Override the strategy for a single position without affecting other tracked positions.
+
+```json
+{
+  "type": "update_position_strategy",
+  "position_id": 1,
+  "strategy": {
+    "target_profit_pct": 200.0,
+    "stop_loss_pct": 5.0,
+    "trailing_stop_pct": 10.0
+  }
+}
+```
+
+| Field         | Type     | Required | Description                               |
+|---------------|----------|----------|-------------------------------------------|
+| `position_id` | `number` | Yes      | Position to override.                     |
+| `strategy`    | `object` | Yes      | Strategy override for this position only. |
+
+<CodeGroup>
+```typescript TypeScript
+session.sender().updatePositionStrategy(positionId, {
+  target_profit_pct: 200,
+  stop_loss_pct: 5,
+  trailing_stop_pct: 10,
+});
+```
+
+```python Python
+session.sender().update_position_strategy(position_id, {
+    "target_profit_pct": 200.0,
+    "stop_loss_pct": 5.0,
+    "trailing_stop_pct": 10.0,
+})
+```
+
+```rust Rust
+session.sender().update_position_strategy(position_id, StrategyConfigMsg {
+    target_profit_pct: 200.0,
+    stop_loss_pct: 5.0,
+    trailing_stop_pct: 10.0,
+    ..Default::default()
+})?;
+```
+
+```go Go
+sender.UpdatePositionStrategy(positionID, stream.StrategyConfigMsg{
+    TargetProfitPct: 200.0,
+    StopLossPct:     5.0,
+    TrailingStopPct: 10.0,
+})
+```
+</CodeGroup>
+
+## `update_watch_wallets`
+
+Add or update watch wallets mid-session for copy trading. Replaces the current watch wallet list.
+
+```json
+{
+  "type": "update_watch_wallets",
+  "watch_wallets": [
+    { "pubkey": "WatchWalletPubkey1..." },
+    { "pubkey": "WatchWalletPubkey2...", "auto_buy": { "wallet_pubkey": "YourBuyWallet...", "amount_quote_units": 100000000 } }
+  ]
+}
+```
+
+| Field           | Type                    | Required | Description                              |
+|-----------------|-------------------------|----------|------------------------------------------|
+| `watch_wallets` | `WatchWalletEntryMsg[]` | Yes      | Updated list of wallets to mirror.       |
+
+Each `WatchWalletEntryMsg` has:
+
+| Field      | Type              | Required | Description                                     |
+|------------|-------------------|----------|-------------------------------------------------|
+| `pubkey`   | `string`          | Yes      | Public key of the wallet to watch.              |
+| `auto_buy` | `AutoBuyConfigMsg` | No      | If set, automatically mirror buys from this wallet. |
+
+`AutoBuyConfigMsg`:
+
+| Field                | Type     | Required | Description                                  |
+|----------------------|----------|----------|----------------------------------------------|
+| `wallet_pubkey`      | `string` | Yes      | Your wallet that will execute the buy.       |
+| `amount_quote_units` | `number` | Yes      | Amount in quote asset atomic units per buy.  |
+| `amount_usd1_units`  | `number` | No       | Amount in USD1 atomic units (alternative).   |
+
+<CodeGroup>
+```typescript TypeScript
+session.sender().updateWatchWallets([
+  { pubkey: "WatchWalletPubkey1..." },
+  { pubkey: "WatchWalletPubkey2...", auto_buy: { wallet_pubkey: "YourBuyWallet...", amount_quote_units: 100000000 } },
+]);
+```
+
+```python Python
+session.sender().update_watch_wallets([
+    {"pubkey": "WatchWalletPubkey1..."},
+    {"pubkey": "WatchWalletPubkey2...", "auto_buy": {"wallet_pubkey": "YourBuyWallet...", "amount_quote_units": 100000000}},
+])
+```
+
+```rust Rust
+session.sender().update_watch_wallets(vec![
+    WatchWalletEntryMsg { pubkey: "WatchWalletPubkey1...".into(), auto_buy: None },
+    WatchWalletEntryMsg {
+        pubkey: "WatchWalletPubkey2...".into(),
+        auto_buy: Some(AutoBuyConfigMsg {
+            wallet_pubkey: "YourBuyWallet...".into(),
+            amount_quote_units: 100000000,
+            amount_usd1_units: None,
+        }),
+    },
+])?;
+```
+
+```go Go
+sender.UpdateWatchWallets([]stream.WatchWalletEntryMsg{
+    {Pubkey: "WatchWalletPubkey1..."},
+    {Pubkey: "WatchWalletPubkey2...", AutoBuy: &stream.AutoBuyConfigMsg{
+        WalletPubkey: "YourBuyWallet...", AmountQuoteUnits: 100000000,
+    }},
 })
 ```
 </CodeGroup>

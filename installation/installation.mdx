@@ -128,9 +128,8 @@ On first run, the setup wizard launches inside the container. Config files are w
 |------|-------|-------------|
 | `--setup` | | Force-run the onboarding wizard |
 | `--config <path>` | `-f` | Path to a custom config file |
-| `--verbose` | `-v` | Disable the TUI and output plain log lines |
-| `--no-tui` | | Disable the TUI (requires `-f`) |
+| `--debug` | | Write debug-level logs to `~/.lasersell/debug.log` |
 | `--smoke` | | Run a connectivity health check and exit |
 | `--export-private-key` | | Export your wallet's base58 private key to stdout |
 
-`--smoke`, `--setup`, and `--export-private-key` are mutually exclusive. `--no-tui` and `--verbose` both require `-f` to specify the config file.
+`--smoke`, `--setup`, and `--export-private-key` are mutually exclusive.

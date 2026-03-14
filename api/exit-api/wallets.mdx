@@ -1,0 +1,181 @@
+---
+title: "Wallet Registration"
+description: "Register wallets for the Exit Intelligence Stream using Ed25519 proof of ownership."
+---
+
+## Overview
+
+Wallet registration proves ownership of a Solana wallet to the LaserSell API. Registration is required before connecting wallets to the Exit Intelligence Stream. The stream validates that every wallet in your `configure` message is registered to your account.
+
+Registration uses Ed25519 signatures, so no on-chain transaction is needed.
+
+## `POST /v1/wallets/register`
+
+Register a wallet by proving ownership with an Ed25519 signature.
+
+### Request
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "signature": "base58-encoded-ed25519-signature",
+  "message": "lasersell-register:YourWalletPubkey...:1706000000",
+  "label": "My Trading Wallet"
+}
+```
+
+| Field           | Type     | Required | Description                                            |
+|-----------------|----------|----------|--------------------------------------------------------|
+| `wallet_pubkey` | `string` | Yes      | Solana wallet public key to register.                  |
+| `signature`     | `string` | Yes      | Ed25519 signature of the message, base58 encoded.      |
+| `message`       | `string` | Yes      | Structured message: `lasersell-register:<pubkey>:<unix_timestamp>`. Timestamp must be within 5 minutes. |
+| `label`         | `string` | No       | Optional human-readable label for the wallet.          |
+
+### Response
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "registered": true
+}
+```
+
+### Authentication
+
+Requires an `x-api-key` header with a valid API key.
+
+### Errors
+
+| Status | Code | Description |
+|--------|------|-------------|
+| 400 | Bad Request | Invalid pubkey format, malformed message, or expired timestamp (>5 min). |
+| 403 | Forbidden | Missing or invalid API key, or signature verification failed. |
+
+## `DELETE /v1/wallets`
+
+Unregister a wallet.
+
+### Request
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey..."
+}
+```
+
+### Response
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "removed": true
+}
+```
+
+## SDK Usage
+
+All 4 SDKs provide helper methods for wallet registration.
+
+### `proveOwnership` / `prove_ownership`
+
+Generate a `WalletProof` locally using your keypair. This is a pure cryptographic operation with no network call.
+
+<CodeGroup>
+```typescript TypeScript
+import { proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+// proof = { walletPubkey, signature, message }
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+
+proof = prove_ownership(keypair)
+# proof = WalletProof(wallet_pubkey, signature, message)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::prove_ownership;
+
+let proof = prove_ownership(&keypair);
+// proof = WalletProof { wallet_pubkey, signature, message }
+```
+
+```go Go
+proof := lasersell.ProveOwnership(privateKey)
+// proof = WalletProof{WalletPubkey, Signature, Message}
+```
+</CodeGroup>
+
+### `registerWallet` / `register_wallet`
+
+Send the proof to the API to register the wallet.
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withApiKey(apiKey);
+await client.registerWallet(proof, "My Wallet");
+```
+
+```python Python
+client = ExitApiClient.with_api_key(api_key)
+await client.register_wallet(proof, label="My Wallet")
+```
+
+```rust Rust
+client.register_wallet(&proof, Some("My Wallet")).await?;
+```
+
+```go Go
+client.RegisterWallet(ctx, proof, lasersell.Ptr("My Wallet"))
+```
+</CodeGroup>
+
+### `connectWithWallets` / `connect_with_wallets`
+
+Convenience method that registers wallets and connects to the stream in one step.
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient, proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+const client = new StreamClient(apiKey);
+const session = await client.connectWithWallets(
+  [proof],
+  { target_profit_pct: 50, stop_loss_pct: 10 },
+  120, // deadline_timeout_sec
+);
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+from lasersell_sdk.stream.client import StreamClient
+
+proof = prove_ownership(keypair)
+client = StreamClient(api_key)
+session = await client.connect_with_wallets(
+    [proof],
+    {"target_profit_pct": 50, "stop_loss_pct": 10},
+    deadline_timeout_sec=120,
+)
+```
+
+```rust Rust
+let proof = prove_ownership(&keypair);
+let client = StreamClient::new(api_key);
+let session = client.connect_with_wallets(
+    &[proof],
+    strategy,
+    120,
+).await?;
+```
+
+```go Go
+// Go SDK: register separately, then connect
+proof := lasersell.ProveOwnership(privateKey)
+client.RegisterWallet(ctx, proof, nil)
+session, _ := stream.ConnectSession(ctx, streamClient, configure)
+```
+</CodeGroup>

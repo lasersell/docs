@@ -1,84 +1,101 @@
 ---
-title: "LaserSell UI"
-description: "Guide to the LaserSell Terminal UI: layout, session statuses, keyboard controls, and commands."
+title: "CLI Reference"
+description: "Guide to the LaserSell CLI: daemon behavior, log output, and configuration."
 ---
 
-After unlocking your wallet, LaserSell switches into the Terminal UI (TUI).
+The LaserSell CLI runs as a daemon that monitors your wallet and automatically executes exits when your strategy conditions are met.
 
-![Screenshot2026 01 28at6 41 59AM](/images/Screenshot2026-01-28at6.41.59AM.png)
+## How it works
 
-## Layout
+After unlocking your wallet, the CLI connects to the LaserSell stream and begins monitoring. All activity is logged to the terminal via structured log output.
 
-| Area | Purpose |
-|------|---------|
-| **Header** | Running/paused status, RPC latency, WebSocket status, wallet, SOL/USD1 balances |
-| **Sessions** (left) | List of detected tokens with status |
-| **Strategy** (right top) | Current strategy settings (TP, SL, TS, deadline, slippage, graduation) |
-| **Selected** (right middle) | Details for the highlighted token (cost basis, PnL, market, proceeds) |
-| **Output** (right bottom) | Command responses and log events |
-| **Command** (bottom) | Type commands here |
-
-Use **Tab** to switch focus between the Sessions pane and Command pane.
-
-## Session statuses
-
-| Status | Meaning |
-|--------|---------|
-| `DETECTED` | Mint detected, not yet started |
-| `FILTERED` | Rejected by filters |
-| `ACTIVE` | Position tracked, monitoring for exits |
-| `SELL SCHED` | Exit triggered, sell queued |
-| `SELLING` | Sell in progress |
-| `CLOSED` | Sold or ended |
-| `ERROR` | Failed |
-
-## Keyboard controls
-
-| Key | Action |
-|-----|--------|
-| **Tab / Shift+Tab** | Toggle focus between Sessions and Command |
-| **Up / Down** | Move selection (Sessions pane) |
-| **Enter** | Toggle expanded details (Sessions pane) |
-| **Space** | Pause/resume new sessions (Sessions pane) |
-| **m** | Toggle mouse capture (Sessions pane) |
-| **Ctrl+C** | Quit |
-
-## Commands
-
-### Strategy commands
-
-Update strategy settings live. Changes are saved to your config file immediately.
-
-```
-set tp 6%
-set sl 10%
-set ts 5%
-set slippage 20%
-set timeout 120
-set graduation on
+```shellscript
+lasersell
 ```
 
-| Command | Aliases | Accepts |
-|---------|---------|---------|
-| `set tp <percent>` | | Percent string, e.g. `6%` |
-| `set sl <percent>` | | Percent string, e.g. `10%` |
-| `set ts <percent>` | `set trailing` | Percent string, e.g. `5%` |
-| `set slippage <percent>` | `set slip` | Percent string, e.g. `20%` |
-| `set timeout <seconds>` | `set to` | Integer seconds, `0` to disable |
-| `set graduation <on\|off>` | | `on`/`true` or `off`/`false` |
+The daemon runs until you press **Ctrl+C** to gracefully shut down.
 
-### Trading commands
+## Log output
 
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| `sell` | `s` | Sell the selected position. Requires `y` confirmation. |
+The CLI outputs structured events as they happen:
 
-### Utility commands
+| Event | Meaning |
+|-------|---------|
+| `startup` | CLI started, wallet unlocked |
+| `stream_connected` | Connected to the LaserSell stream |
+| `wallet_registered` | Wallet ownership verified with the server |
+| `balance_update` | SOL balance polled |
+| `session_started` | New position detected and monitoring began |
+| `pnl_update` | Profit/loss update for an active position |
+| `sell_scheduled` | Exit condition triggered, sell queued |
+| `sell_attempt` | Sell transaction submitted |
+| `sell_complete` | Sell confirmed on-chain |
+| `session_closed` | Position fully exited |
+| `liquidity_snapshot` | Pool liquidity update (trend + depth bands) |
+| `stream_disconnected` | Stream connection lost |
 
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| `help` | `?` | Show available commands |
-| `pause` | | Stop starting new sessions (existing ones continue) |
-| `resume` | | Resume starting new sessions |
-| `clear` | | Clear the output panel |
-| `quit` | `exit`, `q` | Exit LaserSell |
+## CLI flags
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--setup` | | Force-run the onboarding wizard |
+| `--config <path>` | `-f` | Path to a custom config file |
+| `--debug` | | Write debug-level logs to `~/.lasersell/debug.log` |
+| `--smoke` | | Run a connectivity health check and exit |
+| `--export-private-key` | | Export your wallet's base58 private key to stdout |
+
+`--smoke`, `--setup`, and `--export-private-key` are mutually exclusive.
+
+## Headless operation
+
+The CLI is designed for headless server deployments. For automated unlock, set the passphrase via environment variable:
+
+```shellscript
+export LASERSELL_WALLET_PASSPHRASE="your-passphrase"
+lasersell
+```
+
+On a VPS, run in a `tmux` or `screen` session, or use `systemd` to manage the process.
+
+## Exit strategies
+
+The CLI supports all LaserSell exit strategies, configured in `~/.lasersell/config.yml`:
+
+| Strategy | Config field | Description |
+|----------|-------------|-------------|
+| Take-profit | `target_profit` | Exit when profit reaches this % of entry |
+| Stop-loss | `stop_loss` | Exit when loss reaches this % of entry |
+| Trailing stop | `trailing_stop` | Exit when profit drops this % from peak |
+| Deadline timeout | `deadline_timeout` | Force exit after N seconds |
+| Sell on graduation | `sell_on_graduation` | Exit when token migrates to a new DEX |
+| Exit ladder | `take_profit_levels` | Sell partial amounts at multiple profit thresholds |
+| Liquidity guard | `liquidity_guard` | Exit when pool liquidity drops below safe threshold |
+| Breakeven trail | `breakeven_trail` | Trailing stop that activates once position breaks even |
+
+At least one exit condition must be enabled. See [Example Configuration](/onboarding/example-configuration) for the full config reference.
+
+## Copy trading
+
+Monitor other wallets and optionally auto-buy when they buy:
+
+```yaml
+watch_wallets:
+  - pubkey: "TraderWallet1..."
+    label: "whale"
+  - pubkey: "TraderWallet2..."
+    auto_buy:
+      amount: 0.1       # SOL
+      amount_usd1: 0.0   # USD1
+```
+
+Positions from watched wallets are managed by the same exit strategy as your own positions.
+
+## Modifying your strategy
+
+Edit `~/.lasersell/config.yml` and restart the daemon. Changes take effect on the next launch.
+
+To re-run the setup wizard:
+
+```shellscript
+lasersell --setup
+```

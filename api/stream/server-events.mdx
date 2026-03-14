@@ -18,6 +18,7 @@ The server sends messages with a `type` discriminator. All SDKs parse these into
 | `exit_signal_with_tx`   | High     | Exit threshold met; unsigned tx included.      |
 | `pnl_update`            | Low      | Periodic profit and loss snapshot.             |
 | `liquidity_snapshot`    | Low      | Slippage bands and liquidity trend (Tier 1+).  |
+| `trade_tick`            | Low      | Real-time trade notification for a tracked position. |
 
 ## `hello_ok`
 
@@ -281,3 +282,33 @@ The `liquidity_trend` field tracks how pool liquidity is changing over recent ob
 - **`"draining"`**: Liquidity is decreasing. Consider exiting sooner if selling a large position.
 
 Use `session.getLiquidityTrend(positionId)` in any SDK to read the trend.
+
+## `trade_tick`
+
+Real-time notification when a trade occurs on a tracked position's token. Useful for monitoring trading activity on tokens you hold.
+
+```json
+{
+  "type": "trade_tick",
+  "position_id": 1,
+  "time_ms": 1706000005000,
+  "side": "buy",
+  "token_amount": 500000,
+  "quote_amount": 25000000,
+  "price_quote": 50000,
+  "maker": "TraderWallet...",
+  "tx_signature": "5abc..."
+}
+```
+
+| Field          | Type     | Description                                         |
+|----------------|----------|-----------------------------------------------------|
+| `position_id`  | `number` | Position identifier.                                |
+| `time_ms`      | `number` | Trade timestamp in milliseconds.                    |
+| `side`         | `string` | Trade direction: `"buy"` or `"sell"`.               |
+| `token_amount` | `number` | Token amount traded (atomic units).                 |
+| `quote_amount` | `number` | Quote asset amount traded (atomic units).           |
+| `price_quote`  | `number` | Price per token in quote asset (atomic units).      |
+| `maker`        | `string` | Wallet that initiated the trade. May be absent.     |
+| `tx_signature` | `string` | On-chain transaction signature. May be absent.      |
+| `watched`      | `boolean`| `true` if this trade is from a watched wallet.      |

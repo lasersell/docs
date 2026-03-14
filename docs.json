@@ -63,7 +63,7 @@
         ]
       },
       {
-        "tab": "Client",
+        "tab": "CLI",
         "groups": [
           {
             "group": "Getting Started",
@@ -112,6 +112,7 @@
               "api/exit-api/buy",
               "api/exit-api/account",
               "api/exit-api/history",
+              "api/exit-api/wallets",
               "api/exit-api/error-handling"
             ]
           },

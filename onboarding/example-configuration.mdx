@@ -3,7 +3,7 @@ title: "Example Configuration"
 description: "Annotated config.yml reference with all available fields, defaults, and environment variable overrides."
 ---
 
-The setup wizard generates `~/.lasersell/config.yml`. You can edit it directly or use [TUI commands](/onboarding/lasersell-ui) to change strategy settings live.
+The setup wizard generates `~/.lasersell/config.yml`. Edit it directly and restart the daemon to apply changes, or re-run `lasersell --setup`.
 
 <Warning>
 The strategy values shown below are examples only, not an official trading strategy. Configure these based on your own risk tolerance and trading style.
@@ -28,19 +28,45 @@ account:
   # Env: LASERSELL_SEND_TARGET
   # send_target: "helius_sender"
 
+  # Priority fee tip in lamports (default: 1000000 = 0.001 SOL).
+  # tip_lamports: 1000000
+
   # Required only when send_target is "astralane".
   # Env: LASERSELL_ASTRALANE_API_KEY
   # astralane_api_key: "your-astralane-api-key"
 
 strategy:
   # Percentages are relative to your detected buy amount. Use "0%" to disable.
-  # At least one exit condition must be enabled.
+  # At least one exit condition must be enabled (including take_profit_levels).
 
   target_profit: "20%"       # exit when profit reaches this %
   stop_loss: "10%"           # exit when loss reaches this %
   trailing_stop: "5%"        # exit when profit drops this % of entry from its peak
   deadline_timeout: 0        # force exit after N seconds (0 to disable)
   sell_on_graduation: false  # auto-sell when token migrates to a new DEX
+
+  # Liquidity guard: exit when pool liquidity drops below safe threshold.
+  liquidity_guard: false
+
+  # Breakeven trail: trailing stop that activates once position breaks even.
+  # Use "0%" to disable.
+  breakeven_trail: "0%"
+
+  # Exit ladder: sell partial amounts at multiple profit thresholds.
+  # Each level specifies the profit % to trigger, % of position to sell,
+  # and an optional trailing stop % for that tranche.
+  take_profit_levels: []
+  # Example exit ladder:
+  # take_profit_levels:
+  #   - profit_pct: 25       # at 25% profit...
+  #     sell_pct: 30          # sell 30% of the position
+  #     trailing_stop_pct: 0  # immediately (no trailing)
+  #   - profit_pct: 50
+  #     sell_pct: 50
+  #     trailing_stop_pct: 3  # with 3% trailing stop
+  #   - profit_pct: 100
+  #     sell_pct: 100
+  #     trailing_stop_pct: 5  # with 5% trailing stop
 
 sell:
   slippage_pad_bps: 2500              # extra slippage on top of computed value (bps)
@@ -49,6 +75,18 @@ sell:
   slippage_max_bps: 3000              # max slippage cap (bps)
   confirm_timeout_sec: 10             # tx confirmation timeout
   max_retries: 3                      # retry count for failed sells
+
+# Copy trading: watch other wallets and optionally auto-buy when they buy.
+# Positions from watched wallets use the same exit strategy as your own.
+watch_wallets: []
+# Example:
+# watch_wallets:
+#   - pubkey: "TraderWalletPubkey1..."
+#     label: "whale"            # optional display label
+#   - pubkey: "TraderWalletPubkey2..."
+#     auto_buy:
+#       amount: 0.1             # auto-buy with 0.1 SOL
+#       amount_usd1: 0.0        # auto-buy with USD1 (0 to disable)
 ```
 
 ## Environment variable overrides
@@ -62,6 +100,7 @@ Override any config field with its corresponding env var. Useful for Docker, CI,
 | `account.rpc_url` | `LASERSELL_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
 | `account.send_target` | `LASERSELL_SEND_TARGET` | `helius_sender`, `astralane`, or `rpc` |
 | `account.astralane_api_key` | `LASERSELL_ASTRALANE_API_KEY` | `ast_xyz789...` |
+| Wallet passphrase | `LASERSELL_WALLET_PASSPHRASE` | (for headless unlock) |
 
 ## Transaction submission targets
 

@@ -11,8 +11,19 @@ description: "Configure target profit, stop loss, trailing stop, and sell on gra
 | `stop_loss_pct`      | `number`  | Yes      | Stop loss threshold as a percentage (e.g., `1.5` = 1.5%).    |
 | `trailing_stop_pct`  | `number`  | No       | Trailing stop percentage from the peak. Activates only after the position is in profit. |
 | `sell_on_graduation` | `boolean` | No       | If `true`, auto sells when a bonding curve token graduates to an AMM pool. |
+| `take_profit_levels` | `TakeProfitLevelMsg[]` | No | Exit ladder: sell partial amounts at multiple profit thresholds. Each level has `profit_pct` (trigger), `sell_pct` (portion to sell), and `trailing_stop_pct` (optional trailing stop for that level). |
+| `liquidity_guard` | `boolean` | No | When enabled, the stream checks available pool liquidity before generating an exit signal. Prevents exits into thin liquidity. Default: `false`. |
+| `breakeven_trail_pct` | `number` | No | A trailing stop that activates once the position breaks even, trailing from the breakeven point rather than the peak. |
 
 At least one of `target_profit_pct`, `stop_loss_pct`, `trailing_stop_pct`, or `deadline_timeout_sec` (on the configure message) must be greater than zero.
+
+### `TakeProfitLevelMsg` Schema
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `profit_pct` | `number` | Yes | Profit percentage at which this level triggers (e.g., `20` = 20%). |
+| `sell_pct` | `number` | Yes | Percentage of the position to sell at this level (e.g., `50` = sell 50%). |
+| `trailing_stop_pct` | `number` | No | Optional trailing stop for this level. If set, instead of selling immediately at `profit_pct`, a trailing stop activates at this level. Default: `0` (sell immediately). |
 
 ## Setting Strategy at Connection Time
 
@@ -84,6 +95,147 @@ session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
 })
 ```
 </CodeGroup>
+
+## Using StrategyConfigBuilder
+
+All 4 SDKs provide a fluent builder for strategy configuration. The builder validates that at least one exit condition is set when you call `build()`.
+
+<CodeGroup>
+```typescript TypeScript
+import { StrategyConfigBuilder } from "@lasersell/lasersell-sdk";
+
+const strategy = new StrategyConfigBuilder()
+  .targetProfitPct(50)
+  .stopLossPct(10)
+  .trailingStopPct(5)
+  .takeProfitLevels([
+    { profit_pct: 20, sell_pct: 25, trailing_stop_pct: 0 },
+    { profit_pct: 50, sell_pct: 50, trailing_stop_pct: 3 },
+    { profit_pct: 100, sell_pct: 100, trailing_stop_pct: 5 },
+  ])
+  .liquidityGuard(true)
+  .breakevenTrailPct(2)
+  .build();
+```
+
+```python Python
+from lasersell_sdk.stream.client import StrategyConfigBuilder
+
+strategy = (
+    StrategyConfigBuilder()
+    .target_profit_pct(50)
+    .stop_loss_pct(10)
+    .trailing_stop_pct(5)
+    .take_profit_levels([
+        {"profit_pct": 20, "sell_pct": 25, "trailing_stop_pct": 0},
+        {"profit_pct": 50, "sell_pct": 50, "trailing_stop_pct": 3},
+        {"profit_pct": 100, "sell_pct": 100, "trailing_stop_pct": 5},
+    ])
+    .liquidity_guard(True)
+    .breakeven_trail_pct(2.0)
+    .build()
+)
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StrategyConfigBuilder;
+use lasersell_sdk::stream::proto::TakeProfitLevelMsg;
+
+let strategy = StrategyConfigBuilder::new()
+    .target_profit_pct(50.0)
+    .stop_loss_pct(10.0)
+    .trailing_stop_pct(5.0)
+    .take_profit_levels(vec![
+        TakeProfitLevelMsg { profit_pct: 20.0, sell_pct: 25.0, trailing_stop_pct: 0.0 },
+        TakeProfitLevelMsg { profit_pct: 50.0, sell_pct: 50.0, trailing_stop_pct: 3.0 },
+        TakeProfitLevelMsg { profit_pct: 100.0, sell_pct: 100.0, trailing_stop_pct: 5.0 },
+    ])
+    .liquidity_guard(true)
+    .breakeven_trail_pct(2.0)
+    .build();
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+strategy := stream.NewStrategyConfigBuilder().
+    TargetProfitPct(50.0).
+    StopLossPct(10.0).
+    TrailingStopPct(5.0).
+    TakeProfitLevels([]stream.TakeProfitLevelMsg{
+        {ProfitPct: 20.0, SellPct: 25.0, TrailingStopPct: 0.0},
+        {ProfitPct: 50.0, SellPct: 50.0, TrailingStopPct: 3.0},
+        {ProfitPct: 100.0, SellPct: 100.0, TrailingStopPct: 5.0},
+    }).
+    LiquidityGuard(true).
+    BreakevenTrailPct(2.0).
+    Build()
+```
+</CodeGroup>
+
+## Exit Ladder (Take Profit Levels)
+
+An exit ladder lets you take partial profits at multiple thresholds instead of exiting your entire position at a single price. Each level specifies a profit target and the percentage of the remaining position to sell.
+
+### How it works
+
+1. When profit reaches a level's `profit_pct`, the stream sells `sell_pct` of the current position.
+2. If a level has `trailing_stop_pct > 0`, a trailing stop activates at that level instead of selling immediately.
+3. Levels are evaluated in order from lowest to highest `profit_pct`.
+4. The global `target_profit_pct` still applies as a hard cap; if reached before all levels fire, the remaining position is sold.
+
+### Example
+
+With this exit ladder and an entry of 1 SOL:
+
+```json
+{
+  "take_profit_levels": [
+    { "profit_pct": 20, "sell_pct": 25, "trailing_stop_pct": 0 },
+    { "profit_pct": 50, "sell_pct": 50, "trailing_stop_pct": 3 },
+    { "profit_pct": 100, "sell_pct": 100, "trailing_stop_pct": 5 }
+  ],
+  "stop_loss_pct": 15
+}
+```
+
+- At 20% profit (position worth 1.2 SOL): sell 25% immediately.
+- At 50% profit (position worth 1.5 SOL): activate a 3% trailing stop on 50% of the remaining position.
+- At 100% profit (position worth 2 SOL): activate a 5% trailing stop on the remaining position.
+
+## Liquidity Guard
+
+When `liquidity_guard` is enabled, the stream checks pool liquidity before generating an exit signal. If the pool cannot absorb the sell at a reasonable slippage, the signal is deferred until liquidity improves or a timeout forces the exit.
+
+This is useful for large positions in thin pools where an immediate sell would result in excessive slippage.
+
+```json
+{
+  "target_profit_pct": 50,
+  "stop_loss_pct": 10,
+  "liquidity_guard": true
+}
+```
+
+## Breakeven Trail
+
+The `breakeven_trail_pct` field enables a trailing stop that activates once a position breaks even (profit >= 0), trailing from the breakeven point rather than the peak.
+
+Unlike the standard `trailing_stop_pct` which trails from the highest observed profit, the breakeven trail protects you from giving back all gains on a position that briefly went profitable.
+
+### Example
+
+With `breakeven_trail_pct: 2` and an entry of 1 SOL:
+
+| Time | Profit (%) | Breakeven Trail Active | Trigger |
+|------|-----------|----------------------|---------|
+| t=0 | -5 | No (not at breakeven) | — |
+| t=1 | 0 | Yes (at breakeven) | — |
+| t=2 | 3 | Yes | No trigger (profit > 0) |
+| t=3 | -1 | Yes | No trigger (drop < 2% from breakeven) |
+| t=4 | -2.5 | Yes | **Triggered** (drop >= 2% from breakeven) |
+
+Combine with a standard `trailing_stop_pct` to protect both the breakeven point and the profit peak.
 
 ## Trailing Stop Explained
 
@@ -173,3 +325,60 @@ When using `StreamSession`, the deadline timer runs client side and automaticall
 - At least one of these values must be > 0.
 
 Violating these rules raises a `StreamClientError` with kind `"protocol"`.
+
+## Per-Position Strategy Override
+
+You can override the global strategy for individual positions without affecting other tracked positions. This is useful when you want different exit rules for specific tokens.
+
+```json
+{
+  "type": "update_position_strategy",
+  "position_id": 1,
+  "strategy": {
+    "target_profit_pct": 200,
+    "stop_loss_pct": 5,
+    "trailing_stop_pct": 10
+  }
+}
+```
+
+Using the SDK:
+
+<CodeGroup>
+```typescript TypeScript
+session.sender().updatePositionStrategy(positionId, {
+  target_profit_pct: 200,
+  stop_loss_pct: 5,
+  trailing_stop_pct: 10,
+});
+```
+
+```python Python
+session.sender().update_position_strategy(position_id, {
+    "target_profit_pct": 200.0,
+    "stop_loss_pct": 5.0,
+    "trailing_stop_pct": 10.0,
+})
+```
+
+```rust Rust
+session.sender().update_position_strategy(position_id, StrategyConfigMsg {
+    target_profit_pct: 200.0,
+    stop_loss_pct: 5.0,
+    trailing_stop_pct: 10.0,
+    ..Default::default()
+})?;
+```
+
+```go Go
+sender.UpdatePositionStrategy(positionID, stream.StrategyConfigMsg{
+    TargetProfitPct: 200.0,
+    StopLossPct:     5.0,
+    TrailingStopPct: 10.0,
+})
+```
+</CodeGroup>
+
+The override applies only to the specified position. All other positions continue using the global strategy. To revert a position back to the global strategy, send another `update_position_strategy` with the current global strategy values.
+
+Per-position overrides are ephemeral and are not persisted across reconnections.

@@ -48,12 +48,13 @@ If a position goes sideways and no other exit condition fires, the deadline forc
 
 ## Adjust on the Fly
 
-Your risk tolerance may change depending on the setup. LaserSell lets you adjust settings at any time through the TUI, even while a trade is active:
+Your risk tolerance may change depending on the setup. Edit `~/.lasersell/config.yml` and restart the daemon to apply changes:
 
-```
-set sl 5%
-set ts 3%
-set graduation on
+```yaml
+strategy:
+  stop_loss: "5%"
+  trailing_stop: "3%"
+  sell_on_graduation: true
 ```
 
 - **Tighten up:** If a coin pumps, raise your stop loss to breakeven for a risk-free ride.
