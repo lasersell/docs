@@ -1,0 +1,90 @@
+---
+title: "Configuración inicial"
+description: "Recorrido del asistente de configuración de LaserSell que crea tu configuración y wallet cifrada."
+---
+
+El asistente de configuración se ejecuta automáticamente en el primer lanzamiento. Ejecútalo nuevamente en cualquier momento con `lasersell --setup`.
+
+## Lo que necesitas
+
+- **URL de RPC** de [Helius](https://helius.dev), [Chainstack](https://chainstack.com) o cualquier proveedor de RPC de Solana
+- **Clave API de LaserSell** de [app.lasersell.io](https://app.lasersell.io) (gratis)
+- Un plan de wallet: crear una nueva wallet, o tener tu **frase semilla**, **clave secreta base58** o **JSON de par de claves de Solana** listo para importar
+
+## Lo que crea el asistente
+
+- `~/.lasersell/config.yml` (RPC, clave API, estrategia)
+- `~/.lasersell/wallet.keystore.json` (wallet cifrada)
+
+## Recorrido del asistente
+
+### Credenciales
+
+```
+RPC URL (private recommended): https://your-private-rpc.example.com
+LaserSell API key: ********
+```
+
+La entrada de clave API está enmascarada. Se recomienda encarecidamente un RPC privado para producción.
+
+### Estrategia
+
+El asistente te solicita configurar cada condición de salida. Establece valores que coincidan con tu estilo de trading y tolerancia al riesgo.
+
+- **Target Profit**: vender cuando la ganancia alcance este % (por ejemplo, `6%`)
+- **Stop Loss**: vender cuando la pérdida alcance este % (por ejemplo, `10%`)
+- **Trailing Stop**: vender cuando la ganancia caiga este % desde su pico (por ejemplo, `5%`)
+- **Deadline Timeout**: forzar venta después de N segundos (por ejemplo, `120`)
+- **Tolerancia de slippage**: slippage máximo para ventas (por ejemplo, `20%`)
+- **Venta por graduación**: auto vender cuando el token migre a un AMM (`y/N`)
+
+Al menos una condición de salida (take profit, stop loss, trailing stop o deadline) debe estar habilitada. Puedes cambiar cualquiera de estas después editando `~/.lasersell/config.yml` y reiniciando el daemon, o volviendo a ejecutar `lasersell --setup`.
+
+### Wallet
+
+**¿Almacén de claves existente detectado?** Puedes reutilizarlo o crear/importar una wallet diferente.
+
+**Creando una nueva wallet:** LaserSell genera una frase semilla de 12 palabras y la muestra una vez. Guárdala inmediatamente.
+
+<Warning>
+No se te mostrará la frase semilla de nuevo. Si la pierdes, pierdes la wallet.
+</Warning>
+
+**Importando una wallet existente:** Elige una de:
+
+1. **Clave secreta Base58** (la entrada está enmascarada)
+2. **Frase semilla** (usa la ruta de derivación `m/44'/501'/0'/0'`)
+3. **Archivo JSON de par de claves de Solana**
+
+Después de importar, verifica que la clave pública mostrada coincida con la wallet que pretendías.
+
+### Frase de contraseña
+
+Establece una frase de contraseña para cifrar tu almacén de claves:
+
+```
+Keystore passphrase: ********
+Confirm passphrase: ********
+```
+
+<Warning>
+No hay "olvidé mi contraseña." Si pierdes tu frase de contraseña, el almacén de claves no puede recuperarse. Tu ruta de recuperación es reimportar la wallet desde tu frase semilla o clave privada.
+</Warning>
+
+### Revisar y escribir
+
+LaserSell muestra un resumen de tu configuración y pide confirmar para escribir el archivo. Confirma para guardar.
+
+## Después de la configuración
+
+LaserSell continúa con el inicio normal. En lanzamientos futuros, pedirá tu frase de contraseña del almacén de claves para desbloquear la wallet.
+
+Para ejecuciones sin interfaz/automatizadas, establece la variable de entorno `LASERSELL_WALLET_PASSPHRASE`.
+
+## Solución de problemas
+
+**"config file not found; run --setup in an interactive terminal"**
+El asistente requiere un TTY real. Conéctate por SSH a la máquina o abre una terminal local y ejecuta `lasersell --setup`.
+
+**La frase semilla importada da la dirección incorrecta**
+LaserSell usa la ruta de derivación estándar de Solana (`m/44'/501'/0'/0'`). Si tu wallet usa una derivación diferente, importa a través de clave secreta base58 o JSON de par de claves.

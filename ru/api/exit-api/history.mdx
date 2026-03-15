@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "Получение истории сделок с пагинацией для вашего аккаунта из LaserSell API."
+---
+
+## Эндпоинт
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## Заголовки
+
+| Заголовок | Обязательный | Описание |
+|-------------|----------|------------------------|
+| `x-api-key` | Да | Ваш API ключ LaserSell |
+
+## Параметры запроса
+
+| Параметр | Тип | По умолчанию | Описание |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit` | `number` | `50` | Максимальное количество возвращаемых сделок (макс. 200). |
+| `offset` | `number` | `0` | Количество сделок для пропуска при пагинации. |
+| `mint` | `string` | — | Фильтр по конкретному адресу минта токена (base58). |
+| `wallet` | `string` | — | Фильтр по конкретному публичному ключу кошелька (base58). |
+
+## Ответ: `TradeHistoryResponse`
+
+| Поле | Тип | Описание |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | Массив записей сделок, от самых новых к старым. |
+| `total` | `number \| null` | Оценочное общее количество совпадающих сделок для пагинации. |
+
+### Объект `TradeHistoryItem`
+
+| Поле | Тип | Описание |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id` | `number` | Уникальный идентификатор записи сделки. |
+| `session_id` | `number` | Сессия потока, которая произвела эту сделку. |
+| `position_id` | `number` | Идентификатор позиции внутри сессии. |
+| `wallet_pubkey` | `string` | Публичный ключ кошелька, державшего позицию (base58). |
+| `mint` | `string` | Адрес минта токена (base58). |
+| `entry_quote_units` | `number` | Сумма, потраченная на открытие позиции в атомарных единицах котируемого актива. |
+| `exit_quote_units` | `number \| null` | Поступления при закрытии в атомарных единицах котируемого актива. |
+| `profit_quote_units` | `number \| null` | Чистая прибыль или убыток в атомарных единицах котируемого актива. |
+| `tokens` | `number` | Количество приобретённых токенов при входе в атомарных единицах. |
+| `exit_reason` | `string \| null` | Причина закрытия позиции (например, `target_profit`, `stop_loss`, `trailing_stop`, `manual`). |
+| `market_kind` | `string \| null` | DEX или лаунчпад, на котором торговался токен (например, `PumpFun`, `RaydiumCpmm`). |
+| `strategy_target_profit_pct` | `number \| null` | Процент тейк профита, настроенный при открытии позиции. |
+| `strategy_stop_loss_pct` | `number \| null` | Процент стоп лосса, настроенный при открытии позиции. |
+| `strategy_trailing_stop_pct` | `number \| null` | Процент трейлинг стопа, настроенный при открытии позиции. |
+| `opened_at` | `string` | Временная метка ISO 8601 открытия позиции. |
+| `closed_at` | `string \| null` | Временная метка ISO 8601 закрытия позиции. |
+
+## Пример curl
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+С фильтрами:
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Пример ответа
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## Ответы об ошибках
+
+См. [Обработка ошибок](/api/exit-api/error-handling) для полной спецификации конверта ошибок и логики повторных попыток.

@@ -1,0 +1,108 @@
+---
+title: "MCP 서버"
+description: "Model Context Protocol을 통해 AI 에이전트와 MCP 호환 클라이언트를 LaserSell 문서에 연결하세요."
+---
+
+LaserSell MCP 서버는 MCP 호환 AI 클라이언트가 실시간으로 LaserSell 문서를 검색하고 검색할 수 있게 합니다. AI 에이전트가 워크플로를 떠나지 않고 API 참조, SDK 가이드, 코드 예제, 통합 세부사항에 접근할 수 있습니다.
+
+## 서버 URL
+
+```
+https://docs.lasersell.io/mcp
+```
+
+## 사용 가능한 도구
+
+| 도구 | 설명 |
+|------|-------------|
+| `SearchLaserSellDocumentation` | LaserSell 문서 지식 베이스를 검색하여 관련 정보, 코드 예제, API 참조, 가이드를 찾습니다. 제목과 문서 페이지 직접 링크가 포함된 컨텍스트 콘텐츠를 반환합니다. |
+
+## 설정
+
+### Claude Desktop
+
+Claude Desktop MCP 구성 파일에 다음을 추가하세요:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+Node.js 18+ 설치가 필요합니다. 구성을 저장한 후 Claude Desktop을 재시작하세요.
+
+### Claude Code
+
+```bash
+claude mcp add lasersell-docs -- npx @mintlify/mcp --url https://docs.lasersell.io/mcp
+```
+
+### Cursor
+
+Cursor Settings를 열고, **MCP**로 이동하여 **Add new MCP server**를 클릭하고 입력하세요:
+
+- **Name:** `lasersell-docs`
+- **Type:** `command`
+- **Command:** `npx @mintlify/mcp --url https://docs.lasersell.io/mcp`
+
+### Windsurf
+
+Windsurf MCP 구성에 추가하세요:
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+### 기타 MCP 클라이언트
+
+Model Context Protocol을 지원하는 모든 클라이언트는 서버 URL을 사용하여 연결할 수 있습니다:
+
+```
+https://docs.lasersell.io/mcp
+```
+
+전송은 Streamable HTTP입니다. URL을 MCP 클라이언트의 원격 서버 구성에 전달하세요.
+
+## 에이전트가 검색할 수 있는 것
+
+연결되면 `SearchLaserSellDocumentation` 도구가 에이전트에게 다음을 포함한 전체 LaserSell 문서에 대한 접근을 제공합니다:
+
+- `/v1/buy`, `/v1/sell`, Exit Intelligence Stream WebSocket에 대한 **API 참조**.
+- 코드 예제가 포함된 TypeScript, Python, Rust, Go용 **SDK 가이드**.
+- 목표 수익, 손절매, 트레일링 스탑, 졸업 시 매도, 데드라인 타임아웃에 대한 **전략 구성**.
+- Helius Sender, Astralane, 커스텀 RPC를 통한 **트랜잭션 서명 및 제출**.
+- LaserSell을 통해 수익화하는 인테그레이터를 위한 **파트너 수수료 구성**.
+- 지원되는 모든 프로토콜(Pump.fun, PumpSwap, Meteora, Raydium)에 대한 **마켓 컨텍스트 스키마**.
+
+## 예제 쿼리
+
+MCP 서버가 연결되면 AI 클라이언트에 다음과 같은 질문을 할 수 있습니다:
+
+- "LaserSell Python SDK로 매도 트랜잭션을 어떻게 빌드하나요?"
+- "BuildBuyTxRequest의 필드는 무엇인가요?"
+- "TypeScript로 Exit Intelligence Stream에 연결하는 방법을 보여주세요."
+- "트랜잭션 제출에 사용할 수 있는 전송 대상은 무엇인가요?"
+- "파트너 수수료는 어떻게 작동하나요?"

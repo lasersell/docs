@@ -1,0 +1,113 @@
+---
+title: "مثال التكوين"
+description: "مرجع config.yml مُعلّق مع جميع الحقول المتاحة والقيم الافتراضية وتجاوزات متغيرات البيئة."
+---
+
+ينشئ معالج الإعداد `~/.lasersell/config.yml`. عدّله مباشرة وأعد تشغيل البرنامج لتطبيق التغييرات أو أعد تشغيل `lasersell --setup`.
+
+<Warning>
+قيم الاستراتيجية المعروضة أدناه هي أمثلة فقط وليست استراتيجية تداول رسمية. هيئ هذه بناءً على تحمل المخاطر وأسلوب التداول الخاص بك.
+</Warning>
+
+```yaml
+account:
+  # Encrypted keystore or legacy Solana keypair JSON.
+  # Default: ~/.lasersell/wallet.keystore.json
+  # Env: LASERSELL_KEYPAIR_PATH
+  keypair_path: "~/.lasersell/wallet.keystore.json"
+
+  # LaserSell API key (free at https://app.lasersell.io)
+  # Env: LASERSELL_API_KEY
+  api_key: "your-lasersell-api-key"
+
+  # Private Solana RPC endpoint (https:// required).
+  # Env: LASERSELL_RPC_URL or LASERSELL_PRIVATE_RPC_URL
+  rpc_url: "https://your-private-rpc.example.com"
+
+  # Transaction submission backend: "helius_sender" (default), "astralane", or "rpc".
+  # Env: LASERSELL_SEND_TARGET
+  # send_target: "helius_sender"
+
+  # Priority fee tip in lamports (default: 1000000 = 0.001 SOL).
+  # tip_lamports: 1000000
+
+  # Required only when send_target is "astralane".
+  # Env: LASERSELL_ASTRALANE_API_KEY
+  # astralane_api_key: "your-astralane-api-key"
+
+strategy:
+  # Percentages are relative to your detected buy amount. Use "0%" to disable.
+  # At least one exit condition must be enabled (including take_profit_levels).
+
+  target_profit: "20%"       # exit when profit reaches this %
+  stop_loss: "10%"           # exit when loss reaches this %
+  trailing_stop: "5%"        # exit when profit drops this % of entry from its peak
+  deadline_timeout: 0        # force exit after N seconds (0 to disable)
+  sell_on_graduation: false  # auto-sell when token migrates to a new DEX
+
+  # Liquidity guard: exit when pool liquidity drops below safe threshold.
+  liquidity_guard: false
+
+  # Breakeven trail: trailing stop that activates once position breaks even.
+  # Use "0%" to disable.
+  breakeven_trail: "0%"
+
+  # Exit ladder: sell partial amounts at multiple profit thresholds.
+  # Each level specifies the profit % to trigger, % of position to sell,
+  # and an optional trailing stop % for that tranche.
+  take_profit_levels: []
+  # Example exit ladder:
+  # take_profit_levels:
+  #   - profit_pct: 25       # at 25% profit...
+  #     sell_pct: 30          # sell 30% of the position
+  #     trailing_stop_pct: 0  # immediately (no trailing)
+  #   - profit_pct: 50
+  #     sell_pct: 50
+  #     trailing_stop_pct: 3  # with 3% trailing stop
+  #   - profit_pct: 100
+  #     sell_pct: 100
+  #     trailing_stop_pct: 5  # with 5% trailing stop
+
+sell:
+  slippage_pad_bps: 2500              # extra slippage on top of computed value (bps)
+  slippage_retry_bump_bps_first: 20   # extra pad after first slippage error
+  slippage_retry_bump_bps_next: 40    # extra pad after subsequent slippage errors
+  slippage_max_bps: 3000              # max slippage cap (bps)
+  confirm_timeout_sec: 10             # tx confirmation timeout
+  max_retries: 3                      # retry count for failed sells
+
+# Copy trading: watch other wallets and optionally auto-buy when they buy.
+# Positions from watched wallets use the same exit strategy as your own.
+watch_wallets: []
+# Example:
+# watch_wallets:
+#   - pubkey: "TraderWalletPubkey1..."
+#     label: "whale"            # optional display label
+#   - pubkey: "TraderWalletPubkey2..."
+#     auto_buy:
+#       amount: 0.1             # auto-buy with 0.1 SOL
+#       amount_usd1: 0.0        # auto-buy with USD1 (0 to disable)
+```
+
+## تجاوزات متغيرات البيئة
+
+تجاوز أي حقل تكوين بمتغير البيئة المقابل. مفيد لـ Docker والتكامل المستمر أو إدارة الأسرار.
+
+| حقل التكوين | متغير البيئة | مثال |
+|---|---|---|
+| `account.keypair_path` | `LASERSELL_KEYPAIR_PATH` | `/home/user/.lasersell/wallet.keystore.json` |
+| `account.api_key` | `LASERSELL_API_KEY` | `ls_abc123...` |
+| `account.rpc_url` | `LASERSELL_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
+| `account.send_target` | `LASERSELL_SEND_TARGET` | `helius_sender`, `astralane`, or `rpc` |
+| `account.astralane_api_key` | `LASERSELL_ASTRALANE_API_KEY` | `ast_xyz789...` |
+| عبارة مرور المحفظة | `LASERSELL_WALLET_PASSPHRASE` | (للفتح بدون واجهة) |
+
+## أهداف تقديم المعاملات
+
+يدعم LaserSell ثلاث خلفيات لتقديم معاملات البيع. يجب أن يلتزم معظم المستخدمين بالافتراضي.
+
+| الهدف | الوصف |
+|---|---|
+| `helius_sender` | الافتراضي. يستخدم مرسل Helius المحسّن. يتطلب عنوان Helius RPC. |
+| `astralane` | يستخدم خدمة تقديم Astralane. يتطلب `astralane_api_key`. |
+| `rpc` | يرسل مباشرة عبر نقطة نهاية RPC. يعمل مع أي مزود لكن قد يهبط أبطأ. |

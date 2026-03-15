@@ -1,0 +1,135 @@
+---
+title: "Установка"
+description: "Установите LaserSell на Linux, macOS, Windows (WSL) или Docker."
+---
+
+## Быстрая установка
+
+Самый быстрый способ установки на любой платформе:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+Если это работает, переходите к [Быстрому старту](/start-here/quickstart). Варианты для конкретных платформ приведены ниже.
+
+## Руководства по платформам
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh (рекомендуется)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### Ручная настройка APT
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh (рекомендуется)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+Поддерживает Intel и Apple Silicon (серия M).
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### Tarball (без Homebrew)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+LaserSell работает на Windows через WSL (Windows Subsystem for Linux).
+
+### 1. Установите WSL
+
+Откройте PowerShell от имени администратора:
+
+```shellscript
+wsl --install
+```
+
+Перезагрузите компьютер.
+
+### 2. Установите LaserSell
+
+Откройте ваш дистрибутив WSL (например, Ubuntu) и выполните:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. Подготовка
+
+Установите [Docker Desktop](https://www.docker.com/products/docker-desktop/) и создайте пустую папку с именем `lasersell`.
+
+### 2. Запуск
+
+Откройте терминал, перейдите в папку, затем выполните:
+
+**macOS / Linux:**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+При первом запуске мастер настройки запускается внутри контейнера. Файлы конфигурации записываются в подмонтированную папку и сохраняются между запусками.
+
+</Tab>
+</Tabs>
+
+## Обновление
+
+| Метод | Команда |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / Tarball | Повторно запустите `curl -fsSL https://dl.lasersell.io/install.sh \| bash` |
+| Docker | `docker pull lasersell/lasersell` |
+
+## Флаги CLI
+
+| Флаг | Короткий | Описание |
+|------|-------|-------------|
+| `--setup` | | Принудительный запуск мастера настройки |
+| `--config <path>` | `-f` | Путь к кастомному файлу конфигурации |
+| `--debug` | | Запись логов уровня debug в `~/.lasersell/debug.log` |
+| `--smoke` | | Проверка подключения и выход |
+| `--export-private-key` | | Экспорт base58 приватного ключа кошелька в stdout |
+
+`--smoke`, `--setup` и `--export-private-key` взаимоисключающие.

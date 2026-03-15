@@ -1,0 +1,25 @@
+---
+title: "対応DEX"
+description: "LaserSellスワップルーティングのプロトコル、マーケットタイプ、卒業サポート、ローンチパッドカバレッジ。"
+---
+
+対応DEXの完全な一覧、ボンディングカーブとAMMプールの違い、卒業パス、マーケットコンテキストの使用方法については、[英語版ドキュメント](/api/reference/supported-dexs)を参照してください。
+
+## 対応プロトコル
+
+| `market_type` | プロトコル | タイプ | 説明 |
+|----------------------|-----------------------|-----------------|-------------------------------------------------|
+| `pump_fun`           | Pump.fun              | ボンディングカーブ | オリジナルのPump.funボンディングカーブ。 |
+| `pump_swap`          | PumpSwap              | AMM | 卒業したPump.funトークンのPumpSwap AMM。 |
+| `meteora_dbc`        | Meteora DBC           | ダイナミックボンディング | Meteoraダイナミックボンディングカーブプール。 |
+| `meteora_damm_v2`    | Meteora DAMM V2       | AMM | Meteora Dynamic AMM V2プール。 |
+| `raydium_launchpad`  | Raydium Launchpad     | ボンディングカーブ | Raydiumローンチパッドボンディングカーブトークン。 |
+| `raydium_cpmm`       | Raydium CPMM          | AMM | Raydium定積市場メーカープール。 |
+
+## 卒業
+
+| ソースカーブ | 卒業先 |
+|----------------------|-------------------------|
+| `pump_fun`           | `pump_swap`             |
+| `meteora_dbc`        | `meteora_damm_v2`       |
+| `raydium_launchpad`  | `raydium_cpmm`          |

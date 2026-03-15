@@ -1,0 +1,30 @@
+---
+title: "Rust SDK"
+description: "LaserSell Rust SDK를 설치, 구성, 사용하여 async/.await로 트랜잭션을 빌드하고 포지션을 스트리밍하세요."
+---
+
+전체 Rust SDK 참조는 영문 문서 [Rust SDK](/api/sdk/rust)를 참조하세요. 모든 코드 블록과 SDK 예제는 영문 원본과 동일합니다.
+
+## 설치
+
+```bash
+cargo add lasersell-sdk
+cargo add tokio --features full
+```
+
+## 모듈
+
+| 모듈                        | 목적                                |
+|-------------------------------|----------------------------------------|
+| `lasersell_sdk::exit_api`     | `ExitApiClient`, 요청/응답 타입, `ExitApiError` |
+| `lasersell_sdk::tx`           | `SendTarget`, `sign_unsigned_tx`, `send_transaction` |
+| `lasersell_sdk::stream::client` | `StreamClient`, `StreamConfigure`, `StreamConnection`, `StreamSender` |
+| `lasersell_sdk::stream::session` | `StreamSession`, 포지션 추적 |
+| `lasersell_sdk::stream::proto`  | 메시지 타입 (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+| `lasersell_sdk::retry`        | `RetryPolicy` 구성            |
+
+전체 API 클라이언트 사용법, 스트림 세션 코드, 유동성 스냅샷, 트랜잭션 헬퍼, 오류 처리에 대한 코드 예제는 영문 원본 문서를 참조하세요.
+
+## 전체 예제
+
+전체 작동 예제는 [빠른 시작](/api/quickstart)을 참조하세요.

@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "LaserSell API에서 계정의 페이지네이션된 거래 히스토리를 가져옵니다."
+---
+
+## 엔드포인트
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## 헤더
+
+| 헤더      | 필수 | 설명            |
+|-------------|----------|------------------------|
+| `x-api-key` | 예      | LaserSell API 키 |
+
+## 쿼리 매개변수
+
+| 매개변수 | 타입     | 기본값 | 설명                                                       |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit`   | `number` | `50`    | 반환할 최대 거래 수 (최대 200).               |
+| `offset`  | `number` | `0`     | 페이지네이션을 위해 건너뛸 거래 수.                          |
+| `mint`    | `string` | —       | 특정 토큰 민트 주소로 결과 필터링 (base58).         |
+| `wallet`  | `string` | —       | 특정 지갑 공개키로 결과 필터링 (base58).          |
+
+## 응답: `TradeHistoryResponse`
+
+| 필드    | 타입            | 설명                                          |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | 최신순으로 정렬된 거래 기록 배열. |
+| `total`  | `number \| null` | 페이지네이션을 위한 예상 총 일치 거래 수. |
+
+### `TradeHistoryItem` 객체
+
+| 필드                        | 타입             | 설명                                                        |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id`                         | `number`         | 고유 거래 기록 식별자.                                    |
+| `session_id`                 | `number`         | 이 거래를 생성한 스트림 세션.                           |
+| `position_id`                | `number`         | 세션 내 포지션 식별자.                            |
+| `wallet_pubkey`              | `string`         | 포지션을 보유한 지갑 공개키 (base58).                 |
+| `mint`                       | `string`         | 토큰 민트 주소 (base58).                                       |
+| `entry_quote_units`          | `number`         | 견적 자산 원자 단위로 포지션 개시에 사용한 금액.     |
+| `exit_quote_units`           | `number \| null` | 청산 시 견적 자산 원자 단위로 받은 수익금.            |
+| `profit_quote_units`         | `number \| null` | 견적 자산 원자 단위의 순 수익 또는 손실.                    |
+| `tokens`                     | `number`         | 진입 시 취득한 토큰 수(원자 단위).                |
+| `exit_reason`                | `string \| null` | 포지션 청산 이유 (예: `target_profit`, `stop_loss`, `trailing_stop`, `manual`). |
+| `market_kind`                | `string \| null` | 토큰이 거래된 DEX 또는 런치패드 (예: `PumpFun`, `RaydiumCpmm`). |
+| `strategy_target_profit_pct` | `number \| null` | 포지션 개시 시 구성된 목표 수익 비율.      |
+| `strategy_stop_loss_pct`     | `number \| null` | 포지션 개시 시 구성된 손절매 비율.          |
+| `strategy_trailing_stop_pct` | `number \| null` | 포지션 개시 시 구성된 트레일링 스탑 비율.      |
+| `opened_at`                  | `string`         | 포지션 개시 시점의 ISO 8601 타임스탬프.                   |
+| `closed_at`                  | `string \| null` | 포지션 청산 시점의 ISO 8601 타임스탬프.                   |
+
+## curl 예제
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+필터 사용:
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## 응답 예시
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## 오류 응답
+
+전체 오류 엔벨로프 사양과 재시도 가능한 오류 로직은 [오류 처리](/api/exit-api/error-handling)를 참조하세요.

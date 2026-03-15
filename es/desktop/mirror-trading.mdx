@@ -1,0 +1,61 @@
+---
+title: "Mirror Trading"
+description: "Copia operaciones de wallets externas observando su actividad en cadena y replicando automáticamente sus compras."
+---
+
+Mirror Trading te permite observar wallets externas de Solana y copiar automáticamente sus operaciones. Cuando una wallet observada compra un token en un mercado soportado, LaserSell compra el mismo token desde tu wallet usando tu monto de compra configurado. Tu estrategia de salida gestiona la posición automáticamente, igual que cualquier otra operación.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Mirror Trading.mp4"
+/>
+
+## Añadir una wallet de observación
+
+Ingresa una dirección de wallet de Solana o un dominio `.sol` (SNS) para comenzar a observar. La aplicación resuelve dominios SNS automáticamente, para que puedas escribir `alice.sol` en lugar de una clave pública completa.
+
+Cada wallet de observación tiene su propia configuración:
+
+- **Monto de compra (SOL)** — Cuánto SOL gastar al reflejar una compra.
+- **Monto de compra (USD1)** — Cuánto USD1 gastar (cuando el reflejo en USD1 está habilitado en la configuración).
+- **Apodo** — Una etiqueta opcional para fácil identificación. Haz clic en el icono de lápiz para editar en línea.
+- **Habilitado/Deshabilitado** — Interruptor para pausar o reanudar el reflejo sin eliminar la wallet.
+
+## Límites de wallets de observación
+
+Tu nivel de cuenta determina cuántas wallets puedes observar:
+
+| Nivel | Espacios de wallet de observación |
+| :--- | :--- |
+| Personal (Gratis) | 2 |
+| Professional | 10 |
+| Advanced | 25 |
+
+## Cómo funciona el reflejo
+
+1. Una wallet observada compra un token en un mercado soportado.
+2. LaserSell detecta la compra en cadena.
+3. La aplicación compra automáticamente el mismo token desde tu wallet usando el monto de compra configurado para esa wallet de observación.
+4. Tu estrategia de salida (take profit, stop loss, trailing stop, etc.) se aplica a la posición reflejada.
+5. LaserSell sale de la posición automáticamente cuando se cumplen las condiciones.
+
+Las posiciones reflejadas aparecen en el panel de [Posiciones activas](/desktop/active-positions) junto con tus propias operaciones. Están marcadas con la wallet de origen para que puedas distinguir qué posiciones vinieron del reflejo.
+
+## Estadísticas de Mirror
+
+Cada wallet de observación muestra estadísticas de rendimiento:
+
+- Operaciones reflejadas totales
+- Tasa de victorias
+- Mejor y peor operación
+- Tiempo de retención promedio
+- Ganancia total
+
+También hay un resumen global de todas las wallets observadas.
+
+## Comportamiento de posiciones observadas
+
+Las posiciones abiertas a través del reflejo siguen las mismas reglas de salida que tus propias posiciones. Puedes salir manualmente, aplicar anulaciones de estrategia por posición o usar ventas parciales. La única diferencia es que las posiciones observadas no cuentan para los logros de racha de trading.

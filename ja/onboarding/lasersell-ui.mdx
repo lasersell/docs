@@ -1,0 +1,101 @@
+---
+title: "CLIリファレンス"
+description: "LaserSell CLIガイド: デーモン動作、ログ出力、設定。"
+---
+
+LaserSell CLIは、ウォレットを監視し、戦略条件が満たされたときに自動的にエグジットを実行するデーモンとして動作します。
+
+## 仕組み
+
+ウォレットをアンロックした後、CLIはLaserSell Streamに接続して監視を開始します。すべてのアクティビティは構造化されたログ出力としてターミナルにログされます。
+
+```shellscript
+lasersell
+```
+
+デーモンは**Ctrl+C**を押してグレースフルにシャットダウンするまで実行されます。
+
+## ログ出力
+
+CLIはイベントが発生するたびに構造化されたイベントを出力します:
+
+| イベント | 意味 |
+|-------|---------|
+| `startup` | CLI起動、ウォレットアンロック済み |
+| `stream_connected` | LaserSell Streamに接続 |
+| `wallet_registered` | ウォレット所有権がサーバーで検証 |
+| `balance_update` | SOL残高ポーリング |
+| `session_started` | 新しいポジションが検出され監視開始 |
+| `pnl_update` | アクティブポジションの損益更新 |
+| `sell_scheduled` | エグジット条件がトリガー、売却がキューに追加 |
+| `sell_attempt` | 売却トランザクション送信 |
+| `sell_complete` | 売却がオンチェーンで確認 |
+| `session_closed` | ポジションが完全にエグジット |
+| `liquidity_snapshot` | プール流動性更新（トレンド + 深度バンド） |
+| `stream_disconnected` | ストリーム接続切断 |
+
+## CLIフラグ
+
+| フラグ | 短縮 | 説明 |
+|------|-------|-------------|
+| `--setup` | | オンボーディングウィザードを強制実行 |
+| `--config <path>` | `-f` | カスタム設定ファイルのパス |
+| `--debug` | | `~/.lasersell/debug.log`にデバッグレベルログを書き込み |
+| `--smoke` | | 接続ヘルスチェックを実行して終了 |
+| `--export-private-key` | | ウォレットのBase58秘密鍵をstdoutにエクスポート |
+
+`--smoke`、`--setup`、`--export-private-key`は互いに排他的です。
+
+## ヘッドレス運用
+
+CLIはヘッドレスサーバーデプロイメント向けに設計されています。自動アンロックのために、環境変数でパスフレーズを設定:
+
+```shellscript
+export LASERSELL_WALLET_PASSPHRASE="your-passphrase"
+lasersell
+```
+
+VPSでは、`tmux`または`screen`セッションで実行するか、`systemd`を使用してプロセスを管理してください。
+
+## エグジット戦略
+
+CLIは`~/.lasersell/config.yml`で設定されるすべてのLaserSellエグジット戦略をサポートしています:
+
+| 戦略 | 設定フィールド | 説明 |
+|----------|-------------|-------------|
+| テイクプロフィット | `target_profit` | 利益がエントリーのこの%に達したらエグジット |
+| ストップロス | `stop_loss` | 損失がエントリーのこの%に達したらエグジット |
+| トレーリングストップ | `trailing_stop` | 利益がピークからこの%下落したらエグジット |
+| デッドラインタイムアウト | `deadline_timeout` | N秒後に強制エグジット |
+| 卒業時売却 | `sell_on_graduation` | トークンが新しいDEXに移行したらエグジット |
+| エグジットラダー | `take_profit_levels` | 複数の利益閾値で部分的な量を売却 |
+| 流動性ガード | `liquidity_guard` | プール流動性が安全閾値を下回ったらエグジット |
+| ブレークイーブントレール | `breakeven_trail` | ポジションがブレークイーブンになったらアクティベートするトレーリングストップ |
+
+少なくとも1つのエグジット条件が有効である必要があります。完全な設定リファレンスは[設定例](/onboarding/example-configuration)を参照してください。
+
+## コピートレーディング
+
+他のウォレットを監視し、オプションで購入時に自動購入:
+
+```yaml
+watch_wallets:
+  - pubkey: "TraderWallet1..."
+    label: "whale"
+  - pubkey: "TraderWallet2..."
+    auto_buy:
+      amount: 0.1       # SOL
+      amount_usd1: 0.0   # USD1
+```
+
+ウォッチウォレットからのポジションは、自分のポジションと同じエグジット戦略で管理されます。
+
+## 戦略の変更
+
+`~/.lasersell/config.yml`を編集してデーモンを再起動します。変更は次回起動時に有効になります。
+
+セットアップウィザードを再実行するには:
+
+```shellscript
+lasersell --setup
+```

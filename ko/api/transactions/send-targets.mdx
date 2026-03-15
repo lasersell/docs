@@ -1,0 +1,30 @@
+---
+title: "전송 대상"
+description: "서명된 트랜잭션 제출 방법 선택: Default RPC, 커스텀 RPC, Helius Sender 또는 Astralane Iris."
+---
+
+전체 전송 대상 참조는 영문 문서 [Send Targets](/api/transactions/send-targets)를 참조하세요. 모든 코드 블록과 SDK 예제는 영문 원본과 동일합니다.
+
+## 전송 대상이란?
+
+`SendTarget`은 SDK에게 서명된 트랜잭션을 어디에 제출할지 알려줍니다. LaserSell SDK는 각각 다른 사용 사례에 최적화된 네 가지 대상을 지원합니다.
+
+## 사용 가능한 대상
+
+| 대상 | 설명 |
+|---------------------------------|-----------------------|
+| Default RPC | Solana 공용 메인넷 베타 엔드포인트. 테스트 전용. |
+| Custom RPC | 자체 RPC 엔드포인트 URL. 프로덕션 전용 RPC 권장. |
+| Helius Sender | Helius `/fast` 엔드포인트를 통한 최적화된 트랜잭션 랜딩. API 키 불필요. |
+| Astralane Iris | Astralane Iris 게이트웨이를 통한 라우팅. API 키 및 지역 엔드포인트 필요. |
+
+## 권장 사항
+
+| 사용 사례                        | 권장 대상    |
+|---------------------------------|-----------------------|
+| 테스트 및 개발         | Default RPC           |
+| 프로덕션 (일반)            | Helius Sender         |
+| 프로덕션 (레이턴시 민감)  | Astralane Iris        |
+| 프로덕션 (기존 RPC 설정) | Custom RPC            |
+
+전체 코드 예제, 가용 리전 목록, 연결 워밍, send_mode vs SendTarget 비교는 영문 원본 문서를 참조하세요.

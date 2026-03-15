@@ -1,0 +1,73 @@
+---
+title: "Agentes de IA y LaserSell"
+description: "Conecta agentes de IA al motor de Exit Intelligence de LaserSell para trading automatizado de tokens en Solana, gestión de estrategias y monitoreo de posiciones en tiempo real."
+---
+
+Los agentes de IA que interactúan con tokens de Solana pueden usar LaserSell como su capa de ejecución y gestión de salidas. En lugar de construir enrutamiento de swap, manejo de protocolos y lógica de salida desde cero, un agente se conecta a LaserSell y obtiene transacciones preconstruidas, seguimiento de PnL en tiempo real y salidas automatizadas de forma inmediata.
+
+## Qué pueden hacer los agentes con LaserSell
+
+**Construir y ejecutar operaciones.** La [API REST](/api/overview) devuelve transacciones de swap sin firmar para cualquier DEX o launchpad de Solana soportado. Un agente envía un mint y una cantidad, recibe una transacción, la firma y la envía. No se requiere lógica específica de protocolo.
+
+**Automatizar salidas con estrategia.** El [Exit Intelligence Stream](/api/stream/overview) vigila wallets en tiempo real y entrega transacciones de salida preconstruidas cuando se alcanzan umbrales configurables: take profit, stop loss, trailing stop, venta por graduación y deadline timeout. Un agente se conecta una vez y recibe señales de salida automáticamente.
+
+**Monitorear posiciones.** El stream proporciona actualizaciones continuas de PnL, cambios de saldo, aperturas de posición y cierres de posición. Los agentes pueden usar estos datos para tomar decisiones, mostrar información a los usuarios o alimentar otros sistemas.
+
+**Cubrir todos los protocolos principales de Solana.** Una sola integración cubre Pump.fun, PumpSwap, Meteora DBC, Meteora DAMM V2, Raydium Launchpad y Raydium CPMM. El agente no necesita saber en qué protocolo está un token.
+
+## Cómo conectar
+
+Hay tres formas para que los agentes de IA trabajen con LaserSell:
+
+### 1. Servidor MCP (acceso a documentación)
+
+El servidor MCP de LaserSell le da a cualquier cliente de IA compatible con MCP (Claude, Cursor, Windsurf y otros) la capacidad de buscar y recuperar documentación de LaserSell en tiempo real. Esto es útil para agentes que necesitan consultar esquemas de API, patrones de SDK, ejemplos de código o detalles de integración mientras trabajan.
+
+Ver [Servidor MCP](/ai-agents/mcp-server) para instrucciones de configuración.
+
+### 2. Coding Skills (conocimiento de SDK integrado)
+
+Instala el coding skill de LaserSell para darle a tu asistente de IA conocimiento profundo de patrones de SDK, firmas de métodos, ejemplos y solución de problemas cargados directamente en el contexto cuando escribes código de LaserSell.
+
+Ver [Coding Skills](/ai-agents/coding-skills) para instrucciones de instalación.
+
+### 3. SDK y API (integración directa)
+
+Para agentes que necesitan construir transacciones, gestionar posiciones o ejecutar operaciones programáticamente, integra usando el SDK o la API de LaserSell directamente.
+
+- [Resumen de la API](/api/overview) para la superficie completa de la API.
+- [Inicio rápido](/api/quickstart) para construir tu primera transacción.
+- SDKs disponibles en [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust) y [Go](/api/sdk/go).
+
+## Por qué los agentes deberían usar LaserSell
+
+### El problema de integración de agentes
+
+Un agente de IA que quiera operar tokens de Solana hoy tiene que resolver una pila de problemas difíciles: identificar en qué protocolo DEX está un token, deserializar el estado del pool en cadena, calcular cantidades de swap usando matemáticas específicas del protocolo, construir el conjunto correcto de instrucciones, gestionar comisiones de prioridad, manejar reintentos de slippage y sondear cambios de precio para saber cuándo salir. Cada protocolo (Pump.fun, PumpSwap, Raydium, Meteora) tiene un programa diferente, disposiciones de cuentas diferentes y lógica de swap diferente. Son cientos de horas de trabajo de integración, y se rompe cada vez que se lanza un nuevo launchpad.
+
+LaserSell colapsa todo eso en dos llamadas API: una para construir una transacción, un WebSocket para recibir señales de salida.
+
+### Ventajas técnicas
+
+| Capacidad | Sin LaserSell | Con LaserSell |
+|---|---|---|
+| **Enrutamiento de protocolo** | El agente debe detectar en qué DEX está un token, deserializar el estado del pool y construir instrucciones específicas del protocolo para cada uno de más de 6 programas | Una sola llamada API. Envía una dirección mint, recibe una transacción lista para firmar. LaserSell resuelve el protocolo, pool y ruta del lado del servidor |
+| **Lógica de salida** | El agente debe sondear RPC para datos de precios, calcular PnL, rastrear la ganancia pico para trailing stops, gestionar temporizadores para deadlines y construir transacciones de venta manualmente | Conéctate una vez al Exit Intelligence Stream. Recibe eventos `exit_signal_with_tx` con transacciones sin firmar preconstruidas cuando se activan condiciones de estrategia |
+| **Seguimiento de PnL** | El agente debe obtener saldos de tokens, resolver decimales, consultar reservas del pool, calcular precio spot y derivar PnL a intervalos regulares | El stream entrega eventos `pnl_update` continuamente. Sin sondeo, sin llamadas RPC, sin cálculos de precio |
+| **Detección de nuevas posiciones** | El agente debe monitorear el historial de transacciones de la wallet o suscribirse a logs en cadena y analizar cada transacción para identificar compras | El stream dispara `position_opened` con contexto completo (costo base, mint, contexto de mercado) en el momento en que aterriza una compra |
+| **Cobertura multiprotocolo** | Integración separada para curvas de vinculación de Pump.fun, AMM PumpSwap, Raydium Launchpad, Raydium CPMM, Meteora DBC, Meteora DAMM V2 | Una integración cubre los seis. El código del agente no cambia cuando se añade un nuevo protocolo |
+| **Firma de transacciones** | N/A | Todas las transacciones se devuelven sin firmar. El agente firma localmente. Ninguna clave privada sale del entorno del agente |
+| **Manejo de slippage** | El agente debe estimar slippage, reintentar en caso de fallo e incrementar la tolerancia gradualmente | El servidor calcula el slippage. Los reintentos del cliente son automáticos en el SDK con lógica de incremento configurable |
+| **Soporte de nuevos launchpads** | El agente debe hacer ingeniería inversa de cada nuevo programa, construir instrucciones desde cero y mantener compatibilidad continua | LaserSell añade soporte de protocolo del lado del servidor. El agente obtiene cobertura sin cambios de código |
+
+### Qué significa esto en la práctica
+
+**Menos llamadas RPC.** Un agente sin LaserSell necesita sondear datos de precios, obtener saldos y leer estado del pool constantemente. Con el Exit Intelligence Stream, el servidor empuja todo. El uso de RPC del agente se reduce solo al envío de transacciones.
+
+**Ejecución de salida determinística.** Las condiciones de estrategia (TP, SL, trailing stop, deadline, graduación) se evalúan del lado del servidor en cada tick de precio. El agente no necesita estar en línea continuamente ni preocuparse por perder un pico de precio. Cuando se alcanza un umbral, la transacción de salida ya está construida y esperando.
+
+**Sin código específico de protocolo.** El agente envía `{ mint, user_pubkey, amount }` a `/v1/sell` o `/v1/buy`. Ya sea que ese token esté en una curva de vinculación de Pump.fun, un AMM PumpSwap o un pool CPMM de Raydium, la transacción devuelta simplemente funciona.
+
+**Arquitectura orientada a eventos.** El stream es una opción natural para agentes. En lugar de ejecutar bucles de sondeo, el agente se suscribe y reacciona: `position_opened` para registrar una nueva operación, `pnl_update` para mostrar datos, `exit_signal_with_tx` para firmar y enviar. Patrones asincrónicos limpios sin computación desperdiciada.
+
+**Paridad de SDK en 4 lenguajes.** Los SDKs de TypeScript, Python, Rust y Go exponen esquemas idénticos, nombres de métodos y comportamiento. Un agente construido en Python funciona de la misma manera que uno construido en Rust. Ningún SDK es un ciudadano de segunda clase.

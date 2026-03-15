@@ -1,0 +1,160 @@
+---
+title: "Жизненный цикл соединения"
+description: "Рукопожатие WebSocket, hello_ok, лимиты, поведение переподключения, ping/pong и абстракция StreamClient vs StreamSession для Exit Intelligence Stream."
+---
+
+## Шаги подключения
+
+### 1. Открытие WebSocket
+
+Подключитесь к эндпоинту Exit Intelligence Stream с API ключом в заголовке `x-api-key`:
+
+```
+wss://stream.lasersell.io/v1/ws
+```
+
+### 2. Получение `hello_ok`
+
+Сразу после открытия соединения сервер отправляет сообщение `hello_ok`:
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+Объект `limits` отражает лимиты вашего тарифа. См. [Лимиты и тарифы](/api/reference/rate-limits) для деталей.
+
+### 3. Отправка `configure`
+
+После получения `hello_ok` отправьте сообщение `configure` с вашими кошельками и стратегией:
+
+```json
+{
+  "type": "configure",
+  "wallet_pubkeys": ["WALLET_PUBKEY_1", "WALLET_PUBKEY_2"],
+  "strategy": {
+    "target_profit_pct": 5.0,
+    "stop_loss_pct": 1.5,
+    "trailing_stop_pct": 3.0
+  },
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000
+}
+```
+
+### 4. Получение подтверждения
+
+Сервер отвечает начальными сообщениями `balance_update` для токенов, уже имеющихся в настроенных кошельках. Если обнаружена позиция, вы также получите `position_opened`.
+
+## Объект `limits`
+
+| Поле | Тип | Описание |
+|------------------------------|----------|------------------------------------------------|
+| `hi_capacity` | `number` | Максимум высокоприоритетных буферизованных сообщений. |
+| `pnl_flush_ms` | `number` | Интервал отправки обновлений PnL (мс). |
+| `max_positions_per_session` | `number` | Макс. отслеживаемых позиций на сессию. |
+| `max_wallets_per_session` | `number` | Макс. кошельков на сессию. |
+| `max_positions_per_wallet` | `number` | Макс. отслеживаемых позиций на кошелёк. |
+| `max_sessions_per_api_key` | `number` | Макс. одновременных сессий на API ключ. |
+
+## Переподключение
+
+SDK автоматически обрабатывают переподключение. При разрыве WebSocket:
+
+1. Клиент ждёт с экспоненциальной задержкой, начиная со 100 мс.
+2. Задержка удваивается при каждой попытке до максимума 2000 мс.
+3. При успешном переподключении клиент повторно отправляет сообщение `configure`.
+4. Сервер повторно отправляет события `balance_update` и `position_opened` для существующих активов.
+
+Вам не нужно реализовывать логику переподключения самостоятельно.
+
+## Ping и Pong
+
+### Клиентский Ping
+
+Отправьте `ping` для измерения задержки:
+
+```json
+{
+  "type": "ping",
+  "client_time_ms": 1706000000000
+}
+```
+
+Сервер отвечает `pong`:
+
+```json
+{
+  "type": "pong",
+  "server_time_ms": 1706000000001
+}
+```
+
+### Серверный Ping
+
+Сервер также может отправлять ping на уровне протокола WebSocket. SDK автоматически отвечают кадрами pong.
+
+## StreamClient vs StreamSession
+
+### `StreamClient`
+
+Низкоуровневый клиент управляет необработанным WebSocket-соединением:
+
+- Обрабатывает подключение, переподключение и кадрирование сообщений.
+- Возвращает необработанные объекты `ServerMessage` из `recv()`.
+- Предоставляет `StreamSender` для отправки клиентских сообщений.
+- Поддерживает **разделение каналов** через `connectLanes()`, которое разделяет высокоприоритетные сообщения (сигналы выхода, события позиций) от низкоприоритетных (`pnl_update`).
+
+### `StreamSession`
+
+Высокоуровневая сессия обёртывает `StreamClient`:
+
+- **Отслеживание позиций**: автоматически поддерживает карту открытых позиций по ID и токен-аккаунту.
+- **Типизированные события**: возвращает объекты `StreamEvent` с прикреплённым `PositionHandle`.
+- **Таймеры дедлайнов**: автоматически запрашивает сигналы выхода после `deadline_timeout_sec`.
+- **Обновления стратегии**: методы `updateStrategy()` и `updateStrategyOptional()`.
+
+Для большинства интеграций используйте `StreamSession`.
+
+## Каналы
+
+Разделение каналов разбивает поток сообщений на два приёмника:
+
+- **Высокоприоритетный канал**: `hello_ok`, `error`, `balance_update`, `position_opened`, `position_closed`, `exit_signal_with_tx`
+- **Низкоприоритетный канал**: `pnl_update`
+
+Это предотвращает блокировку времязависимых сигналов выхода частыми обновлениями PnL.
+
+Разделение каналов в настоящее время доступно только в **TypeScript SDK** через `connectLanes()`:
+
+```typescript
+const client = new StreamClient("YOUR_API_KEY");
+const connection = await client.connectLanes(configure, {
+  lowPriorityCapacity: 512,
+});
+
+const [sender, highRx, lowRx] = connection.split();
+
+// Process high priority in main loop
+for await (const msg of highRx) {
+  // exit signals, position events...
+}
+
+// Process low priority in background
+for await (const msg of lowRx) {
+  // pnl_update...
+}
+```
+
+Когда буфер низкого приоритета заполнен, самое старое сообщение отбрасывается для поддержания отзывчивости Exit Intelligence Stream.

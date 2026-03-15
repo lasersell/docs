@@ -1,0 +1,108 @@
+---
+title: "Servidor MCP"
+description: "Conecta agentes de IA y clientes compatibles con MCP a la documentación de LaserSell a través del Model Context Protocol."
+---
+
+El servidor MCP de LaserSell permite que cualquier cliente de IA compatible con MCP busque y recupere documentación de LaserSell en tiempo real. Esto da a los agentes de IA acceso a referencias de API, guías de SDK, ejemplos de código y detalles de integración sin salir de su flujo de trabajo.
+
+## URL del servidor
+
+```
+https://docs.lasersell.io/mcp
+```
+
+## Herramientas disponibles
+
+| Herramienta | Descripción |
+|------|-------------|
+| `SearchLaserSellDocumentation` | Busca en la base de conocimiento de documentación de LaserSell para encontrar información relevante, ejemplos de código, referencias de API y guías. Devuelve contenido contextual con títulos y enlaces directos a páginas de documentación. |
+
+## Configuración
+
+### Claude Desktop
+
+Añade lo siguiente a tu archivo de configuración MCP de Claude Desktop:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+Requiere Node.js 18+ instalado en tu máquina. Reinicia Claude Desktop después de guardar la configuración.
+
+### Claude Code
+
+```bash
+claude mcp add lasersell-docs -- npx @mintlify/mcp --url https://docs.lasersell.io/mcp
+```
+
+### Cursor
+
+Abre la configuración de Cursor, navega a **MCP**, haz clic en **Add new MCP server** e ingresa:
+
+- **Name:** `lasersell-docs`
+- **Type:** `command`
+- **Command:** `npx @mintlify/mcp --url https://docs.lasersell.io/mcp`
+
+### Windsurf
+
+Añade a tu configuración MCP de Windsurf:
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+### Otros clientes MCP
+
+Cualquier cliente que soporte el Model Context Protocol puede conectarse usando la URL del servidor:
+
+```
+https://docs.lasersell.io/mcp
+```
+
+El transporte es Streamable HTTP. Pasa la URL a la configuración de servidor remoto de tu cliente MCP.
+
+## Qué pueden buscar los agentes
+
+Una vez conectada, la herramienta `SearchLaserSellDocumentation` da a los agentes acceso a la documentación completa de LaserSell, incluyendo:
+
+- **Referencia de API** para `/v1/buy`, `/v1/sell` y el WebSocket del Exit Intelligence Stream.
+- **Guías de SDK** para TypeScript, Python, Rust y Go con ejemplos de código.
+- **Configuración de estrategia** para take profit, stop loss, trailing stop, venta por graduación y deadline timeout.
+- **Firma y envío de transacciones** a través de Helius Sender, Astralane y RPC personalizado.
+- **Configuración de comisiones de partner** para integradores que monetizan a través de LaserSell.
+- **Esquemas de market context** para todos los protocolos soportados (Pump.fun, PumpSwap, Meteora, Raydium).
+
+## Consultas de ejemplo
+
+Una vez que el servidor MCP está conectado, puedes hacer preguntas a tu cliente de IA como:
+
+- "¿Cómo construyo una transacción de venta con el SDK de Python de LaserSell?"
+- "¿Cuáles son los campos en un BuildBuyTxRequest?"
+- "Muéstrame cómo conectar al Exit Intelligence Stream en TypeScript."
+- "¿Qué send targets están disponibles para el envío de transacciones?"
+- "¿Cómo funcionan las comisiones de partner?"

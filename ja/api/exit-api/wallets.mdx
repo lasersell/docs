@@ -1,0 +1,181 @@
+---
+title: "ウォレット登録"
+description: "Ed25519の所有権証明を使用してExit Intelligence Stream用にウォレットを登録します。"
+---
+
+## 概要
+
+ウォレット登録は、LaserSell APIに対してSolanaウォレットの所有権を証明します。Exit Intelligence Streamにウォレットを接続する前に登録が必要です。ストリームは`configure`メッセージ内のすべてのウォレットがアカウントに登録されていることを検証します。
+
+登録にはEd25519署名を使用するため、オンチェーントランザクションは不要です。
+
+## `POST /v1/wallets/register`
+
+Ed25519署名で所有権を証明してウォレットを登録します。
+
+### リクエスト
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "signature": "base58-encoded-ed25519-signature",
+  "message": "lasersell-register:YourWalletPubkey...:1706000000",
+  "label": "My Trading Wallet"
+}
+```
+
+| フィールド | 型 | 必須 | 説明 |
+|-----------------|----------|----------|--------------------------------------------------------|
+| `wallet_pubkey` | `string` | はい | 登録するSolanaウォレット公開鍵。 |
+| `signature`     | `string` | はい | メッセージのEd25519署名（base58エンコード）。 |
+| `message`       | `string` | はい | 構造化メッセージ: `lasersell-register:<pubkey>:<unix_timestamp>`。タイムスタンプは5分以内である必要があります。 |
+| `label`         | `string` | いいえ | ウォレットのオプションの人間可読ラベル。 |
+
+### レスポンス
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "registered": true
+}
+```
+
+### 認証
+
+有効なAPIキーを含む`x-api-key`ヘッダーが必要です。
+
+### エラー
+
+| ステータス | コード | 説明 |
+|--------|------|-------------|
+| 400 | Bad Request | 無効なpubkeyフォーマット、不正なメッセージ、またはタイムスタンプ期限切れ（5分超）。 |
+| 403 | Forbidden | APIキーの欠落/無効、または署名検証失敗。 |
+
+## `DELETE /v1/wallets`
+
+ウォレットの登録を解除します。
+
+### リクエスト
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey..."
+}
+```
+
+### レスポンス
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "removed": true
+}
+```
+
+## SDKの使用方法
+
+4つのSDKすべてにウォレット登録用のヘルパーメソッドが用意されています。
+
+### `proveOwnership` / `prove_ownership`
+
+キーペアを使用してローカルで`WalletProof`を生成します。ネットワーク呼び出しのない純粋な暗号操作です。
+
+<CodeGroup>
+```typescript TypeScript
+import { proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+// proof = { walletPubkey, signature, message }
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+
+proof = prove_ownership(keypair)
+# proof = WalletProof(wallet_pubkey, signature, message)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::prove_ownership;
+
+let proof = prove_ownership(&keypair);
+// proof = WalletProof { wallet_pubkey, signature, message }
+```
+
+```go Go
+proof := lasersell.ProveOwnership(privateKey)
+// proof = WalletProof{WalletPubkey, Signature, Message}
+```
+</CodeGroup>
+
+### `registerWallet` / `register_wallet`
+
+証明をAPIに送信してウォレットを登録します。
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withApiKey(apiKey);
+await client.registerWallet(proof, "My Wallet");
+```
+
+```python Python
+client = ExitApiClient.with_api_key(api_key)
+await client.register_wallet(proof, label="My Wallet")
+```
+
+```rust Rust
+client.register_wallet(&proof, Some("My Wallet")).await?;
+```
+
+```go Go
+client.RegisterWallet(ctx, proof, lasersell.Ptr("My Wallet"))
+```
+</CodeGroup>
+
+### `connectWithWallets` / `connect_with_wallets`
+
+ウォレットの登録とストリーム接続を1ステップで行う便利メソッドです。
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient, proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+const client = new StreamClient(apiKey);
+const session = await client.connectWithWallets(
+  [proof],
+  { target_profit_pct: 50, stop_loss_pct: 10 },
+  120, // deadline_timeout_sec
+);
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+from lasersell_sdk.stream.client import StreamClient
+
+proof = prove_ownership(keypair)
+client = StreamClient(api_key)
+session = await client.connect_with_wallets(
+    [proof],
+    {"target_profit_pct": 50, "stop_loss_pct": 10},
+    deadline_timeout_sec=120,
+)
+```
+
+```rust Rust
+let proof = prove_ownership(&keypair);
+let client = StreamClient::new(api_key);
+let session = client.connect_with_wallets(
+    &[proof],
+    strategy,
+    120,
+).await?;
+```
+
+```go Go
+// Go SDK: register separately, then connect
+proof := lasersell.ProveOwnership(privateKey)
+client.RegisterWallet(ctx, proof, nil)
+session, _ := stream.ConnectSession(ctx, streamClient, configure)
+```
+</CodeGroup>

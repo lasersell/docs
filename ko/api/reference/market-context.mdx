@@ -1,0 +1,45 @@
+---
+title: "마켓 컨텍스트"
+description: "지원되는 각 DEX 프로토콜의 중첩 객체가 포함된 전체 MarketContextMsg 스키마."
+---
+
+## 개요
+
+`MarketContextMsg`는 토큰 시장에 사용되는 DEX 풀과 프로토콜을 설명합니다. 다음에 나타납니다:
+
+- `position_opened` 서버 이벤트
+- `exit_signal_with_tx` 서버 이벤트
+- `BuildSellTxRequest` (선택적, 서버 측 해석을 건너뛰기 위해)
+
+빌드 요청에서 생략하면 서버가 자동으로 컨텍스트를 해석합니다.
+
+## `MarketContextMsg` 스키마
+
+| 필드               | 타입     | 필수 | 설명                                    |
+|---------------------|----------|----------|------------------------------------------------|
+| `market_type`       | `string` | 예      | 지원되는 마켓 타입 중 하나 (아래 참조). |
+| `pumpfun`           | `object` | 아니오       | Pump.fun 본딩 커브 컨텍스트.                |
+| `pumpswap`          | `object` | 아니오       | PumpSwap AMM 컨텍스트.                          |
+| `meteora_dbc`       | `object` | 아니오       | Meteora DBC 컨텍스트.                           |
+| `meteora_damm_v2`   | `object` | 아니오       | Meteora DAMM V2 컨텍스트.                       |
+| `raydium_launchpad` | `object` | 아니오       | Raydium Launchpad 컨텍스트.                     |
+| `raydium_cpmm`      | `object` | 아니오       | Raydium CPMM 컨텍스트.                          |
+
+중첩 객체 중 정확히 하나가 `market_type`과 일치하여 존재해야 합니다.
+
+<Note>
+`market_type` 값은 밑줄을 사용하며(예: `pump_fun`), 중첩 객체 키는 밑줄을 사용하지 않습니다(예: `pumpfun`). 아래 표에 표시된 정확한 케이싱과 일치시키세요.
+</Note>
+
+## `market_type` 값
+
+| 값                | 프로토콜              |
+|----------------------|-----------------------|
+| `pump_fun`           | Pump.fun              |
+| `pump_swap`          | PumpSwap              |
+| `meteora_dbc`        | Meteora DBC           |
+| `meteora_damm_v2`    | Meteora DAMM V2       |
+| `raydium_launchpad`  | Raydium Launchpad     |
+| `raydium_cpmm`       | Raydium CPMM          |
+
+전체 중첩 컨텍스트 객체 스키마 (PumpFunContextMsg, PumpSwapContextMsg, MeteoraDbcContextMsg, MeteoraDammV2ContextMsg, RaydiumLaunchpadContextMsg, RaydiumCpmmContextMsg), JSON 예제, 빌드 요청에서의 마켓 컨텍스트 전달 방법, TypeScript 타입 참조에 대한 내용은 영문 원본 문서 [Market Context](/api/reference/market-context)를 참조하세요.

@@ -1,0 +1,67 @@
+---
+title: "Configuración de estrategia"
+description: "Configura umbrales de take profit, stop loss, trailing stop y venta por graduación para el Exit Intelligence Stream."
+---
+
+## Esquema `StrategyConfigMsg`
+
+| Campo                | Tipo      | Requerido | Descripción                                                 |
+|----------------------|-----------|----------|-------------------------------------------------------------|
+| `target_profit_pct`  | `number`  | Sí       | Umbral de take profit como porcentaje (por ejemplo, `5` = 5%). |
+| `stop_loss_pct`      | `number`  | Sí       | Umbral de stop loss como porcentaje (por ejemplo, `1.5` = 1.5%). |
+| `trailing_stop_pct`  | `number`  | No       | Porcentaje de trailing stop desde el pico. Se activa solo después de que la posición esté en ganancia. |
+| `sell_on_graduation` | `boolean` | No       | Si es `true`, auto vende cuando un token de curva de vinculación se gradúa a un pool AMM. |
+| `take_profit_levels` | `TakeProfitLevelMsg[]` | No | Ladder de salida: vender cantidades parciales en múltiples umbrales de ganancia. Cada nivel tiene `profit_pct` (activación), `sell_pct` (porción a vender) y `trailing_stop_pct` (trailing stop opcional para ese nivel). |
+| `liquidity_guard` | `boolean` | No | Cuando está habilitado, el stream verifica la liquidez disponible del pool antes de generar una señal de salida. Previene salidas en liquidez escasa. Por defecto: `false`. |
+| `breakeven_trail_pct` | `number` | No | Un trailing stop que se activa una vez que la posición alcanza breakeven, siguiendo desde el punto de breakeven en lugar del pico. |
+
+Al menos uno de `target_profit_pct`, `stop_loss_pct`, `trailing_stop_pct` o `deadline_timeout_sec` (en el mensaje configure) debe ser mayor que cero.
+
+### Esquema `TakeProfitLevelMsg`
+
+| Campo | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `profit_pct` | `number` | Sí | Porcentaje de ganancia al cual este nivel se activa (por ejemplo, `20` = 20%). |
+| `sell_pct` | `number` | Sí | Porcentaje de la posición a vender en este nivel (por ejemplo, `50` = vender 50%). |
+| `trailing_stop_pct` | `number` | No | Trailing stop opcional para este nivel. Si se establece, en lugar de vender inmediatamente en `profit_pct`, se activa un trailing stop en este nivel. Por defecto: `0` (vender inmediatamente). |
+
+## Establecer estrategia al conectar
+
+La estrategia se proporciona en el mensaje `configure` cuando te conectas por primera vez. Ver los ejemplos de código en la [documentación en inglés](/api/stream/strategy-configuration) para implementaciones en los 4 SDKs.
+
+## Ladder de salida (Take Profit Levels)
+
+Un ladder de salida te permite tomar ganancias parciales en múltiples umbrales en lugar de salir de toda tu posición a un solo precio. Cada nivel especifica un objetivo de ganancia y el porcentaje de la posición restante a vender.
+
+### Cómo funciona
+
+1. Cuando la ganancia alcanza el `profit_pct` de un nivel, el stream vende `sell_pct` de la posición actual.
+2. Si un nivel tiene `trailing_stop_pct > 0`, se activa un trailing stop en ese nivel en lugar de vender inmediatamente.
+3. Los niveles se evalúan en orden del `profit_pct` más bajo al más alto.
+4. El `target_profit_pct` global aún aplica como tope; si se alcanza antes de que todos los niveles se disparen, la posición restante se vende.
+
+## Guarda de liquidez
+
+Cuando `liquidity_guard` está habilitada, el stream verifica la liquidez del pool antes de generar una señal de salida. Si el pool no puede absorber la venta con un slippage razonable, la señal se difiere hasta que la liquidez mejore o un timeout fuerza la salida.
+
+## Trail de breakeven
+
+El campo `breakeven_trail_pct` habilita un trailing stop que se activa una vez que una posición alcanza breakeven (ganancia >= 0), siguiendo desde el punto de breakeven en lugar del pico.
+
+## Trailing stop explicado
+
+El trailing stop rastrea la ganancia más alta observada desde que la posición se abrió. Cuando la ganancia cae desde ese pico por `trailing_stop_pct`, se dispara una señal de salida. El trailing stop solo se activa una vez que la posición está en ganancia.
+
+## Actualizar estrategia durante la sesión
+
+Puedes cambiar la estrategia en cualquier momento sin reconectar enviando un mensaje `update_strategy`. La nueva estrategia surte efecto inmediatamente para todas las posiciones rastreadas.
+
+## Timeout de deadline
+
+El `deadline_timeout_sec` se establece en el mensaje `configure` (no en el objeto de estrategia). Define el tiempo máximo en segundos para mantener una posición antes de solicitar una señal de salida, independientemente de la ganancia o pérdida.
+
+## Anulación de estrategia por posición
+
+Puedes anular la estrategia global para posiciones individuales sin afectar otras posiciones rastreadas. Esto es útil cuando quieres reglas de salida diferentes para tokens específicos. Las anulaciones son efímeras y no se persisten entre reconexiones.
+
+Ver la [documentación en inglés](/api/stream/strategy-configuration) para ejemplos de código completos en los 4 SDKs.

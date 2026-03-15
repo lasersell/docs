@@ -1,0 +1,57 @@
+---
+title: "GET /v1/account"
+description: "استرجاع مستوى حسابك واسم الخطة وحدود الاستخدام من LaserSell API."
+---
+
+## نقطة النهاية
+
+```
+GET https://api.lasersell.io/v1/account
+```
+
+## الترويسات
+
+| Header      | Required | Description            |
+|-------------|----------|------------------------|
+| `x-api-key` | Yes      | مفتاح LaserSell API الخاص بك |
+
+## الاستجابة: `AccountResponse`
+
+| Field       | Type     | Description                                      |
+|-------------|----------|--------------------------------------------------|
+| `tier`      | `number` | معرف المستوى الرقمي (`0`, `1`, أو `2`).      |
+| `tier_name` | `string` | اسم الخطة المقروء (`free`, `tier_1`, `tier_2`). |
+| `limits`    | `object` | حدود الاستخدام لخطتك (انظر أدناه).          |
+
+### كائن `limits`
+
+| Field                       | Type     | Description                                           |
+|-----------------------------|----------|-------------------------------------------------------|
+| `max_wallets`               | `number` | أقصى عدد محافظ يمكنك تتبعها في وقت واحد.         |
+| `max_positions_per_wallet`  | `number` | أقصى عدد مراكز مفتوحة لكل محفظة.                    |
+| `max_positions_per_session` | `number` | أقصى عدد مراكز مفتوحة عبر جميع المحافظ.      |
+
+## مثال curl
+
+```bash
+curl https://api.lasersell.io/v1/account \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## مثال استجابة
+
+```json
+{
+  "tier": 1,
+  "tier_name": "tier_1",
+  "limits": {
+    "max_wallets": 5,
+    "max_positions_per_wallet": 100,
+    "max_positions_per_session": 500
+  }
+}
+```
+
+## استجابات الأخطاء
+
+راجع [معالجة الأخطاء](/api/exit-api/error-handling) لمواصفات مغلف الأخطاء الكامل ومنطق الأخطاء القابلة لإعادة المحاولة.

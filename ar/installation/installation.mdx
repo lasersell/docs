@@ -1,0 +1,135 @@
+---
+title: "التثبيت"
+description: "ثبّت LaserSell على Linux أو macOS أو Windows (WSL) أو Docker."
+---
+
+## التثبيت السريع
+
+أسرع طريقة للتثبيت على أي منصة:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+إذا نجح ذلك، انتقل إلى [البدء السريع](/start-here/quickstart). خيارات خاصة بالمنصة أدناه.
+
+## أدلة المنصات
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh (موصى به)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### إعداد APT يدوي
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh (موصى به)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+يدعم كلاً من Intel وApple Silicon (سلسلة M).
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### ملف مضغوط (بدون Homebrew)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+يعمل LaserSell على Windows من خلال WSL (نظام Windows الفرعي لنظام Linux).
+
+### 1. ثبّت WSL
+
+افتح PowerShell كمسؤول:
+
+```shellscript
+wsl --install
+```
+
+أعد تشغيل جهازك.
+
+### 2. ثبّت LaserSell
+
+افتح توزيعة WSL (مثل Ubuntu) وشغّل:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. التحضير
+
+ثبّت [Docker Desktop](https://www.docker.com/products/docker-desktop/) وأنشئ مجلداً فارغاً باسم `lasersell`.
+
+### 2. التشغيل
+
+افتح طرفية، انتقل إلى المجلد، ثم شغّل:
+
+**macOS / Linux:**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+عند أول تشغيل، يُطلق معالج الإعداد داخل الحاوية. تُكتب ملفات التكوين في المجلد المركب وتستمر عبر التشغيلات.
+
+</Tab>
+</Tabs>
+
+## الترقية
+
+| الطريقة | الأمر |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / ملف مضغوط | أعد تشغيل `curl -fsSL https://dl.lasersell.io/install.sh \| bash` |
+| Docker | `docker pull lasersell/lasersell` |
+
+## خيارات سطر الأوامر
+
+| الخيار | اختصار | الوصف |
+|------|-------|-------------|
+| `--setup` | | فرض تشغيل معالج الإعداد |
+| `--config <path>` | `-f` | مسار ملف تكوين مخصص |
+| `--debug` | | كتابة سجلات بمستوى التصحيح إلى `~/.lasersell/debug.log` |
+| `--smoke` | | تشغيل فحص صحة الاتصال والخروج |
+| `--export-private-key` | | تصدير المفتاح الخاص لمحفظتك بصيغة base58 إلى المخرجات القياسية |
+
+`--smoke` و`--setup` و`--export-private-key` متبادلة الاستبعاد.

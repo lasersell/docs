@@ -1,0 +1,27 @@
+---
+title: "SDK de Go"
+description: "Instala, configura y usa el SDK de Go de LaserSell con patrones context.Context para construir transacciones y transmitir posiciones."
+---
+
+## Instalación
+
+```bash
+go get github.com/lasersell/lasersell-sdk/go
+```
+
+## Paquetes
+
+| Paquete                                   | Propósito                                |
+|-------------------------------------------|----------------------------------------|
+| `github.com/lasersell/lasersell-sdk/go`   | `ExitAPIClient`, `SendTarget`, `SignUnsignedTx`, `SendTransaction` |
+| `github.com/lasersell/lasersell-sdk/go/stream` | `StreamClient`, `StreamSession`, `StreamConfigure`, tipos de mensajes |
+
+Todos los métodos aceptan un `context.Context` para cancelación y timeouts.
+
+Los campos opcionales en el SDK de Go usan tipos puntero (`*int`, `*string`).
+
+Para ejemplos completos de código, consulta la [documentación en inglés](/api/sdk/go).
+
+## Ejemplo completo
+
+Ver el [Inicio rápido](/api/quickstart) para un ejemplo completo funcional.

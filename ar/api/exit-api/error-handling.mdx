@@ -1,0 +1,238 @@
+---
+title: "معالجة الأخطاء"
+description: "رموز حالة HTTP وتنسيق مغلف الأخطاء وأنواع ExitApiError وسلوك إعادة المحاولة لـ LaserSell API."
+---
+
+## رموز حالة HTTP
+
+| Status | المعنى                            | قابل لإعادة المحاولة |
+|--------|------------------------------------|-----------|
+| 200    | نجاح                            | غير ذي صلة       |
+| 400    | طلب سيئ (معاملات غير صالحة أو رمز غير صالح أو برنامج رمز غير مدعوم) | لا  |
+| 401    | غير مصرح (مفتاح API مفقود أو غير صالح) | لا |
+| 404    | سوق غير مدعوم أو رمز لم يُفهرس بعد | لا (انظر أدناه) |
+| 422    | غير قابل للمعالجة (طلب صالح لكن لا مسار قابل للتنفيذ) | لا |
+| 429    | محدود المعدل                       | نعم       |
+| 502    | بوابة سيئة (فشل RPC أو تبادل لامركزي) | نعم |
+| 503    | الخدمة غير متاحة (الموجه غير جاهز أو متوقف) | نعم |
+| 500    | خطأ خادم داخلي              | نعم       |
+
+## مغلفات الاستجابة
+
+### نجاح
+
+```json
+{
+  "status": "ok",
+  "tx": "base64-encoded unsigned transaction",
+  "route": { "market_type": "pumpswap", "pool_id": "..." }
+}
+```
+
+### سوق غير مدعوم
+
+يُعاد عندما لا يوجد مسار قابل للتنفيذ للرمز على أي تبادل لامركزي مدعوم. يوفر حقل `message` شرحاً مقروئاً.
+
+```json
+{
+  "status": "unsupported",
+  "reason": "no_route",
+  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+}
+```
+
+| Reason | Status | Description |
+|--------|--------|-------------|
+| `no_route` | 404 | لا يوجد تبادل لامركزي مدعوم لديه مجمع لهذا الرمز |
+| `invalid_mint` | 400 | عنوان الرمز غير موجود على السلسلة |
+| `unsupported_token_program` | 400 | الرمز يستخدم برنامجاً غير SPL Token أو Token-2022 |
+
+### لم يُفهرس
+
+يُعاد عندما يوجد الرمز لكن لم يتم حله بعد. أعد المحاولة بعد تأخير قصير.
+
+```json
+{
+  "status": "not_indexed",
+  "mint": "So11111111111111111111111111111111111111112",
+  "reason": "mint not indexed yet; try again shortly"
+}
+```
+
+### خطأ
+
+استجابات أخطاء عامة لإخفاقات التحقق وحدود المعدل وأخطاء الخادم.
+
+```json
+{
+  "error": "descriptive error message"
+}
+```
+
+تحلل حزم التطوير جميع متغيرات الاستجابة وتكشفها عبر نوع `ExitApiError`.
+
+## أنواع `ExitApiError`
+
+تكشف كل حزمة تطوير `ExitApiError` (أو ما يعادله) بمميز `kind`:
+
+| Kind              | المحفز                                    | قابل لإعادة المحاولة |
+|-------------------|--------------------------------------------|-----------|
+| `transport`       | فشل شبكة أو خطأ DNS أو مهلة        | نعم       |
+| `http_status`     | استجابة HTTP غير 2xx                      | نعم إذا الحالة >= 500 أو 429 |
+| `envelope_status` | الخادم أعاد `{ "status": "error" }`    | لا        |
+| `parse`           | لم يمكن تحليل جسم الاستجابة كـ JSON  | لا        |
+
+### التحقق من قابلية إعادة المحاولة
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## سلوك إعادة المحاولة المدمج
+
+تتضمن جميع حزم التطوير إعادة محاولة تلقائية بهذه الافتراضيات:
+
+| Setting             | Default Value |
+|---------------------|---------------|
+| Max attempts        | 2             |
+| Initial backoff     | 25 ms         |
+| Max backoff         | 25 ms         |
+| Jitter              | 25 ms         |
+| Connect timeout     | 200 ms        |
+| Attempt timeout     | 900 ms        |
+
+تنطلق إعادة المحاولة فقط للأخطاء حيث يُعيد `isRetryable()` القيمة `true` (إخفاقات النقل واستجابات 5xx و429 لحدود المعدل).
+
+### تخصيص سياسة إعادة المحاولة
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+```rust Rust
+use std::time::Duration;
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+use secrecy::SecretString;
+
+let client = ExitApiClient::with_options(
+    Some(SecretString::new("YOUR_API_KEY".into())),
+    ExitApiClientOptions {
+        connect_timeout: Duration::from_millis(200),
+        attempt_timeout: Duration::from_millis(2000),
+        retry_policy: RetryPolicy {
+            max_attempts: 3,
+            initial_backoff: Duration::from_millis(50),
+            max_backoff: Duration::from_millis(200),
+            jitter: Duration::from_millis(50),
+        },
+    },
+)?;
+```
+
+```go Go
+import (
+    "time"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 200 * time.Millisecond,
+    AttemptTimeout: 2000 * time.Millisecond,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+})
+```
+</CodeGroup>
+
+## أفضل الممارسات
+
+- **لا تعد المحاولة** لأخطاء `400` أو `401` أو `422`. هذه تشير إلى مشكلة في الطلب أو المصادقة يجب إصلاحها في الكود.
+- **لا تعد المحاولة** لـ `404` مع `"status": "unsupported"`. الرمز ليس لديه سوق مدعوم.
+- **أعد المحاولة مرة** لـ `404` مع `"status": "not_indexed"`. قد يحتاج الرمز لحظة للحل.
+- **تراجع أسياً** عند استجابات `429`. تتعامل إعادة المحاولة المدمجة مع هذا تلقائياً.
+- **أعد المحاولة مع تراجع** عند أخطاء `502` و`503`. هذه مشاكل بنية تحتية عابرة.
+- **سجّل تفاصيل الأخطاء** بما في ذلك `kind` و`status` و`body` للتصحيح.
+- إذا رأيت أخطاء `envelope_status` متكررة، تحقق من صحة عنوان `mint` و`user_pubkey`.

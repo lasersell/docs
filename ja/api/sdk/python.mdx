@@ -1,0 +1,27 @@
+---
+title: "Python SDK"
+description: "LaserSell Python SDKのインストール、設定、非同期パターンによるトランザクション構築とポジションストリーミング。"
+---
+
+Python SDKの完全なインストール手順、モジュール一覧、APIクライアント使用法、Exit Intelligence Streamセッション、流動性スナップショット、トランザクションヘルパー、エラー処理については、[英語版ドキュメント](/api/sdk/python)を参照してください。
+
+## インストール
+
+```bash
+pip install lasersell-sdk
+```
+
+追加機能用のオプションエクストラ:
+
+```bash
+# Transaction signing (requires solders)
+pip install lasersell-sdk[tx]
+
+# WebSocket stream (requires websockets)
+pip install lasersell-sdk[stream]
+
+# Both
+pip install lasersell-sdk[tx,stream]
+```
+
+完全な動作例については[クイックスタート](/api/quickstart)を参照してください。

@@ -1,0 +1,181 @@
+---
+title: "지갑 등록"
+description: "Ed25519 소유권 증명을 사용하여 Exit Intelligence Stream을 위한 지갑을 등록합니다."
+---
+
+## 개요
+
+지갑 등록은 LaserSell API에 Solana 지갑의 소유권을 증명합니다. Exit Intelligence Stream에 지갑을 연결하기 전에 등록이 필요합니다. 스트림은 `configure` 메시지의 모든 지갑이 계정에 등록되어 있는지 검증합니다.
+
+등록은 Ed25519 서명을 사용하므로 온체인 트랜잭션이 필요 없습니다.
+
+## `POST /v1/wallets/register`
+
+Ed25519 서명으로 소유권을 증명하여 지갑을 등록합니다.
+
+### 요청
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "signature": "base58-encoded-ed25519-signature",
+  "message": "lasersell-register:YourWalletPubkey...:1706000000",
+  "label": "My Trading Wallet"
+}
+```
+
+| 필드           | 타입     | 필수 | 설명                                            |
+|-----------------|----------|----------|--------------------------------------------------------|
+| `wallet_pubkey` | `string` | 예      | 등록할 Solana 지갑 공개키.                  |
+| `signature`     | `string` | 예      | 메시지의 Ed25519 서명, base58 인코딩.      |
+| `message`       | `string` | 예      | 구조화된 메시지: `lasersell-register:<pubkey>:<unix_timestamp>`. 타임스탬프는 5분 이내여야 합니다. |
+| `label`         | `string` | 아니오       | 선택적인 사람이 읽을 수 있는 지갑 레이블.          |
+
+### 응답
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "registered": true
+}
+```
+
+### 인증
+
+유효한 API 키가 있는 `x-api-key` 헤더가 필요합니다.
+
+### 오류
+
+| 상태 | 코드 | 설명 |
+|--------|------|-------------|
+| 400 | Bad Request | 잘못된 공개키 형식, 잘못된 메시지 형식, 만료된 타임스탬프(5분 초과). |
+| 403 | Forbidden | 누락되었거나 잘못된 API 키, 서명 검증 실패. |
+
+## `DELETE /v1/wallets`
+
+지갑 등록을 해제합니다.
+
+### 요청
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey..."
+}
+```
+
+### 응답
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "removed": true
+}
+```
+
+## SDK 사용법
+
+4개 SDK 모두 지갑 등록을 위한 헬퍼 메서드를 제공합니다.
+
+### `proveOwnership` / `prove_ownership`
+
+키페어를 사용하여 로컬에서 `WalletProof`를 생성합니다. 네트워크 호출 없는 순수 암호화 작업입니다.
+
+<CodeGroup>
+```typescript TypeScript
+import { proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+// proof = { walletPubkey, signature, message }
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+
+proof = prove_ownership(keypair)
+# proof = WalletProof(wallet_pubkey, signature, message)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::prove_ownership;
+
+let proof = prove_ownership(&keypair);
+// proof = WalletProof { wallet_pubkey, signature, message }
+```
+
+```go Go
+proof := lasersell.ProveOwnership(privateKey)
+// proof = WalletProof{WalletPubkey, Signature, Message}
+```
+</CodeGroup>
+
+### `registerWallet` / `register_wallet`
+
+증명을 API에 전송하여 지갑을 등록합니다.
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withApiKey(apiKey);
+await client.registerWallet(proof, "My Wallet");
+```
+
+```python Python
+client = ExitApiClient.with_api_key(api_key)
+await client.register_wallet(proof, label="My Wallet")
+```
+
+```rust Rust
+client.register_wallet(&proof, Some("My Wallet")).await?;
+```
+
+```go Go
+client.RegisterWallet(ctx, proof, lasersell.Ptr("My Wallet"))
+```
+</CodeGroup>
+
+### `connectWithWallets` / `connect_with_wallets`
+
+지갑 등록과 스트림 연결을 한 단계로 수행하는 편의 메서드입니다.
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient, proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+const client = new StreamClient(apiKey);
+const session = await client.connectWithWallets(
+  [proof],
+  { target_profit_pct: 50, stop_loss_pct: 10 },
+  120, // deadline_timeout_sec
+);
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+from lasersell_sdk.stream.client import StreamClient
+
+proof = prove_ownership(keypair)
+client = StreamClient(api_key)
+session = await client.connect_with_wallets(
+    [proof],
+    {"target_profit_pct": 50, "stop_loss_pct": 10},
+    deadline_timeout_sec=120,
+)
+```
+
+```rust Rust
+let proof = prove_ownership(&keypair);
+let client = StreamClient::new(api_key);
+let session = client.connect_with_wallets(
+    &[proof],
+    strategy,
+    120,
+).await?;
+```
+
+```go Go
+// Go SDK: 별도 등록 후 연결
+proof := lasersell.ProveOwnership(privateKey)
+client.RegisterWallet(ctx, proof, nil)
+session, _ := stream.ConnectSession(ctx, streamClient, configure)
+```
+</CodeGroup>

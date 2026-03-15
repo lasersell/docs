@@ -1,0 +1,32 @@
+---
+title: "TypeScript SDK"
+description: "LaserSell TypeScript SDK를 설치, 구성, 사용하여 트랜잭션을 빌드하고, 포지션을 스트리밍하고, 거래를 제출하세요."
+---
+
+전체 TypeScript SDK 참조는 영문 문서 [TypeScript SDK](/api/sdk/typescript)를 참조하세요. 모든 코드 블록과 SDK 예제는 영문 원본과 동일합니다.
+
+## 설치
+
+```bash
+npm install @lasersell/lasersell-sdk
+```
+
+패키지에 TypeScript 선언이 포함되며 ESM과 CommonJS를 모두 지원합니다.
+
+## 모듈
+
+| Import                          | 목적                                |
+|---------------------------------|----------------------------------------|
+| `ExitApiClient`                 | 서명되지 않은 매수/매도 트랜잭션 빌드.  |
+| `StreamClient`                  | 저수준 WebSocket 스트림 클라이언트.     |
+| `StreamSession`                 | 포지션 추적이 있는 고수준 스트림. |
+| `signUnsignedTx`                | 서명되지 않은 base64 트랜잭션 서명.   |
+| `signUnsignedTxB64Fast`         | 인라인 서명 빠른 경로 (base64 반환). |
+| `sendTransaction`               | 서명된 트랜잭션 제출.           |
+| `sendTargetRpc`, `sendTargetHeliusSender`, `sendTargetAstralane` | 전송 대상 생성자. |
+
+전체 API 클라이언트 사용법, 스트림 세션 코드, 레인 분리, 유동성 스냅샷, 트랜잭션 헬퍼, 오류 처리에 대한 코드 예제는 영문 원본 문서를 참조하세요.
+
+## 전체 예제
+
+전체 작동 예제는 [빠른 시작](/api/quickstart)을 참조하세요.

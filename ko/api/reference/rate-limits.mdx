@@ -1,0 +1,77 @@
+---
+title: "속도 제한 및 티어"
+description: "티어 용량, hello_ok의 limits 객체, 429 응답 처리 방법을 이해합니다."
+---
+
+## 가격 티어
+
+LaserSell은 네 가지 티어를 제공합니다. 각 티어는 REST API와 Exit Intelligence Stream 모두의 속도 제한을 결정합니다.
+
+| 티어 | 이름 | 가격 |
+|------|------|-------|
+| 0 | Personal | 무료 |
+| 1 | Professional | $99/월 |
+| 2 | Advanced Exit Engine | $249/월 |
+| 3 | Enterprise | 맞춤 |
+
+## 티어별 Exit Intelligence Stream 제한
+
+| 제한 | Personal (무료) | Professional | Advanced | Enterprise |
+|-------|-----------------|-------------|----------|------------|
+| 세션당 지갑 | 1 | 5 | 200 | 맞춤 |
+| 지갑당 포지션 | 2 | 100 | 100 | 맞춤 |
+| 세션당 포지션 | 2 | 500 | 20,000 | 맞춤 |
+| API 키당 세션 | 1 | 1 | 1 | 맞춤 |
+| 고우선순위 버퍼 (`hi_capacity`) | 256 | 256 | 256 | 맞춤 |
+| 손익 플러시 간격 (`pnl_flush_ms`) | 100 ms | 100 ms | 100 ms | 맞춤 |
+| 비활동 타임아웃 | 45분 | 없음 | 없음 | 없음 |
+| [유동성 스냅샷](/api/stream/server-events#liquidity_snapshot) | 아니오 | 예 | 예 | 예 |
+| 파트너 수수료 | 아니오 | 아니오 | 예 | 예 |
+
+## REST API 속도 제한
+
+REST API (`/v1/sell`, `/v1/buy`)는 슬라이딩 윈도우를 사용하여 키당 요청 제한을 적용합니다.
+
+| 티어 | 분당 요청 |
+|------|-------------------|
+| Personal (무료) | 60 |
+| Professional | 60 |
+| Advanced | 60 |
+| Enterprise | 맞춤 |
+
+## 연결 시 제한 읽기
+
+Exit Intelligence Stream에 연결하면 `hello_ok` 메시지에 API 키 티어를 반영하는 `limits` 객체가 포함됩니다:
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 256,
+    "pnl_flush_ms": 100,
+    "max_positions_per_session": 500,
+    "max_wallets_per_session": 5,
+    "max_positions_per_wallet": 100,
+    "max_sessions_per_api_key": 1
+  }
+}
+```
+
+## 429 응답 처리
+
+REST API 속도 제한을 초과하면 서버가 HTTP `429 Too Many Requests`로 응답합니다. SDK는 내장 재시도 정책을 사용하여 `429` 응답을 자동으로 재시도합니다. 지속적인 429 오류가 발생하면:
+
+1. **요청 빈도를 확인하세요.** API 호출 속도를 줄이세요.
+2. **요청을 일괄 처리하세요.** 여러 트랜잭션을 빌드하는 경우 간격을 두세요.
+3. **재시도 백오프를 늘리세요.** 서버가 복구할 시간을 주기 위해 더 긴 백오프를 구성하세요.
+
+재시도 정책 사용자 정의에 대한 자세한 내용은 [오류 처리](/api/exit-api/error-handling)를 참조하세요.
+
+## 모범 사례
+
+- **연결 시 제한을 읽으세요.** 포지션을 보내기 전에 `limits` 객체를 사용하여 구성을 검증하세요.
+- **용량 오류를 모니터링하세요.** 용량 관련 코드의 `error` 메시지를 로그하고 알림하세요.
+- **레인 분리를 사용하세요 (TypeScript).** 높은 포지션 수에서는 `connectLanes()`를 사용하여 `pnl_update` 메시지가 시간에 민감한 이벤트를 차단하는 것을 방지하세요.
+- **429 응답을 존중하세요.** 즉시 재시도하지 말고 지수 백오프를 사용하세요.

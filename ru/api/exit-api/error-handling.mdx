@@ -1,0 +1,237 @@
+---
+title: "Обработка ошибок"
+description: "HTTP коды статусов, формат конверта ошибок, типы ExitApiError и поведение повторных попыток для LaserSell API."
+---
+
+## HTTP коды статусов
+
+| Статус | Значение | Повторяемый |
+|--------|------------------------------------|-----------|
+| 200 | Успех | Н/Д |
+| 400 | Неверный запрос (невалидные параметры, невалидный минт, неподдерживаемая программа токенов) | Нет |
+| 401 | Не авторизован (отсутствующий или неверный API ключ) | Нет |
+| 404 | Неподдерживаемый рынок или минт ещё не проиндексирован | Нет (см. ниже) |
+| 422 | Необрабатываемый (валидный запрос, но нет жизнеспособного маршрута) | Нет |
+| 429 | Превышен лимит запросов | Да |
+| 502 | Bad gateway (сбой вышестоящего RPC или DEX) | Да |
+| 503 | Сервис недоступен (маршрутизатор не готов или приостановлен) | Да |
+| 500 | Внутренняя ошибка сервера | Да |
+
+## Конверты ответов
+
+### Успех
+
+```json
+{
+  "status": "ok",
+  "tx": "base64-encoded unsigned transaction",
+  "route": { "market_type": "pumpswap", "pool_id": "..." }
+}
+```
+
+### Неподдерживаемый рынок
+
+Возвращается, когда у минта нет жизнеспособного маршрута на любом поддерживаемом DEX. Поле `message` содержит человекочитаемое и ИИ-читаемое объяснение.
+
+```json
+{
+  "status": "unsupported",
+  "reason": "no_route",
+  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+}
+```
+
+| Причина | Статус | Описание |
+|--------|--------|-------------|
+| `no_route` | 404 | Ни один поддерживаемый DEX не имеет пула для этого минта |
+| `invalid_mint` | 400 | Адрес минта не существует в блокчейне |
+| `unsupported_token_program` | 400 | Токен использует программу, отличную от SPL Token или Token-2022 |
+
+### Не проиндексирован
+
+Возвращается, когда минт существует, но ещё не разрешён. Повторите запрос после небольшой задержки.
+
+```json
+{
+  "status": "not_indexed",
+  "mint": "So11111111111111111111111111111111111111112",
+  "reason": "mint not indexed yet; try again shortly"
+}
+```
+
+### Ошибка
+
+Общие ответы об ошибках для сбоев валидации, лимитов запросов и серверных ошибок.
+
+```json
+{
+  "error": "descriptive error message"
+}
+```
+
+SDK парсят все варианты ответов и предоставляют их через тип `ExitApiError`.
+
+## Типы `ExitApiError`
+
+Каждый SDK предоставляет `ExitApiError` (или эквивалент) с дискриминатором `kind`:
+
+| Kind | Триггер | Повторяемый |
+|-------------------|--------------------------------------------|-----------|
+| `transport` | Сбой сети, ошибка DNS, таймаут | Да |
+| `http_status` | Не-2xx HTTP ответ | Да, если статус >= 500 или 429 |
+| `envelope_status` | Сервер вернул `{ "status": "error" }` | Нет |
+| `parse` | Тело ответа не удалось распарсить как JSON | Нет |
+
+### Проверка повторяемости
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## Встроенное поведение повторных попыток
+
+Все SDK включают автоматические повторные попытки с такими настройками по умолчанию:
+
+| Настройка | Значение по умолчанию |
+|---------------------|---------------|
+| Макс. попыток | 2 |
+| Начальная задержка | 25 мс |
+| Макс. задержка | 25 мс |
+| Джиттер | 25 мс |
+| Таймаут подключения | 200 мс |
+| Таймаут попытки | 900 мс |
+
+Повторные попытки срабатывают только для ошибок, где `isRetryable()` возвращает `true` (сбои транспорта, ответы 5xx и 429).
+
+### Настройка политики повторных попыток
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+```rust Rust
+use std::time::Duration;
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+
+let client = ExitApiClient::with_options(
+    Some(SecretString::new("YOUR_API_KEY".into())),
+    ExitApiClientOptions {
+        connect_timeout: Duration::from_millis(200),
+        attempt_timeout: Duration::from_millis(2000),
+        retry_policy: RetryPolicy {
+            max_attempts: 3,
+            initial_backoff: Duration::from_millis(50),
+            max_backoff: Duration::from_millis(200),
+            jitter: Duration::from_millis(50),
+        },
+    },
+)?;
+```
+
+```go Go
+import (
+    "time"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 200 * time.Millisecond,
+    AttemptTimeout: 2000 * time.Millisecond,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+})
+```
+</CodeGroup>
+
+## Лучшие практики
+
+- **Не повторяйте** ошибки `400`, `401` или `422`. Они указывают на проблему в запросе или аутентификации, которую нужно исправить в коде.
+- **Не повторяйте** `404` со `"status": "unsupported"`. У минта нет поддерживаемого рынка.
+- **Повторите один раз** при `404` со `"status": "not_indexed"`. Минту может потребоваться время для разрешения.
+- **Используйте экспоненциальную задержку** при ответах `429`. Встроенные повторные попытки обрабатывают это автоматически.
+- **Повторяйте с задержкой** при ошибках `502` и `503`. Это временные проблемы инфраструктуры.
+- **Логируйте детали ошибок**, включая `kind`, `status` и `body` для отладки.
+- Если вы видите постоянные ошибки `envelope_status`, проверьте корректность вашего адреса `mint` и `user_pubkey`.

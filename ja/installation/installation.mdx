@@ -1,0 +1,135 @@
+---
+title: "インストール"
+description: "Linux、macOS、Windows（WSL）、またはDockerにLaserSellをインストールします。"
+---
+
+## クイックインストール
+
+あらゆるプラットフォームでの最速のインストール方法:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+動作すれば、[クイックスタート](/start-here/quickstart)にスキップしてください。プラットフォーム固有のオプションは以下の通りです。
+
+## プラットフォームガイド
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh（推奨）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### 手動APTセットアップ
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh（推奨）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+IntelとApple Silicon（Mシリーズ）の両方をサポートしています。
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### Tarball（Homebrewなし）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+LaserSellはWSL（Windows Subsystem for Linux）を通じてWindowsで動作します。
+
+### 1. WSLのインストール
+
+管理者としてPowerShellを開きます:
+
+```shellscript
+wsl --install
+```
+
+コンピュータを再起動します。
+
+### 2. LaserSellのインストール
+
+WSLディストロ（例: Ubuntu）を開いて実行:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. 準備
+
+[Docker Desktop](https://www.docker.com/products/docker-desktop/)をインストールし、`lasersell`という名前の空のフォルダを作成します。
+
+### 2. 実行
+
+ターミナルを開き、フォルダに`cd`して実行:
+
+**macOS / Linux:**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+初回実行時、コンテナ内でセットアップウィザードが起動します。設定ファイルはマウントされたフォルダに書き込まれ、再実行時も持続します。
+
+</Tab>
+</Tabs>
+
+## アップグレード
+
+| 方法 | コマンド |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / Tarball | `curl -fsSL https://dl.lasersell.io/install.sh \| bash`を再実行 |
+| Docker | `docker pull lasersell/lasersell` |
+
+## CLIフラグ
+
+| フラグ | 短縮 | 説明 |
+|------|-------|-------------|
+| `--setup` | | オンボーディングウィザードを強制実行 |
+| `--config <path>` | `-f` | カスタム設定ファイルのパス |
+| `--debug` | | `~/.lasersell/debug.log`にデバッグレベルログを書き込み |
+| `--smoke` | | 接続ヘルスチェックを実行して終了 |
+| `--export-private-key` | | ウォレットのBase58秘密鍵をstdoutにエクスポート |
+
+`--smoke`、`--setup`、`--export-private-key`は互いに排他的です。

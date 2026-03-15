@@ -1,0 +1,113 @@
+---
+title: "示例配置"
+description: "带注释的 config.yml 参考，包含所有可用字段、默认值和环境变量覆盖。"
+---
+
+设置向导生成 `~/.lasersell/config.yml`。直接编辑并重启守护进程以应用更改，或重新运行 `lasersell --setup`。
+
+<Warning>
+下面显示的策略值仅为示例，不是官方交易策略。请根据你自己的风险承受能力和交易风格进行配置。
+</Warning>
+
+```yaml
+account:
+  # 加密密钥库或旧版 Solana 密钥对 JSON。
+  # 默认: ~/.lasersell/wallet.keystore.json
+  # 环境变量: LASERSELL_KEYPAIR_PATH
+  keypair_path: "~/.lasersell/wallet.keystore.json"
+
+  # LaserSell API 密钥（在 https://app.lasersell.io 免费获取）
+  # 环境变量: LASERSELL_API_KEY
+  api_key: "your-lasersell-api-key"
+
+  # 私有 Solana RPC 端点（需要 https://）。
+  # 环境变量: LASERSELL_RPC_URL 或 LASERSELL_PRIVATE_RPC_URL
+  rpc_url: "https://your-private-rpc.example.com"
+
+  # 交易提交后端: "helius_sender"（默认）、"astralane" 或 "rpc"。
+  # 环境变量: LASERSELL_SEND_TARGET
+  # send_target: "helius_sender"
+
+  # 优先费小费（lamports）（默认: 1000000 = 0.001 SOL）。
+  # tip_lamports: 1000000
+
+  # 仅当 send_target 为 "astralane" 时需要。
+  # 环境变量: LASERSELL_ASTRALANE_API_KEY
+  # astralane_api_key: "your-astralane-api-key"
+
+strategy:
+  # 百分比相对于你检测到的买入金额。使用 "0%" 禁用。
+  # 至少一个退出条件必须启用（包括 take_profit_levels）。
+
+  target_profit: "20%"       # 利润达到此 % 时退出
+  stop_loss: "10%"           # 亏损达到此 % 时退出
+  trailing_stop: "5%"        # 利润从峰值下降此入场 % 时退出
+  deadline_timeout: 0        # N 秒后强制退出（0 禁用）
+  sell_on_graduation: false  # 代币迁移到新 DEX 时自动卖出
+
+  # 流动性保护：池流动性低于安全阈值时退出。
+  liquidity_guard: false
+
+  # 保本追踪：仓位达到保本后激活的追踪止损。
+  # 使用 "0%" 禁用。
+  breakeven_trail: "0%"
+
+  # 退出阶梯：在多个利润阈值处卖出部分仓位。
+  # 每个级别指定触发的利润 %、要卖出的仓位 %，
+  # 以及该批次的可选追踪止损 %。
+  take_profit_levels: []
+  # 退出阶梯示例:
+  # take_profit_levels:
+  #   - profit_pct: 25       # 在 25% 利润时...
+  #     sell_pct: 30          # 卖出 30% 的仓位
+  #     trailing_stop_pct: 0  # 立即（无追踪）
+  #   - profit_pct: 50
+  #     sell_pct: 50
+  #     trailing_stop_pct: 3  # 带 3% 追踪止损
+  #   - profit_pct: 100
+  #     sell_pct: 100
+  #     trailing_stop_pct: 5  # 带 5% 追踪止损
+
+sell:
+  slippage_pad_bps: 2500              # 在计算值之上的额外滑点（bps）
+  slippage_retry_bump_bps_first: 20   # 第一次滑点错误后的额外填充
+  slippage_retry_bump_bps_next: 40    # 后续滑点错误后的额外填充
+  slippage_max_bps: 3000              # 最大滑点上限（bps）
+  confirm_timeout_sec: 10             # 交易确认超时
+  max_retries: 3                      # 失败卖出的重试次数
+
+# 跟单交易：监控其他钱包，可选在他们买入时自动买入。
+# 来自监控钱包的仓位使用与你自己相同的退出策略。
+watch_wallets: []
+# 示例:
+# watch_wallets:
+#   - pubkey: "TraderWalletPubkey1..."
+#     label: "whale"            # 可选显示标签
+#   - pubkey: "TraderWalletPubkey2..."
+#     auto_buy:
+#       amount: 0.1             # 用 0.1 SOL 自动买入
+#       amount_usd1: 0.0        # 用 USD1 自动买入（0 禁用）
+```
+
+## 环境变量覆盖
+
+使用对应的环境变量覆盖任何配置字段。对 Docker、CI 或密钥管理很有用。
+
+| 配置字段 | 环境变量 | 示例 |
+|---|---|---|
+| `account.keypair_path` | `LASERSELL_KEYPAIR_PATH` | `/home/user/.lasersell/wallet.keystore.json` |
+| `account.api_key` | `LASERSELL_API_KEY` | `ls_abc123...` |
+| `account.rpc_url` | `LASERSELL_RPC_URL` | `https://mainnet.helius-rpc.com/?api-key=...` |
+| `account.send_target` | `LASERSELL_SEND_TARGET` | `helius_sender`、`astralane` 或 `rpc` |
+| `account.astralane_api_key` | `LASERSELL_ASTRALANE_API_KEY` | `ast_xyz789...` |
+| 钱包密码短语 | `LASERSELL_WALLET_PASSPHRASE` | （用于无头解锁） |
+
+## 交易提交目标
+
+LaserSell 支持三种提交卖出交易的后端。大多数用户应使用默认值。
+
+| 目标 | 说明 |
+|---|---|
+| `helius_sender` | 默认。使用 Helius 的优化发送器。需要 Helius RPC URL。 |
+| `astralane` | 使用 Astralane 的提交服务。需要 `astralane_api_key`。 |
+| `rpc` | 通过你的 RPC 端点直接发送。兼容任何提供商但落地可能较慢。 |

@@ -1,0 +1,238 @@
+---
+title: "오류 처리"
+description: "LaserSell API의 HTTP 상태 코드, 오류 엔벨로프 형식, ExitApiError 종류, 재시도 동작."
+---
+
+## HTTP 상태 코드
+
+| 상태 | 의미                            | 재시도 가능 |
+|--------|------------------------------------|-----------|
+| 200    | 성공                            | 해당 없음       |
+| 400    | 잘못된 요청 (잘못된 매개변수, 잘못된 민트, 지원되지 않는 토큰 프로그램) | 아니오  |
+| 401    | 인증 실패 (누락 또는 잘못된 API 키) | 아니오 |
+| 404    | 지원되지 않는 마켓 또는 아직 인덱싱되지 않은 민트 | 아니오 (아래 참조) |
+| 422    | 처리 불가 (유효한 요청이지만 실행 가능한 경로 없음) | 아니오 |
+| 429    | 속도 제한                       | 예       |
+| 502    | 잘못된 게이트웨이 (업스트림 RPC 또는 DEX 장애) | 예 |
+| 503    | 서비스 사용 불가 (라우터 준비되지 않음 또는 일시 중지) | 예 |
+| 500    | 내부 서버 오류              | 예       |
+
+## 응답 엔벨로프
+
+### 성공
+
+```json
+{
+  "status": "ok",
+  "tx": "base64-encoded unsigned transaction",
+  "route": { "market_type": "pumpswap", "pool_id": "..." }
+}
+```
+
+### 지원되지 않는 마켓
+
+지원되는 DEX에서 실행 가능한 경로가 없는 민트일 때 반환됩니다. `message` 필드는 사람과 AI가 읽을 수 있는 설명을 제공합니다.
+
+```json
+{
+  "status": "unsupported",
+  "reason": "no_route",
+  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+}
+```
+
+| 사유 | 상태 | 설명 |
+|--------|--------|-------------|
+| `no_route` | 404 | 이 민트에 대한 풀이 지원되는 DEX에 없음 |
+| `invalid_mint` | 400 | 민트 주소가 온체인에 존재하지 않음 |
+| `unsupported_token_program` | 400 | 토큰이 SPL Token 또는 Token-2022 이외의 프로그램 사용 |
+
+### 인덱싱되지 않음
+
+민트가 존재하지만 아직 해석되지 않았을 때 반환됩니다. 짧은 지연 후 재시도하세요.
+
+```json
+{
+  "status": "not_indexed",
+  "mint": "So11111111111111111111111111111111111111112",
+  "reason": "mint not indexed yet; try again shortly"
+}
+```
+
+### 오류
+
+검증 실패, 속도 제한, 서버 오류에 대한 일반 오류 응답입니다.
+
+```json
+{
+  "error": "descriptive error message"
+}
+```
+
+SDK는 모든 응답 변형을 파싱하고 `ExitApiError` 타입을 통해 표면화합니다.
+
+## `ExitApiError` 종류
+
+모든 SDK는 `kind` 판별자가 있는 `ExitApiError`(또는 동등물)를 노출합니다:
+
+| 종류              | 트리거                                    | 재시도 가능 |
+|-------------------|--------------------------------------------|-----------|
+| `transport`       | 네트워크 장애, DNS 오류, 타임아웃        | 예       |
+| `http_status`     | 2xx가 아닌 HTTP 응답                      | 상태 >= 500 또는 429인 경우 예 |
+| `envelope_status` | 서버가 `{ "status": "error" }`를 반환    | 아니오        |
+| `parse`           | 응답 본문을 JSON으로 파싱할 수 없음  | 아니오        |
+
+### 재시도 가능 여부 확인
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## 내장 재시도 동작
+
+모든 SDK에는 다음 기본값으로 자동 재시도가 포함됩니다:
+
+| 설정             | 기본값 |
+|---------------------|---------------|
+| 최대 시도        | 2             |
+| 초기 백오프     | 25 ms         |
+| 최대 백오프         | 25 ms         |
+| 지터              | 25 ms         |
+| 연결 타임아웃     | 200 ms        |
+| 시도 타임아웃     | 900 ms        |
+
+`isRetryable()`이 `true`를 반환하는 오류(전송 장애, 5xx 응답, 429 속도 제한)에 대해서만 재시도가 트리거됩니다.
+
+### 재시도 정책 사용자 정의
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+```rust Rust
+use std::time::Duration;
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+use secrecy::SecretString;
+
+let client = ExitApiClient::with_options(
+    Some(SecretString::new("YOUR_API_KEY".into())),
+    ExitApiClientOptions {
+        connect_timeout: Duration::from_millis(200),
+        attempt_timeout: Duration::from_millis(2000),
+        retry_policy: RetryPolicy {
+            max_attempts: 3,
+            initial_backoff: Duration::from_millis(50),
+            max_backoff: Duration::from_millis(200),
+            jitter: Duration::from_millis(50),
+        },
+    },
+)?;
+```
+
+```go Go
+import (
+    "time"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 200 * time.Millisecond,
+    AttemptTimeout: 2000 * time.Millisecond,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+})
+```
+</CodeGroup>
+
+## 모범 사례
+
+- `400`, `401`, `422` 오류는 **재시도하지 마세요**. 코드에서 수정해야 할 요청 또는 인증 문제입니다.
+- `"status": "unsupported"`인 `404`는 **재시도하지 마세요**. 민트에 지원되는 마켓이 없습니다.
+- `"status": "not_indexed"`인 `404`는 **한 번 재시도**하세요. 민트가 해석에 잠시 시간이 필요할 수 있습니다.
+- `429` 응답에는 **지수 백오프**를 적용하세요. 내장 재시도가 자동으로 처리합니다.
+- `502` 및 `503` 오류에는 **백오프와 함께 재시도**하세요. 일시적인 인프라 문제입니다.
+- 디버깅을 위해 `kind`, `status`, `body`를 포함한 **오류 세부사항을 기록**하세요.
+- 일관된 `envelope_status` 오류가 보이면 `mint` 주소와 `user_pubkey`가 올바른지 확인하세요.

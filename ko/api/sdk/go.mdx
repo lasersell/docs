@@ -1,0 +1,25 @@
+---
+title: "Go SDK"
+description: "LaserSell Go SDK를 설치, 구성, 사용하여 context.Context 패턴으로 트랜잭션을 빌드하고 포지션을 스트리밍하세요."
+---
+
+전체 Go SDK 참조는 영문 문서 [Go SDK](/api/sdk/go)를 참조하세요. 모든 코드 블록과 SDK 예제는 영문 원본과 동일합니다.
+
+## 설치
+
+```bash
+go get github.com/lasersell/lasersell-sdk/go
+```
+
+## 패키지
+
+| 패키지                                   | 목적                                |
+|-------------------------------------------|----------------------------------------|
+| `github.com/lasersell/lasersell-sdk/go`   | `ExitAPIClient`, `SendTarget`, `SignUnsignedTx`, `SendTransaction` |
+| `github.com/lasersell/lasersell-sdk/go/stream` | `StreamClient`, `StreamSession`, `StreamConfigure`, 메시지 타입 |
+
+전체 API 클라이언트 사용법, 스트림 세션 코드, 유동성 스냅샷, 트랜잭션 헬퍼, 오류 처리, context.Context 패턴에 대한 코드 예제는 영문 원본 문서를 참조하세요.
+
+## 전체 예제
+
+전체 작동 예제는 [빠른 시작](/api/quickstart)을 참조하세요.

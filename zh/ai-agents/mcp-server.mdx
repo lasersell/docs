@@ -1,0 +1,108 @@
+---
+title: "MCP 服务器"
+description: "通过 Model Context Protocol 将 AI 代理和 MCP 兼容客户端连接到 LaserSell 文档。"
+---
+
+LaserSell MCP 服务器让任何 MCP 兼容的 AI 客户端实时搜索和检索 LaserSell 文档。这使 AI 代理能够在不离开工作流的情况下访问 API 参考、SDK 指南、代码示例和集成细节。
+
+## 服务器 URL
+
+```
+https://docs.lasersell.io/mcp
+```
+
+## 可用工具
+
+| 工具 | 说明 |
+|------|-------------|
+| `SearchLaserSellDocumentation` | 在 LaserSell 文档知识库中搜索相关信息、代码示例、API 参考和指南。返回带标题和文档页面直接链接的上下文内容。 |
+
+## 设置
+
+### Claude Desktop
+
+将以下内容添加到你的 Claude Desktop MCP 配置文件：
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+需要安装 Node.js 18+。保存配置后重启 Claude Desktop。
+
+### Claude Code
+
+```bash
+claude mcp add lasersell-docs -- npx @mintlify/mcp --url https://docs.lasersell.io/mcp
+```
+
+### Cursor
+
+打开 Cursor 设置，导航到 **MCP**，点击 **Add new MCP server**，输入：
+
+- **Name:** `lasersell-docs`
+- **Type:** `command`
+- **Command:** `npx @mintlify/mcp --url https://docs.lasersell.io/mcp`
+
+### Windsurf
+
+添加到你的 Windsurf MCP 配置：
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+### 其他 MCP 客户端
+
+任何支持 Model Context Protocol 的客户端都可以使用服务器 URL 连接：
+
+```
+https://docs.lasersell.io/mcp
+```
+
+传输方式为 Streamable HTTP。将 URL 传递给你的 MCP 客户端的远程服务器配置。
+
+## 代理可以搜索什么
+
+连接后，`SearchLaserSellDocumentation` 工具让代理可以访问完整的 LaserSell 文档，包括：
+
+- `/v1/buy`、`/v1/sell` 和退出智能流 WebSocket 的 **API 参考**。
+- TypeScript、Python、Rust 和 Go 的 **SDK 指南**，包含代码示例。
+- 目标利润、止损、追踪止损、毕业即卖和截止时间配置的**策略配置**。
+- 通过 Helius Sender、Astralane 和自定义 RPC 的**交易签名和提交**。
+- 通过 LaserSell 变现的集成方的**合作伙伴费用配置**。
+- 所有支持协议（Pump.fun、PumpSwap、Meteora、Raydium）的**市场上下文模式**。
+
+## 示例查询
+
+MCP 服务器连接后，你可以向 AI 客户端提出如下问题：
+
+- "如何使用 LaserSell Python SDK 构建卖出交易？"
+- "BuildBuyTxRequest 中有哪些字段？"
+- "展示如何在 TypeScript 中连接退出智能流。"
+- "有哪些可用的交易提交发送目标？"
+- "合作伙伴费用是如何工作的？"

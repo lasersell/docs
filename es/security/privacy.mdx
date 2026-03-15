@@ -1,0 +1,95 @@
+---
+title: "Privacidad y datos"
+description: "Qué datos recopila LaserSell, a dónde van y tus controles sobre ellos."
+---
+
+LaserSell está construido sobre una filosofía de red de "mínimo privilegio". Toda la construcción y firma de transacciones ocurre localmente en tu máquina. Solo transmitimos datos estrictamente necesarios para autenticar tu cuenta, proporcionar servicios de API e impulsar la plataforma.
+
+Esta página resume qué datos salen de tu máquina y a dónde van. La política de privacidad legal completa está en [lasersell.io/privacy](https://www.lasersell.io/privacy).
+
+## Lo que permanece local (acceso cero)
+
+Esto nunca sale de tu máquina:
+
+| Datos | Detalles |
+| :--- | :--- |
+| **Claves privadas y frases semilla** | Cifradas en tu disco en el almacén de claves. Nunca se transmiten. |
+| **Configuración de estrategia** | Tu TP, SL, trailing stop, deadline y otros ajustes se ejecutan enteramente de forma local. |
+| **Construcción y firma de transacciones** | Las transacciones se construyen y firman en tu máquina, luego se envían directamente a la red Solana a través de tu RPC. |
+
+## Lo que recopilamos
+
+### Autenticación y cuentas
+
+- **Correo electrónico y credenciales**: almacenados en Supabase para la autenticación de cuentas en [app.lasersell.io](https://app.lasersell.io).
+- **Datos de perfil OAuth**: si inicias sesión a través de GitHub, X/Twitter o Google, recibimos información de perfil limitada (sin contraseñas).
+- **MFA**: basado en TOTP. No recopilamos números de teléfono.
+
+### API y actividad de trading
+
+- **Claves públicas de wallets**: enviadas a LaserSell API para autenticación e identificación de sesión.
+- **Claves API**: almacenadas cifradas para la autenticación de endpoints.
+- **Actividad de trading**: a medida que la plataforma evoluciona, planeamos registrar la actividad vinculada a tus claves API (PnL, configuración, frecuencia de trading, direcciones de wallets) para mejorar el producto y proporcionar analíticas.
+
+### Pagos
+
+- **Stripe** maneja todo el procesamiento de pagos. No almacenamos números de tarjetas de crédito en nuestros servidores.
+
+### Datos técnicos
+
+- **Direcciones IP, user agents, marcas de tiempo y trazas de error**: recopilados en logs del servidor para monitoreo de infraestructura y prevención de abuso.
+- **Google Analytics**: utilizado solo en sitios de marketing y documentación, no en el dashboard autenticado.
+- **Cookies esenciales y almacenamiento local**: utilizados en app.lasersell.io para gestión de sesiones.
+
+## Conexiones de red
+
+Cuando el cliente LaserSell está ejecutándose, establece conexiones salientes a:
+
+### 1. Red Solana (tu RPC)
+
+- **Destino:** Tu proveedor de RPC configurado (por ejemplo, Helius, Chainstack).
+- **Propósito:** Leer datos en cadena (precios, curvas de vinculación) y transmitir transacciones firmadas.
+- **Nota:** Tu proveedor de RPC puede ver tu dirección IP y las solicitudes que haces.
+
+### 2. Emisor de transacciones (si aplica)
+
+- **Destino:** Depende de tu configuración de `send_target`: Helius Sender, Astralane o RPC directo.
+- **Propósito:** Transmitir tus transacciones firmadas localmente para un aterrizaje rápido en cadena.
+- **Nota:** El emisor ve el payload de la transacción firmada.
+
+### 3. LaserSell API
+
+- **Destino:** `api.lasersell.app`
+- **Propósito:** Autenticación, verificación de licencia y Exit Intelligence Stream (WebSocket).
+
+## Servicios de terceros
+
+Compartimos datos con estos proveedores para operar la plataforma:
+
+| Proveedor | Propósito |
+| :--- | :--- |
+| **Stripe** | Procesamiento de pagos |
+| **Supabase** | Base de datos y autenticación |
+| **Better Stack** | Gestión de logs (EE.UU.) |
+| **Typeform** | Solicitudes de admisión empresarial |
+| **Nodos RPC de Solana** | Resolución de datos en cadena |
+
+**No** vendemos tu información personal ni datos de uso de la API a intermediarios de datos ni para publicidad dirigida.
+
+## Retención de datos
+
+- **Datos de cuenta y facturación** se retienen mientras tu cuenta esté activa.
+- **Logs del servidor** se rotan rutinariamente o se anonimizan según las prácticas de seguridad operacional.
+
+## Tus derechos
+
+- Actualiza tus métodos de autenticación y claves API a través del [dashboard](https://app.lasersell.io).
+- Solicita acceso, corrección o eliminación de tus datos enviando un correo a [support@lasersell.io](mailto:support@lasersell.io).
+
+## Seguridad
+
+Usamos cifrado para claves API y gestión de sesiones, junto con salvaguardas administrativas y técnicas. Si descubres una vulnerabilidad de seguridad, repórtala a [security@lasersell.io](mailto:security@lasersell.io). Te alentamos a usar nuestra [clave PGP](https://www.lasersell.io/lasersell-pgp-key.asc). Consulta nuestro [security.txt](https://www.lasersell.io/.well-known/security.txt) para las guías completas de divulgación.
+
+## Jurisdicción
+
+La información puede ser transferida a los EE.UU. u otras jurisdicciones donde operan nuestros proveedores de servicios. Nuestros servicios están destinados a usuarios de 18 años o más.

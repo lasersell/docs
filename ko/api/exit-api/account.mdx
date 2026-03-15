@@ -1,0 +1,57 @@
+---
+title: "GET /v1/account"
+description: "LaserSell API에서 계정 티어, 요금제 이름, 사용 제한을 조회합니다."
+---
+
+## 엔드포인트
+
+```
+GET https://api.lasersell.io/v1/account
+```
+
+## 헤더
+
+| 헤더      | 필수 | 설명            |
+|-------------|----------|------------------------|
+| `x-api-key` | 예      | LaserSell API 키 |
+
+## 응답: `AccountResponse`
+
+| 필드       | 타입     | 설명                                      |
+|-------------|----------|--------------------------------------------------|
+| `tier`      | `number` | 숫자 티어 식별자 (`0`, `1` 또는 `2`).      |
+| `tier_name` | `string` | 사람이 읽을 수 있는 요금제 이름 (`free`, `tier_1`, `tier_2`). |
+| `limits`    | `object` | 요금제의 사용 제한 (아래 참조).          |
+
+### `limits` 객체
+
+| 필드                       | 타입     | 설명                                           |
+|-----------------------------|----------|-------------------------------------------------------|
+| `max_wallets`               | `number` | 동시에 추적할 수 있는 최대 지갑 수.         |
+| `max_positions_per_wallet`  | `number` | 지갑당 최대 열린 포지션 수.                    |
+| `max_positions_per_session` | `number` | 모든 지갑에 걸친 최대 총 열린 포지션 수.      |
+
+## curl 예제
+
+```bash
+curl https://api.lasersell.io/v1/account \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## 응답 예시
+
+```json
+{
+  "tier": 1,
+  "tier_name": "tier_1",
+  "limits": {
+    "max_wallets": 5,
+    "max_positions_per_wallet": 100,
+    "max_positions_per_session": 500
+  }
+}
+```
+
+## 오류 응답
+
+전체 오류 엔벨로프 사양과 재시도 가능한 오류 로직은 [오류 처리](/api/exit-api/error-handling)를 참조하세요.

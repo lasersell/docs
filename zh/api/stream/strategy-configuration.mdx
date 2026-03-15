@@ -1,0 +1,167 @@
+---
+title: "策略配置"
+description: "为退出智能流配置目标利润、止损、追踪止损和毕业即卖阈值。"
+---
+
+## `StrategyConfigMsg` 模式
+
+| 字段                | 类型      | 必需 | 说明                                                 |
+|----------------------|-----------|----------|-------------------------------------------------------------|
+| `target_profit_pct`  | `number`  | 是      | 止盈阈值百分比（例如 `5` = 5%）。      |
+| `stop_loss_pct`      | `number`  | 是      | 止损阈值百分比（例如 `1.5` = 1.5%）。    |
+| `trailing_stop_pct`  | `number`  | 否       | 从峰值的追踪止损百分比。仅在仓位盈利后激活。 |
+| `sell_on_graduation` | `boolean` | 否       | 如果为 `true`，联合曲线代币毕业到 AMM 池时自动卖出。 |
+| `take_profit_levels` | `TakeProfitLevelMsg[]` | 否 | 退出阶梯：在多个利润阈值处卖出部分仓位。每个级别有 `profit_pct`（触发）、`sell_pct`（卖出比例）和 `trailing_stop_pct`（该级别的可选追踪止损）。 |
+| `liquidity_guard` | `boolean` | 否 | 启用时，流在生成退出信号前检查可用池流动性。防止退出到薄流动性中。默认：`false`。 |
+| `breakeven_trail_pct` | `number` | 否 | 仓位保本后激活的追踪止损，从保本点而非峰值追踪。 |
+
+至少 `target_profit_pct`、`stop_loss_pct`、`trailing_stop_pct` 或 `deadline_timeout_sec`（在 configure 消息上）之一必须大于零。
+
+### `TakeProfitLevelMsg` 模式
+
+| 字段 | 类型 | 必需 | 说明 |
+|---|---|---|---|
+| `profit_pct` | `number` | 是 | 此级别触发的利润百分比（例如 `20` = 20%）。 |
+| `sell_pct` | `number` | 是 | 在此级别卖出的仓位百分比（例如 `50` = 卖出 50%）。 |
+| `trailing_stop_pct` | `number` | 否 | 此级别的可选追踪止损。如果设置，不会在 `profit_pct` 处立即卖出，而是在此级别激活追踪止损。默认：`0`（立即卖出）。 |
+
+## 在连接时设置策略
+
+策略在首次连接时在 `configure` 消息中提供：
+
+<CodeGroup>
+```typescript TypeScript
+const session = await StreamSession.connect(client, {
+  wallet_pubkeys: ["WALLET_PUBKEY"],
+  strategy: {
+    target_profit_pct: 10,
+    stop_loss_pct: 2,
+    trailing_stop_pct: 5,
+    sell_on_graduation: true,
+  },
+  deadline_timeout_sec: 60,
+  send_mode: "helius_sender",
+  tip_lamports: 1000,
+});
+```
+
+```python Python
+session = await StreamSession.connect(
+    client,
+    StreamConfigure(
+        wallet_pubkeys=["WALLET_PUBKEY"],
+        strategy={
+            "target_profit_pct": 10.0,
+            "stop_loss_pct": 2.0,
+            "trailing_stop_pct": 5.0,
+            "sell_on_graduation": True,
+        },
+        deadline_timeout_sec=60,
+        send_mode="helius_sender",
+        tip_lamports=1000,
+    ),
+)
+```
+
+```rust Rust
+let session = StreamSession::connect(&client, StreamConfigure {
+    wallet_pubkeys: vec!["WALLET_PUBKEY".into()],
+    strategy: StrategyConfigMsg {
+        target_profit_pct: 10.0,
+        stop_loss_pct: 2.0,
+        trailing_stop_pct: Some(5.0),
+        sell_on_graduation: Some(true),
+    },
+    deadline_timeout_sec: Some(60),
+    send_mode: Some("helius_sender".to_string()),
+    tip_lamports: Some(1000),
+}).await?;
+```
+
+```go Go
+sendMode := "helius_sender"
+tipLamports := uint64(1000)
+session, err := stream.ConnectSession(ctx, client, stream.StreamConfigure{
+    WalletPubkeys: []string{"WALLET_PUBKEY"},
+    Strategy: stream.StrategyConfigMsg{
+        TargetProfitPct:    10.0,
+        StopLossPct:        2.0,
+        TrailingStopPct:    5.0,
+        SellOnGraduation:   true,
+    },
+    DeadlineTimeoutSec: 60,
+    SendMode:           &sendMode,
+    TipLamports:        &tipLamports,
+})
+```
+</CodeGroup>
+
+## 退出阶梯（止盈级别）
+
+退出阶梯让你在多个阈值处获取部分利润，而不是在单一价格处退出全部仓位。每个级别指定利润目标和要卖出的剩余仓位百分比。
+
+### 工作原理
+
+1. 当利润达到某个级别的 `profit_pct` 时，流卖出当前仓位的 `sell_pct`。
+2. 如果某个级别的 `trailing_stop_pct > 0`，则在该级别激活追踪止损而不是立即卖出。
+3. 级别按 `profit_pct` 从低到高评估。
+4. 全局 `target_profit_pct` 仍作为硬上限；如果在所有级别触发前达到，则卖出剩余仓位。
+
+## 流动性保护
+
+启用 `liquidity_guard` 后，流在生成退出信号前检查池流动性。如果池无法在合理滑点下吸收卖出，信号将被推迟直到流动性改善或超时强制退出。
+
+这对于在薄池中的大仓位很有用，立即卖出会导致过大的滑点。
+
+## 保本追踪
+
+`breakeven_trail_pct` 字段启用一个在仓位保本（利润 >= 0）后激活的追踪止损，从保本点而非峰值追踪。
+
+与从最高观察利润追踪的标准 `trailing_stop_pct` 不同，保本追踪保护你免于在曾短暂盈利的仓位上回吐所有收益。
+
+## 追踪止损说明
+
+追踪止损追踪仓位开仓以来观察到的最高利润。当利润从该峰值下降 `trailing_stop_pct` 时，退出信号触发。
+
+追踪止损仅在仓位盈利后激活。如果仓位在盈利之前就变为亏损，则触发止损。
+
+## 会话中更新策略
+
+你可以随时通过发送 `update_strategy` 消息更改策略而无需重连：
+
+```json
+{
+  "type": "update_strategy",
+  "strategy": {
+    "target_profit_pct": 15,
+    "stop_loss_pct": 3,
+    "trailing_stop_pct": 7
+  }
+}
+```
+
+新策略对所有被追踪的仓位立即生效。不会关闭或重新开启仓位；服务器只是根据新阈值重新评估现有仓位。
+
+## 截止时间
+
+`deadline_timeout_sec` 在 `configure` 消息上设置（不在策略对象本身上）。它定义持有仓位的最大时间（秒），无论盈亏如何都会请求退出信号。
+
+使用 `StreamSession` 时，截止时间计时器在客户端运行并在触发时自动调用 `requestExitSignal`。如果你直接使用 `StreamClient`，你必须自己实现截止时间逻辑。
+
+## 单仓位策略覆盖
+
+你可以为单个仓位覆盖全局策略而不影响其他被追踪的仓位。这对于你想对特定代币使用不同退出规则时很有用。
+
+```json
+{
+  "type": "update_position_strategy",
+  "position_id": 1,
+  "strategy": {
+    "target_profit_pct": 200,
+    "stop_loss_pct": 5,
+    "trailing_stop_pct": 10
+  }
+}
+```
+
+覆盖仅适用于指定的仓位。所有其他仓位继续使用全局策略。单仓位覆盖是临时的，不会在重连后保留。

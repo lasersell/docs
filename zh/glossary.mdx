@@ -1,0 +1,227 @@
+---
+title: "术语表"
+description: "LaserSell 文档中使用的关键术语、缩写和概念的定义。"
+---
+
+## A
+
+**AMM（自动做市商）**
+一种去中心化交易所协议，使用数学公式根据池子储备来确定代币价格，无需订单簿即可实现代币兑换。PumpSwap、Meteora DAMM V2 和 Raydium CPMM 都是 LaserSell 支持的 AMM 示例。
+
+**Argon2id**
+一种内存密集型密码哈希算法，LaserSell 用它从你的密码短语派生加密密钥。使针对密钥库的暴力破解攻击在计算上代价高昂。
+
+**Associated Token Account（关联代币账户，ATA）**
+一个派生的链上账户，用于为给定钱包地址持有特定的 SPL 代币。当钱包首次收到某个代币时自动创建。
+
+**Astralane Iris**
+一个交易提交网关，支持区域端点以优化延迟。是 LaserSell SDK 中可用的[发送目标](/api/transactions/send-targets)之一。需要 Astralane API 密钥。
+
+**原子单位**
+代币的最小不可分割单位。对于 SOL，原子单位是 lamport（1 SOL = 1,000,000,000 lamports）。其他代币定义自己的小数精度。
+
+## B
+
+**余额更新**
+退出智能流在你的钱包的 SOL 或代币余额发生变化时发送的服务器事件（`balance_update`）。参见[服务器事件](/api/stream/server-events)。
+
+**基点（BPS）**
+等于百分之一的百分比的单位。100 基点 = 1%。在 LaserSell API 中用于滑点容忍度和合作伙伴费用配置。
+
+**联合曲线**
+Pump.fun 等发射台使用的数学公式，根据流通供应量确定代币价格。联合曲线上的代币尚未迁移到 AMM 池。
+
+## C
+
+**冷存储**
+离线钱包存储（如硬件钱包），用于长期持有。定期将你的热钱包利润转移到冷存储。
+
+**配置消息**
+连接到退出智能流后发送的第一条客户端消息。指定你的钱包地址和策略参数。服务器用 `configured` 事件响应。参见[客户端消息](/api/stream/client-messages)。
+
+## D
+
+**截止时间**
+一个时间限制（以秒为单位），如果在配置的持续时间内没有其他策略条件（目标利润、止损、追踪止损）触发，则强制自动退出。防止资金被锁定在停滞的仓位中。
+
+## E
+
+**退出智能**
+LaserSell 的核心技术。一个实时系统，监控钱包仓位，在每次价格更新时评估策略条件，并在阈值满足时提供预构建的未签名退出交易。
+
+**退出智能流**
+到 `wss://stream.lasersell.io/v1/ws` 的持久 WebSocket 连接，提供实时仓位追踪、盈亏更新和自动退出信号。参见[流概览](/api/stream/overview)。
+
+**退出信号**
+一个服务器事件（`exit_signal_with_tx`），包含预构建的未签名卖出交易，在策略条件满足时触发。退出智能流中最重要的事件。参见[服务器事件](/api/stream/server-events)。
+
+**ExitApiClient**
+用于通过 `/v1/buy` 和 `/v1/sell` 按需构建买入和卖出交易的 SDK 客户端。
+
+## G
+
+**毕业**
+代币从联合曲线（如 Pump.fun）迁移到 AMM 池（如 PumpSwap）的时刻。价格动态通常在毕业时发生显著变化。
+
+## H
+
+**`hello_ok`**
+连接到退出智能流后收到的第一条服务器消息。包含你的会话 ID 和等级速率限制。参见[连接生命周期](/api/stream/connection-lifecycle)。
+
+**Helius Sender**
+一个交易提交服务，通过 Helius `/fast` 端点路由，以优化 Solana 上的交易落地。无需 API 密钥。是 LaserSell 的默认[发送目标](/api/transactions/send-targets)。
+
+**热钱包**
+任何连接到互联网的用于活跃交易的钱包。LaserSell 在你的设备上创建本地热钱包，以实现快速交易执行。
+
+## J
+
+**Jito 小费**
+直接支付给 Solana 验证者，以便你的交易在同一区块中优先于其他交易。这是网络费用，不是 LaserSell 的费用。
+
+## K
+
+**密钥库**
+LaserSell 客户端用于在本地存储私钥的加密文件格式。使用 XChaCha20-Poly1305 加密和 Argon2id 派生的密钥。参见[钱包加密](/security/wallet-encryption)。
+
+## L
+
+**Lamport**
+SOL 的最小单位。1 SOL = 1,000,000,000 lamports。API 字段如 `amount_in_total`、`tip_lamports` 和 `partner_fee_lamports` 以 lamports 计价。
+
+**通道分离**
+一项功能（仅 TypeScript SDK），将退出智能流分成两个接收器：用于退出信号和仓位事件的高优先级通道，以及用于盈亏更新的低优先级通道。防止频繁的盈亏更新阻塞时间敏感的退出信号。
+
+## M
+
+**市场上下文**
+描述代币市场使用的 DEX 池和协议的元数据，包括池地址和配置。在流事件中返回，也可以选择性地传递给构建请求以跳过服务器端解析。参见[市场上下文](/api/reference/market-context)。
+
+**Meme 币**
+一种通常受互联网文化启发的加密货币，以高波动性和投机交易为特征。LaserSell 主要针对的市场类别。
+
+**Meteora DBC（动态联合曲线）**
+Meteora 的联合曲线协议，用于代币的初始发行阶段。LaserSell 支持。
+
+**Meteora DAMM V2（动态 AMM V2）**
+Meteora 的动态自动做市商，用于从联合曲线迁移后的代币。LaserSell 支持。
+
+**模式（路由）**
+`/v1/buy` 和 `/v1/sell` 请求上的字段，值为 `"fast"` 或 `"secure"`。快速模式优化速度；安全模式添加额外的确认检查。不要与发送模式混淆。
+
+## N
+
+**非托管**
+用户保留对私钥和资金完全控制的架构。LaserSell 从不在其服务器上存储密钥。所有交易都以未签名形式返回，由用户或其应用在本地签名。
+
+## P
+
+**合作伙伴费用**
+集成方可以添加到任何买入或卖出交易中的可选费用，作为链上兑换的一部分原子化路由到指定钱包。可按每个请求配置基点或固定 lamports。在 Advanced 和 Enterprise 等级可用。参见[合作伙伴费用](/api/reference/partner-fees)。
+
+**密码短语**
+解锁加密密钥库所需的用户定义密码。如果此密码短语丢失，钱包将无法解密。
+
+**盈亏（PnL）**
+仓位的当前估计利润或亏损。退出智能流以固定间隔发送 `pnl_update` 事件，包含更新后的值。
+
+**`pnl_update`**
+包含被追踪仓位最新盈亏计算的服务器事件。以固定间隔发送。高频发送是通道分离存在的原因。参见[服务器事件](/api/stream/server-events)。
+
+**仓位句柄**
+由 `StreamSession` 事件返回的引用对象，通过 ID、代币账户、代币地址和钱包来标识被追踪的仓位。用于关闭仓位和请求退出信号。
+
+**`position_opened`**
+当退出智能流检测到被追踪钱包中的新代币购买时触发的服务器事件。包含仓位 ID、代币地址、成本基础和市场上下文。参见[服务器事件](/api/stream/server-events)。
+
+**`position_closed`**
+当被追踪的仓位完全退出或被移除时触发的服务器事件。参见[服务器事件](/api/stream/server-events)。
+
+**优先费**
+支付给验证者的标准 Solana 区块链费用，用于计算优先级。与 Jito 小费分开。
+
+**私钥**
+授予对钱包资产控制权的加密密钥。LaserSell 客户端将其在本地加密，永不传输。API 和 SDK 永远不需要私钥；所有交易都以未签名形式返回。
+
+**Pump.fun**
+一个 Solana 代币发射台，代币从联合曲线开始交易，然后毕业到 AMM。
+
+**PumpSwap**
+Pump.fun 代币从联合曲线毕业后迁移到的 AMM。LaserSell 支持。
+
+## R
+
+**速率限制**
+你可以使用多少请求或资源的上限，由你的定价等级决定。适用于 REST API（每分钟请求数）和退出智能流（钱包数、仓位数、会话数）。参见[速率限制和等级](/api/reference/rate-limits)。
+
+**Raydium CPMM（恒定乘积做市商）**
+Raydium 的标准 AMM 池。LaserSell 支持。
+
+**Raydium Launchpad**
+Raydium 的代币发行平台。LaserSell 支持。
+
+**路由费**
+通过 LaserSell Router 执行的每笔订单的交易费用。费率取决于你的订阅等级：2%（免费）、0.9%（Professional）、0.5%（Advanced）或自定义（Enterprise）。在链上原子化执行。参见[费率结构](/pricing/fee-structure)。
+
+**RPC（远程过程调用）**
+作为 Solana 区块链网关的节点。LaserSell 使用 RPC 连接来读取链上数据和广播交易。生产使用建议使用私有 RPC 端点。
+
+**跑路**
+代币的流动性被撤走或卖出被禁用的场景，导致价格崩溃。LaserSell 的止损、追踪止损和毕业即卖功能有助于限制风险敞口。
+
+## S
+
+**助记词**
+用于生成或恢复钱包的 12 或 24 个单词的助记短语。仅在初始钱包创建时显示一次。
+
+**毕业即卖**
+一种策略条件，在代币从联合曲线迁移到 AMM 池的时刻自动退出仓位。防止毕业后的抛售。
+
+**发送模式**
+构建请求上的字段（`"rpc"`、`"helius_sender"` 或 `"astralane"`），告诉服务器为哪个提交上下文优化交易。应与你选择的发送目标匹配。
+
+**发送目标**
+一个配置，告诉 SDK 将已签名的交易提交到哪里。选项：默认 RPC、自定义 RPC、Helius Sender、Astralane Iris。参见[发送目标](/api/transactions/send-targets)。
+
+**滑点**
+交易的预期价格与实际执行价格之间的差异。高波动性和低流动性会增加滑点。
+
+**止损**
+一种策略条件，当价格从入场价下跌配置的百分比时自动卖出仓位。限制单笔交易的下行风险。
+
+**StreamClient**
+退出智能流的底层 SDK 客户端。管理 WebSocket 连接、重连和消息帧。返回原始服务器消息。参见[连接生命周期](/api/stream/connection-lifecycle)。
+
+**StreamSession**
+围绕 `StreamClient` 的高级 SDK 包装器。提供自动仓位追踪、截止时间计时器、带仓位句柄的类型化事件和策略更新方法。推荐用于大多数集成。
+
+## T
+
+**目标利润**
+一种策略条件，当仓位的盈亏达到配置的利润百分比时触发自动卖出。
+
+**追踪止损**
+一种动态止损，追踪仓位开仓以来观察到的最高利润。如果利润从该峰值下降配置的百分比，则触发退出信号。在反转前锁定上涨仓位的收益。
+
+## U
+
+**USD1**
+一种稳定币，支持作为卖出交易的替代输出资产（替代 SOL）。
+
+**未签名交易**
+由 LaserSell API 返回的 base64 编码的 Solana `VersionedTransaction`。必须在提交前使用你的私钥在本地签名。LaserSell 从不处理签名。
+
+## V
+
+**VersionedTransaction**
+一种 Solana 交易格式，支持版本化的指令布局和地址查找表。LaserSell API 返回的所有交易都使用此格式。
+
+## W
+
+**WebSocket（WSS）**
+一种通信协议，支持实时双向数据流。退出智能流使用 WSS 以最小延迟传递仓位事件和退出信号。
+
+## X
+
+**XChaCha20-Poly1305**
+LaserSell 客户端用于保护密钥库文件中私钥的认证加密算法。同时提供保密性和完整性验证。

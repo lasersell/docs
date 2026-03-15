@@ -1,0 +1,238 @@
+---
+title: "Manejo de errores"
+description: "Códigos de estado HTTP, formato de envolvente de error, tipos de ExitApiError y comportamiento de reintentos para LaserSell API."
+---
+
+## Códigos de estado HTTP
+
+| Estado | Significado                            | Reintentable |
+|--------|------------------------------------|-----------|
+| 200    | Éxito                              | N/A       |
+| 400    | Solicitud incorrecta (parámetros inválidos, mint inválido, programa de token no soportado) | No  |
+| 401    | No autorizado (clave API faltante o inválida) | No |
+| 404    | Mercado no soportado o mint no indexado aún | No (ver abajo) |
+| 422    | No procesable (solicitud válida pero sin ruta viable) | No |
+| 429    | Límite de tasa excedido               | Sí       |
+| 502    | Bad gateway (fallo de RPC o DEX upstream) | Sí |
+| 503    | Servicio no disponible (router no listo o pausado) | Sí |
+| 500    | Error interno del servidor             | Sí       |
+
+## Envolventes de respuesta
+
+### Éxito
+
+```json
+{
+  "status": "ok",
+  "tx": "base64-encoded unsigned transaction",
+  "route": { "market_type": "pumpswap", "pool_id": "..." }
+}
+```
+
+### Mercado no soportado
+
+Se devuelve cuando un mint no tiene ruta viable en ningún DEX soportado. El campo `message` proporciona una explicación legible por humanos y por IA.
+
+```json
+{
+  "status": "unsupported",
+  "reason": "no_route",
+  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+}
+```
+
+| Razón | Estado | Descripción |
+|--------|--------|-------------|
+| `no_route` | 404 | Ningún DEX soportado tiene un pool para este mint |
+| `invalid_mint` | 400 | La dirección mint no existe en cadena |
+| `unsupported_token_program` | 400 | El token usa un programa diferente a SPL Token o Token-2022 |
+
+### No indexado
+
+Se devuelve cuando el mint existe pero aún no ha sido resuelto. Reintenta después de un breve retraso.
+
+```json
+{
+  "status": "not_indexed",
+  "mint": "So11111111111111111111111111111111111111112",
+  "reason": "mint not indexed yet; try again shortly"
+}
+```
+
+### Error
+
+Respuestas de error generales para fallos de validación, límites de tasa y errores del servidor.
+
+```json
+{
+  "error": "descriptive error message"
+}
+```
+
+Los SDKs analizan todas las variantes de respuesta y las exponen a través del tipo `ExitApiError`.
+
+## Tipos de `ExitApiError`
+
+Cada SDK expone un `ExitApiError` (o equivalente) con un discriminador `kind`:
+
+| Tipo              | Disparador                                    | Reintentable |
+|-------------------|--------------------------------------------|-----------|
+| `transport`       | Fallo de red, error DNS, timeout            | Sí       |
+| `http_status`     | Respuesta HTTP no 2xx                       | Sí si estado >= 500 o 429 |
+| `envelope_status` | El servidor devolvió `{ "status": "error" }` | No        |
+| `parse`           | El cuerpo de respuesta no pudo ser parseado como JSON | No        |
+
+### Verificar reintentabilidad
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## Comportamiento de reintentos integrado
+
+Todos los SDKs incluyen reintentos automáticos con estos valores por defecto:
+
+| Configuración       | Valor por defecto |
+|---------------------|---------------|
+| Intentos máximos    | 2             |
+| Backoff inicial     | 25 ms         |
+| Backoff máximo      | 25 ms         |
+| Jitter              | 25 ms         |
+| Timeout de conexión | 200 ms        |
+| Timeout de intento  | 900 ms        |
+
+Los reintentos solo se activan para errores donde `isRetryable()` devuelve `true` (fallos de transporte, respuestas 5xx y límites de tasa 429).
+
+### Personalizar política de reintentos
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+```rust Rust
+use std::time::Duration;
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+use secrecy::SecretString;
+
+let client = ExitApiClient::with_options(
+    Some(SecretString::new("YOUR_API_KEY".into())),
+    ExitApiClientOptions {
+        connect_timeout: Duration::from_millis(200),
+        attempt_timeout: Duration::from_millis(2000),
+        retry_policy: RetryPolicy {
+            max_attempts: 3,
+            initial_backoff: Duration::from_millis(50),
+            max_backoff: Duration::from_millis(200),
+            jitter: Duration::from_millis(50),
+        },
+    },
+)?;
+```
+
+```go Go
+import (
+    "time"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 200 * time.Millisecond,
+    AttemptTimeout: 2000 * time.Millisecond,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+})
+```
+</CodeGroup>
+
+## Mejores prácticas
+
+- **No reintentar** errores `400`, `401` o `422`. Estos indican un problema de solicitud o autenticación que debe corregirse en el código.
+- **No reintentar** `404` con `"status": "unsupported"`. El mint no tiene mercado soportado.
+- **Reintentar una vez** en `404` con `"status": "not_indexed"`. El mint puede necesitar un momento para resolverse.
+- **Esperar exponencialmente** en respuestas `429`. El reintento integrado lo maneja automáticamente.
+- **Reintentar con backoff** en errores `502` y `503`. Son problemas transitorios de infraestructura.
+- **Registrar detalles del error** incluyendo `kind`, `status` y `body` para depuración.
+- Si ves errores consistentes de `envelope_status`, verifica que tu dirección `mint` y `user_pubkey` sean correctos.

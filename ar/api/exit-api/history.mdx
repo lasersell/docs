@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "جلب سجل التداول المرقّم لحسابك من LaserSell API."
+---
+
+## نقطة النهاية
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## الترويسات
+
+| Header      | Required | Description            |
+|-------------|----------|------------------------|
+| `x-api-key` | Yes      | مفتاح LaserSell API الخاص بك |
+
+## معاملات الاستعلام
+
+| Parameter | Type     | Default | Description                                                       |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit`   | `number` | `50`    | أقصى عدد صفقات للإرجاع (حد أقصى 200).               |
+| `offset`  | `number` | `0`     | عدد الصفقات للتخطي للترقيم.                          |
+| `mint`    | `string` | —       | تصفية النتائج لعنوان رمز محدد (base58).         |
+| `wallet`  | `string` | —       | تصفية النتائج لمفتاح عام محفظة محدد (base58).          |
+
+## الاستجابة: `TradeHistoryResponse`
+
+| Field    | Type            | Description                                          |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | مصفوفة سجلات الصفقات مرتبة من الأحدث أولاً. |
+| `total`  | `number \| null` | العدد الإجمالي المقدر للصفقات المطابقة للترقيم. |
+
+### كائن `TradeHistoryItem`
+
+| Field                        | Type             | Description                                                        |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id`                         | `number`         | معرف سجل الصفقة الفريد.                                    |
+| `session_id`                 | `number`         | جلسة البث التي أنتجت هذه الصفقة.                           |
+| `position_id`                | `number`         | معرف المركز ضمن الجلسة.                            |
+| `wallet_pubkey`              | `string`         | المفتاح العام للمحفظة التي احتفظت بالمركز (base58).                 |
+| `mint`                       | `string`         | عنوان الرمز (base58).                                       |
+| `entry_quote_units`          | `number`         | المبلغ المنفق لفتح المركز بالوحدات الذرية لأصل الاقتباس.     |
+| `exit_quote_units`           | `number \| null` | العائد المستلم عند الإغلاق بالوحدات الذرية لأصل الاقتباس.            |
+| `profit_quote_units`         | `number \| null` | صافي الربح أو الخسارة بالوحدات الذرية لأصل الاقتباس.                    |
+| `tokens`                     | `number`         | عدد الرموز المكتسبة عند الدخول بالوحدات الذرية.                |
+| `exit_reason`                | `string \| null` | سبب إغلاق المركز (مثل `target_profit`, `stop_loss`, `trailing_stop`, `manual`). |
+| `market_kind`                | `string \| null` | التبادل اللامركزي أو منصة الإطلاق التي تُداول عليها الرمز (مثل `PumpFun`, `RaydiumCpmm`). |
+| `strategy_target_profit_pct` | `number \| null` | نسبة جني الأرباح المحددة عند فتح المركز.      |
+| `strategy_stop_loss_pct`     | `number \| null` | نسبة وقف الخسارة المحددة عند فتح المركز.          |
+| `strategy_trailing_stop_pct` | `number \| null` | نسبة الوقف المتحرك المحددة عند فتح المركز.      |
+| `opened_at`                  | `string`         | طابع زمني ISO 8601 عند فتح المركز.                   |
+| `closed_at`                  | `string \| null` | طابع زمني ISO 8601 عند إغلاق المركز.                   |
+
+## مثال curl
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+مع التصفية:
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## مثال استجابة
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## استجابات الأخطاء
+
+راجع [معالجة الأخطاء](/api/exit-api/error-handling) لمواصفات مغلف الأخطاء الكامل ومنطق الأخطاء القابلة لإعادة المحاولة.

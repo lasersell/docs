@@ -1,0 +1,107 @@
+---
+title: "Wallet"
+description: "Gestiona múltiples wallets, visualiza holdings de tokens, envía y recibe SOL y tokens SPL, e intercambia a través de Jupiter."
+---
+
+La página de Wallet es tu centro para gestionar wallets, ver holdings y ejecutar transacciones manuales. Tiene cinco pestañas: Resumen, Enviar, Recibir, Swap y Gestionar.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Wallet.mp4"
+/>
+
+## Resumen
+
+La pestaña de Resumen muestra todos los tokens mantenidos en tus wallets activas.
+
+**Cada token muestra:**
+- Símbolo y logo
+- Precio actual
+- Cambio de precio en 24 horas
+- Tu saldo y su valor en tu moneda de visualización
+
+**Filtros:**
+- **Todos** — Cada token en tus wallets
+- **Armados** — Tokens monitoreados activamente por el stream de LaserSell
+- **Wallet** — Filtrar por wallet específica
+
+Los tokens en mercados soportados muestran una insignia **Armado** cuando LaserSell los está monitoreando. Los tokens en mercados no soportados muestran una nota de que la auto venta no está disponible, con la opción de intercambiar manualmente.
+
+### Búsqueda de tokens
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Search.mp4"
+/>
+
+Busca cualquier token de Solana por nombre, símbolo o dirección mint. Los resultados muestran precio, información de mercado y si el token está en un mercado que LaserSell soporta. Puedes saltar directamente a la pestaña de Swap con un token preseleccionado.
+
+## Enviar
+
+Transfiere SOL o cualquier token SPL a otra wallet.
+
+1. Selecciona la wallet desde la que enviar.
+2. Ingresa la dirección del destinatario (clave pública de Solana o dominio `.sol`).
+3. Elige el activo (SOL o cualquier token SPL en tu wallet).
+4. Ingresa la cantidad (o haz clic en Máximo).
+5. Revisa los detalles de la transacción.
+6. Confirma para firmar y transmitir.
+
+Después de un envío exitoso, verás una confirmación con un enlace para ver la transacción en Solscan.
+
+## Recibir
+
+Muestra tu dirección de wallet como texto (con un botón de copiar) y como código QR. Usa esto para recibir SOL o tokens SPL de otra wallet en la red principal de Solana.
+
+Si tienes múltiples wallets, selecciona cuál mostrar usando el selector de wallet en la parte superior.
+
+## Swap
+
+Intercambia entre cualquier token de Solana usando el enrutamiento de Jupiter.
+
+1. Selecciona la wallet desde la que intercambiar.
+2. Elige el token de entrada e ingresa la cantidad.
+3. Elige el token de salida (buscar por nombre, símbolo o mint).
+4. Revisa la cotización: cantidad de salida, impacto en el precio, ruta y slippage.
+5. Confirma para firmar y ejecutar.
+
+La interfaz de swap obtiene cotizaciones en vivo de Jupiter y se actualiza automáticamente mientras escribes (con debounce para rendimiento).
+
+**Aviso de mercado no soportado:** Si intercambias por un token en un mercado que LaserSell aún no monitorea, verás una nota: la auto venta no estará disponible para ese token. Aún puedes mantenerlo y venderlo manualmente.
+
+## Gestionar
+
+Añade, respalda y elimina wallets.
+
+### Añadir una wallet
+
+- **Importar existente** — Pega una clave privada en Base58. La clave se cifra inmediatamente con tu frase de contraseña elegida.
+- **Generar nueva** — Crea un nuevo par de claves localmente. Finánciala con SOL para empezar a operar.
+
+Cada wallet se cifra independientemente. Puedes usar frases de contraseña diferentes por wallet.
+
+### Respaldo
+
+Haz clic en el botón de respaldo en cualquier wallet, ingresa tu frase de contraseña, y tu clave privada se revela. Cópiala y almacénala de forma segura fuera de línea. Esta es la única forma de recuperar tu wallet si pierdes acceso a tu máquina.
+
+<Warning>
+Nunca compartas tu clave privada. LaserSell nunca la pedirá fuera del flujo de importación.
+</Warning>
+
+### Eliminar una wallet
+
+La eliminación es un proceso de dos pasos. La aplicación te solicita respaldar tu clave primero, luego confirma la eliminación permanente. Una vez eliminado, el archivo de almacén de claves cifrado se elimina del disco y no se puede recuperar.
+
+### Límites de wallets
+
+| Nivel | Wallets activas |
+| :--- | :--- |
+| Personal (Gratis) | 1 |
+| Professional | 5 |
+| Advanced | 200 |

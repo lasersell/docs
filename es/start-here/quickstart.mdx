@@ -1,0 +1,93 @@
+---
+title: "Inicio rápido"
+description: "Instala LaserSell y comienza a auto vender en menos de 5 minutos."
+---
+
+## Prerrequisitos
+
+- **Endpoint RPC privado.** Recomendamos registrarte para un nivel gratuito de RPC en [Helius](https://helius.dev), [Shyft](https://shyft.to) o [Chainstack](https://chainstack.com). Un RPC privado te da actualizaciones de saldo más rápidas y confirmaciones de transacciones más confiables que el RPC público de Solana.
+- **Clave API de LaserSell.** Regístrate en [app.lasersell.io](https://app.lasersell.io) para crear una clave API gratuita. El nivel gratuito es suficiente para la mayoría de los usuarios.
+
+## Instalación
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+Verifica que funcionó:
+
+```shellscript
+lasersell --version
+```
+
+¿Necesitas instrucciones específicas por plataforma? Ver [Resumen de instalación](/installation/overview).
+
+## Configuración
+
+Ejecuta LaserSell. El asistente de configuración se inicia automáticamente en el primer lanzamiento:
+
+```shellscript
+lasersell
+```
+
+El asistente te pedirá tu URL de RPC, clave API, configuración de estrategia, wallet (crear nueva o importar existente) y una frase de contraseña para cifrar tu almacén de claves.
+
+<Warning>
+No hay "olvidé mi contraseña." Si pierdes tu frase de contraseña, el almacén de claves no puede recuperarse.
+</Warning>
+
+Para un recorrido detallado de cada paso, ver [Configuración inicial](/onboarding/initial-setup).
+
+## Verificación
+
+Ejecuta una verificación de salud para confirmar que todo está conectado:
+
+```shellscript
+lasersell --smoke
+```
+
+Deberías ver `SMOKE OK`. Luego inicia LaserSell:
+
+```shellscript
+lasersell
+```
+
+LaserSell ahora está monitoreando tu wallet.
+
+## Qué sucede ahora
+
+LaserSell es un **monitor pasivo**. No coloca operaciones por ti. En su lugar, observa tu wallet en busca de nuevas compras de tokens y maneja el lado de la venta automáticamente.
+
+1. Compras tokens usando cualquier plataforma en la que ya operes (Photon, BullX, Phantom, Jupiter, etc.)
+2. LaserSell detecta la compra automáticamente en segundos
+3. El CLI registra la posición como activa con actualizaciones de PnL en vivo
+4. Cuando cualquier condición de salida se activa (take profit, stop loss, trailing stop, deadline o graduación), LaserSell construye y firma la transacción de venta automáticamente
+5. Tú sigues operando. LaserSell sigue vendiendo.
+
+## Tu primera salida automatizada
+
+Recorre el ciclo completo para ver LaserSell en acción:
+
+1. **LaserSell está ejecutándose.** Ves la salida de log confirmando que el stream está conectado y tu wallet está registrada.
+2. **Compra una posición pequeña** en cualquier plataforma soportada. Empieza pequeño para que puedas observar la mecánica sin arriesgar capital real.
+3. **Observa los logs.** En segundos, verás eventos `session_started` y `pnl_update` para tu nueva posición.
+4. **La salida se activa.** Cuando tu condición de take profit, stop loss, trailing stop o deadline se active, verás `sell_scheduled` seguido de `sell_complete` con la firma en cadena.
+
+Ese es el ciclo completo. Tú operas normalmente, y LaserSell maneja cada salida.
+
+## Ajusta tu estrategia
+
+Edita `~/.lasersell/config.yml` para ajustar tu estrategia, luego reinicia el daemon. O vuelve a ejecutar el asistente de configuración:
+
+```shellscript
+lasersell --setup
+```
+
+Para la referencia completa de configuración, ver [Configuración de ejemplo](/onboarding/example-configuration).
+
+## Siguientes pasos
+
+- [Referencia del CLI](/onboarding/lasersell-ui): Eventos de log, flags del CLI, operación sin interfaz y copy trading
+- [Configuración de ejemplo](/onboarding/example-configuration): Referencia completa de configuración con todos los campos disponibles
+- [Configuración inicial](/onboarding/initial-setup): Vuelve a ejecutar el asistente de configuración con `lasersell --setup`
+- [Seguridad de claves](/security/key-safety): Protege tus claves

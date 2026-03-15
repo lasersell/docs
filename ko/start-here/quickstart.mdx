@@ -1,0 +1,93 @@
+---
+title: "빠른 시작"
+description: "LaserSell을 설치하고 5분 안에 자동 매도를 시작하세요."
+---
+
+## 사전 요구사항
+
+- **전용 RPC 엔드포인트.** [Helius](https://helius.dev), [Shyft](https://shyft.to), [Chainstack](https://chainstack.com)에서 무료 티어 RPC에 가입하는 것을 권장합니다. 전용 RPC는 공용 Solana RPC보다 더 빠른 잔액 업데이트와 더 안정적인 트랜잭션 확인을 제공합니다.
+- **LaserSell API 키.** [app.lasersell.io](https://app.lasersell.io)에 가입하여 무료 API 키를 생성하세요. 대부분의 사용자에게 무료 티어면 충분합니다.
+
+## 설치
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+작동 확인:
+
+```shellscript
+lasersell --version
+```
+
+플랫폼별 설치 안내가 필요하면 [설치 개요](/installation/overview)를 참조하세요.
+
+## 설정
+
+LaserSell을 실행합니다. 첫 실행 시 설정 마법사가 자동으로 시작됩니다:
+
+```shellscript
+lasersell
+```
+
+마법사가 RPC URL, API 키, 전략 설정, 지갑(새로 생성 또는 기존 가져오기), 키스토어 암호화를 위한 패스프레이즈를 요청합니다.
+
+<Warning>
+"비밀번호 찾기"가 없습니다. 패스프레이즈를 잃으면 키스토어를 복구할 수 없습니다.
+</Warning>
+
+모든 프롬프트에 대한 자세한 안내는 [초기 설정](/onboarding/initial-setup)을 참조하세요.
+
+## 확인
+
+헬스 체크를 실행하여 모든 것이 연결되었는지 확인합니다:
+
+```shellscript
+lasersell --smoke
+```
+
+`SMOKE OK`가 표시되어야 합니다. 그런 다음 LaserSell을 시작합니다:
+
+```shellscript
+lasersell
+```
+
+LaserSell이 이제 지갑을 모니터링하고 있습니다.
+
+## 이제 무엇이 일어나나
+
+LaserSell은 **수동 모니터**입니다. 거래를 대신하지 않습니다. 대신 지갑에서 새로운 토큰 매수를 감시하고 매도 측을 자동으로 처리합니다.
+
+1. 평소 거래하는 플랫폼(Photon, BullX, Phantom, Jupiter 등)에서 토큰을 매수합니다
+2. LaserSell이 몇 초 안에 자동으로 매수를 감지합니다
+3. CLI가 실시간 손익 업데이트와 함께 포지션을 활성으로 기록합니다
+4. 청산 조건(목표 수익, 손절매, 트레일링 스탑, 데드라인 또는 졸업)이 발동하면, LaserSell이 자동으로 매도 트랜잭션을 빌드하고 서명합니다
+5. 계속 거래합니다. LaserSell이 계속 매도합니다.
+
+## 첫 번째 자동 청산
+
+전체 루프를 진행하여 LaserSell을 실제로 확인하세요:
+
+1. **LaserSell이 실행 중입니다.** 스트림이 연결되고 지갑이 등록되었다는 로그 출력을 볼 수 있습니다.
+2. **소액 포지션을 매수합니다** 지원되는 플랫폼에서. 실제 자본을 위험에 노출하지 않고 메커니즘을 볼 수 있도록 소액으로 시작하세요.
+3. **로그를 확인합니다.** 몇 초 안에 새 포지션에 대한 `session_started`와 `pnl_update` 이벤트를 볼 수 있습니다.
+4. **청산이 발동합니다.** 목표 수익, 손절매, 트레일링 스탑 또는 데드라인 조건이 트리거되면, `sell_scheduled` 다음에 온체인 서명이 포함된 `sell_complete`를 볼 수 있습니다.
+
+이것이 전체 루프입니다. 평소처럼 거래하면 LaserSell이 모든 청산을 처리합니다.
+
+## 전략 조정
+
+`~/.lasersell/config.yml`을 편집하여 전략을 조정한 후 데몬을 재시작합니다. 또는 설정 마법사를 다시 실행합니다:
+
+```shellscript
+lasersell --setup
+```
+
+전체 구성 참조는 [예제 구성](/onboarding/example-configuration)을 참조하세요.
+
+## 다음 단계
+
+- [CLI 참조](/onboarding/lasersell-ui): 로그 이벤트, CLI 플래그, 헤드리스 운영, 카피 트레이딩
+- [예제 구성](/onboarding/example-configuration): 사용 가능한 모든 필드가 포함된 전체 구성 참조
+- [초기 설정](/onboarding/initial-setup): `lasersell --setup`으로 설정 마법사 다시 실행
+- [키 안전](/security/key-safety): 키 보호

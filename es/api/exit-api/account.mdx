@@ -1,0 +1,57 @@
+---
+title: "GET /v1/account"
+description: "Recupera tu nivel de cuenta, nombre del plan y límites de uso de LaserSell API."
+---
+
+## Endpoint
+
+```
+GET https://api.lasersell.io/v1/account
+```
+
+## Encabezados
+
+| Encabezado  | Requerido | Descripción            |
+|-------------|----------|------------------------|
+| `x-api-key` | Sí       | Tu clave API de LaserSell |
+
+## Respuesta: `AccountResponse`
+
+| Campo       | Tipo     | Descripción                                      |
+|-------------|----------|--------------------------------------------------|
+| `tier`      | `number` | Identificador numérico del nivel (`0`, `1` o `2`). |
+| `tier_name` | `string` | Nombre legible del plan (`free`, `tier_1`, `tier_2`). |
+| `limits`    | `object` | Límites de uso para tu plan (ver abajo).          |
+
+### Objeto `limits`
+
+| Campo                       | Tipo     | Descripción                                           |
+|-----------------------------|----------|-------------------------------------------------------|
+| `max_wallets`               | `number` | Máximo de wallets que puedes rastrear simultáneamente. |
+| `max_positions_per_wallet`  | `number` | Máximo de posiciones abiertas por wallet.              |
+| `max_positions_per_session` | `number` | Máximo total de posiciones abiertas en todas las wallets. |
+
+## Ejemplo con curl
+
+```bash
+curl https://api.lasersell.io/v1/account \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Respuesta de ejemplo
+
+```json
+{
+  "tier": 1,
+  "tier_name": "tier_1",
+  "limits": {
+    "max_wallets": 5,
+    "max_positions_per_wallet": 100,
+    "max_positions_per_session": 500
+  }
+}
+```
+
+## Respuestas de error
+
+Ver [Manejo de errores](/api/exit-api/error-handling) para la especificación completa del formato de error y la lógica de errores reintentables.

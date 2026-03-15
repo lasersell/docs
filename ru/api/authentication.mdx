@@ -1,0 +1,91 @@
+---
+title: "Аутентификация"
+description: "Получите API ключ в панели управления LaserSell и аутентифицируйте запросы на всех четырёх SDK."
+---
+
+## Получение API ключа
+
+1. Войдите на [app.lasersell.io](https://app.lasersell.io).
+2. Перейдите в **Settings > API Keys**.
+3. Нажмите **Create API Key**, дайте ему имя и скопируйте значение.
+
+Храните ключ в безопасности. Он не может быть отображён повторно после создания.
+
+## Аутентификация запросов
+
+Каждый запрос к LaserSell API и каждое WebSocket-соединение к Exit Intelligence Stream требует API ключ, переданный через HTTP заголовок `x-api-key`.
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### Примеры SDK
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### Аутентификация Exit Intelligence Stream
+
+WebSocket Exit Intelligence Stream также использует `x-api-key`. SDK обрабатывает это автоматически при создании `StreamClient`:
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## Лучшие практики безопасности
+
+- **Никогда не коммитьте API ключ** в систему контроля версий. Используйте переменные окружения или менеджер секретов.
+- **Регулярно ротируйте ключи** через панель управления.
+- **Разграничивайте доступ**, создавая отдельные ключи для разных ботов или окружений.
+- Если ключ скомпрометирован, немедленно отзовите его из панели управления и создайте замену.

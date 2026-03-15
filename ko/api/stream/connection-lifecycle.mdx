@@ -1,0 +1,160 @@
+---
+title: "연결 수명 주기"
+description: "Exit Intelligence Stream의 WebSocket 핸드셰이크, hello_ok, 제한, 재연결 동작, 핑/퐁, StreamClient vs StreamSession 추상화."
+---
+
+## 연결 단계
+
+### 1. WebSocket 열기
+
+`x-api-key` 헤더에 API 키를 포함하여 Exit Intelligence Stream 엔드포인트에 연결합니다:
+
+```
+wss://stream.lasersell.io/v1/ws
+```
+
+### 2. `hello_ok` 수신
+
+연결이 열리면 즉시 서버가 `hello_ok` 메시지를 보냅니다:
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+`limits` 객체는 티어의 용량을 반영합니다. 자세한 내용은 [속도 제한 및 티어](/api/reference/rate-limits)를 참조하세요.
+
+### 3. `configure` 전송
+
+`hello_ok`를 받은 후 지갑과 전략으로 `configure` 메시지를 보냅니다:
+
+```json
+{
+  "type": "configure",
+  "wallet_pubkeys": ["WALLET_PUBKEY_1", "WALLET_PUBKEY_2"],
+  "strategy": {
+    "target_profit_pct": 5.0,
+    "stop_loss_pct": 1.5,
+    "trailing_stop_pct": 3.0
+  },
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000
+}
+```
+
+### 4. 확인 수신
+
+서버가 구성된 지갑에 이미 보유된 토큰에 대한 초기 `balance_update` 메시지로 응답합니다. 포지션이 감지되면 `position_opened`도 받게 됩니다.
+
+## `limits` 객체
+
+| 필드                        | 타입     | 설명                                    |
+|------------------------------|----------|------------------------------------------------|
+| `hi_capacity`                | `number` | 최대 고우선순위 메시지 버퍼.        |
+| `pnl_flush_ms`              | `number` | 손익 업데이트가 플러시되는 간격 (ms). |
+| `max_positions_per_session`  | `number` | 세션당 최대 추적 포지션.              |
+| `max_wallets_per_session`    | `number` | 세션당 최대 지갑.                        |
+| `max_positions_per_wallet`   | `number` | 지갑당 최대 추적 포지션.               |
+| `max_sessions_per_api_key`   | `number` | API 키당 최대 동시 세션.            |
+
+## 재연결
+
+SDK는 자동으로 재연결을 처리합니다. WebSocket이 끊기면:
+
+1. 클라이언트가 100 ms부터 시작하는 지수 백오프로 대기합니다.
+2. 백오프는 각 시도마다 두 배로 증가하여 최대 2,000 ms까지.
+3. 재연결 성공 시 클라이언트가 `configure` 메시지를 다시 보냅니다.
+4. 서버가 기존 보유에 대한 `balance_update` 및 `position_opened` 이벤트를 다시 발행합니다.
+
+재연결 로직을 직접 구현할 필요가 없습니다.
+
+## 핑과 퐁
+
+### 클라이언트 핑
+
+왕복 레이턴시를 측정하기 위해 `ping`을 보냅니다:
+
+```json
+{
+  "type": "ping",
+  "client_time_ms": 1706000000000
+}
+```
+
+서버가 `pong`으로 응답합니다:
+
+```json
+{
+  "type": "pong",
+  "server_time_ms": 1706000000001
+}
+```
+
+### 서버 핑
+
+서버도 WebSocket 프로토콜 수준의 핑을 보낼 수 있습니다. SDK가 퐁 프레임으로 자동 응답합니다.
+
+## StreamClient vs StreamSession
+
+### `StreamClient`
+
+원시 WebSocket 연결을 관리하는 저수준 클라이언트:
+
+- 연결, 재연결, 메시지 프레이밍을 처리합니다.
+- `recv()`에서 원시 `ServerMessage` 객체를 반환합니다.
+- 클라이언트 메시지 전송을 위한 `StreamSender`를 제공합니다.
+- 고우선순위 메시지(청산 신호, 포지션 이벤트)와 저우선순위 메시지(`pnl_update`)를 분리하는 `connectLanes()`를 통한 **레인 분리**를 지원합니다.
+
+### `StreamSession`
+
+`StreamClient`를 다음으로 감싸는 고수준 세션:
+
+- **포지션 추적**: ID 및 토큰 계정별 열린 포지션 맵을 자동으로 유지합니다.
+- **타입 이벤트**: `PositionHandle`이 첨부된 `StreamEvent` 객체를 반환합니다.
+- **데드라인 타이머**: `deadline_timeout_sec` 후 자동으로 청산 신호를 요청합니다.
+- **전략 업데이트**: `updateStrategy()` 및 `updateStrategyOptional()` 메서드.
+
+대부분의 통합에서 `StreamSession`을 사용하세요.
+
+## 레인
+
+레인 분리는 메시지 스트림을 두 개의 수신기로 분리합니다:
+
+- **고우선순위 레인**: `hello_ok`, `error`, `balance_update`, `position_opened`, `position_closed`, `exit_signal_with_tx`
+- **저우선순위 레인**: `pnl_update`
+
+이를 통해 높은 빈도의 손익 업데이트가 시간에 민감한 청산 신호를 차단하는 것을 방지합니다.
+
+레인 분리는 현재 **TypeScript SDK에서만** `connectLanes()`를 통해 사용할 수 있습니다:
+
+```typescript
+const client = new StreamClient("YOUR_API_KEY");
+const connection = await client.connectLanes(configure, {
+  lowPriorityCapacity: 512,
+});
+
+const [sender, highRx, lowRx] = connection.split();
+
+// 메인 루프에서 고우선순위 처리
+for await (const msg of highRx) {
+  // 청산 신호, 포지션 이벤트...
+}
+
+// 백그라운드에서 저우선순위 처리
+for await (const msg of lowRx) {
+  // pnl_update...
+}
+```
+
+저우선순위 버퍼가 가득 차면 Exit Intelligence Stream의 반응성을 유지하기 위해 가장 오래된 메시지가 삭제됩니다.

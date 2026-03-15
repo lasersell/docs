@@ -37,9 +37,11 @@ This is the latency that matters for automated exits. When the Exit Intelligence
 
 On the co-located path, LaserSell builds transactions in under 5 ms on average. The next fastest method is over 12x slower. This is the path used by the Exit Intelligence Stream for automated exits.
 
-## Public Internet (Desktop App and SDK)
+## Public Internet (SDK and API)
 
-Standard API latency over the public internet, measured from a MacBook Pro. This represents the latency experienced by Desktop App users and developers calling the LaserSell API directly.
+Standard API latency over the public internet, measured from a MacBook Pro. This represents the latency experienced by developers making direct REST API calls from their own applications.
+
+Desktop App users do not experience these numbers. The Desktop App receives pre-built exit transactions through the Exit Intelligence Stream, which builds transactions on the co-located path (the sub-5ms numbers above) and pushes them to the client over a persistent WebSocket connection.
 
 ### Buy Transaction Build
 
@@ -63,7 +65,7 @@ Standard API latency over the public internet, measured from a MacBook Pro. This
 | Jupiter Metis API | 181.73 ms | 155.88 ms | 222.54 ms | 174.92 ms |
 | PumpFun SDK | 541.00 ms | 277.65 ms | 2,029.10 ms | 317.28 ms |
 
-Over the public internet, LaserSell is consistently the fastest with the tightest variance. The PumpFun SDK shows the most volatility, with worst-case latencies exceeding 4 seconds on buys and 2 seconds on sells.
+Over the public internet, LaserSell is consistently the fastest with the tightest variance. The PumpFun SDK shows the most volatility, with worst-case latencies exceeding 4 seconds on buys and 2 seconds on sells. These numbers are relevant for SDK and API integrators building their own tools.
 
 ## What is Being Compared
 

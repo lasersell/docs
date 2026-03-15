@@ -1,0 +1,135 @@
+---
+title: "安装"
+description: "在 Linux、macOS、Windows（WSL）或 Docker 上安装 LaserSell。"
+---
+
+## 快速安装
+
+在任何平台上最快的安装方式：
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+如果成功，跳到[快速入门](/start-here/quickstart)。特定平台选项如下。
+
+## 平台指南
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh（推荐）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### 手动 APT 设置
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh（推荐）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+同时支持 Intel 和 Apple Silicon（M 系列）。
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### Tarball（无 Homebrew）
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+LaserSell 通过 WSL（Windows Subsystem for Linux）在 Windows 上运行。
+
+### 1. 安装 WSL
+
+以管理员身份打开 PowerShell：
+
+```shellscript
+wsl --install
+```
+
+重启你的电脑。
+
+### 2. 安装 LaserSell
+
+打开你的 WSL 发行版（如 Ubuntu）并运行：
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. 准备
+
+安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 并创建一个名为 `lasersell` 的空文件夹。
+
+### 2. 运行
+
+打开终端，`cd` 到该文件夹，然后运行：
+
+**macOS / Linux：**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell)：**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+首次运行时，设置向导在容器内启动。配置文件写入你挂载的文件夹并在多次运行间保留。
+
+</Tab>
+</Tabs>
+
+## 升级
+
+| 方法 | 命令 |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / Tarball | 重新运行 `curl -fsSL https://dl.lasersell.io/install.sh \| bash` |
+| Docker | `docker pull lasersell/lasersell` |
+
+## CLI 标志
+
+| 标志 | 缩写 | 说明 |
+|------|-------|-------------|
+| `--setup` | | 强制运行引导向导 |
+| `--config <path>` | `-f` | 自定义配置文件路径 |
+| `--debug` | | 将调试级别日志写入 `~/.lasersell/debug.log` |
+| `--smoke` | | 运行连通性健康检查并退出 |
+| `--export-private-key` | | 将钱包的 base58 私钥导出到标准输出 |
+
+`--smoke`、`--setup` 和 `--export-private-key` 互斥。

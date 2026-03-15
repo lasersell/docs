@@ -1,0 +1,45 @@
+---
+title: "Seguridad"
+description: "Cómo LaserSell Desktop protege tus wallets con cifrado local, Touch ID y auto bloqueo."
+---
+
+LaserSell Desktop es no custodial. Tus claves privadas están cifradas en tu máquina y nunca salen de tu dispositivo. Así es como funciona el modelo de seguridad.
+
+## Cifrado de wallet
+
+Cada wallet se cifra en reposo usando **XChaCha20-Poly1305** con una clave derivada de tu frase de contraseña a través de **Argon2id** (KDF con uso intensivo de memoria). Cada wallet tiene su propia sal aleatoria.
+
+Los archivos de almacén de claves cifrados se almacenan en `~/.lasersell-app/wallets/`. Incluso si alguien obtiene acceso a tu sistema de archivos, no puede leer tus claves sin tu frase de contraseña.
+
+Puedes usar frases de contraseña diferentes para diferentes wallets. La aplicación solicita la frase de contraseña de cada wallet al desbloquear.
+
+## Touch ID
+
+En macOS, puedes habilitar Touch ID para un desbloqueo más rápido de wallets. Cuando está habilitado, tu frase de contraseña se almacena de forma segura en el Keychain de macOS y se recupera mediante autenticación biométrica en cada desbloqueo.
+
+Para habilitar: **Configuración > Seguridad > Touch ID Unlock**. Se te pedirá que ingreses tu frase de contraseña una vez para almacenarla en el Keychain.
+
+Para deshabilitar: Desactiva el ajuste. Tu frase de contraseña se elimina del Keychain y volverás al ingreso manual de frase de contraseña.
+
+## Auto bloqueo
+
+La aplicación bloquea automáticamente tus wallets después de un período de inactividad. Esto borra todas las claves descifradas de la memoria y pausa el monitoreo hasta que desbloquees nuevamente.
+
+**Opciones:** 15 minutos, 30 minutos, 45 minutos, 1 hora, 2 horas, 6 horas o Deshabilitado.
+
+El temporizador de inactividad se reinicia con cualquier movimiento del ratón, entrada de teclado o clic. También puedes bloquear manualmente en cualquier momento desde **Configuración > Seguridad > Lock LaserSell**.
+
+## Firma de transacciones
+
+Todas las transacciones se firman localmente en tu dispositivo. LaserSell construye la transacción, tu par de claves local la firma, y la transacción firmada se transmite directamente a la red Solana a través de tu endpoint RPC. Ningún intermediario toca tu clave privada.
+
+## Lo que nunca hacemos
+
+- **Nunca transmitimos tus claves.** Las claves privadas y frases semilla nunca se envían por la red.
+- **Nunca almacenamos claves en texto plano.** El almacén de claves siempre está cifrado en disco.
+- **Nunca respaldamos en la nube.** No hay sincronización en la nube, no hay respaldo remoto, y no hay recuperación de "olvidé mi frase de contraseña". Si pierdes tu frase de contraseña y no has respaldado tu clave, la wallet es irrecuperable.
+- **Nunca retenemos custodia.** El programa de enrutamiento LaserSell Router es de paso. Tus fondos se mueven directamente de tu wallet al DEX y de vuelta.
+
+<Warning>
+Respalda tus claves privadas. Puedes hacer esto desde [Wallet > Gestionar](/desktop/wallet). Si pierdes acceso a tu máquina y tu frase de contraseña, no hay ruta de recuperación. LaserSell no puede ayudarte a recuperar claves perdidas.
+</Warning>

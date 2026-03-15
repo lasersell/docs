@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "LaserSell APIを通じてSOLをトークンにスワップするための未署名購入トランザクションを構築します。"
+---
+
+<Warning>
+この購入をExit Intelligence Streamで追跡する予定の場合、購入トランザクションを送信する**前に**ストリームを接続する**必要があります**。ストリームはオンチェーンのトークン到着をリアルタイムで観察して新しいポジションを検出します。購入がランディングしたときにストリームが接続されていない場合、ポジションは追跡されず、エグジットシグナルは生成されません。
+</Warning>
+
+## エンドポイント
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## ヘッダー
+
+| ヘッダー | 必須 | 説明 |
+|----------------|----------|---------------------------------|
+| `Content-Type` | はい | `application/json`である必要があります |
+| `x-api-key`    | はい | LaserSell APIキー |
+
+## リクエストボディ: `BuildBuyTxRequest`
+
+| フィールド | 型 | 必須 | 説明 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | はい | 購入するトークンミントアドレス（base58）。 |
+| `user_pubkey`           | `string` | はい | ウォレット公開鍵（base58）。 |
+| `amount`                | `number` | いいえ* | 使用する人間可読金額（例: SOLの場合`0.1`、USD1の場合`10.0`）。`amount_in_total`と排他的。 |
+| `amount_in_total`       | `number` | いいえ* | 入力アセットのatomic unitsでの使用金額（例: SOLの場合lamport）。`amount`と排他的。 |
+| `slippage_bps`          | `number` | はい | ベーシスポイントでの最大スリッページ許容値（例: `2000` = 20%）。 |
+| `input`                 | `string` | いいえ | 入力アセット: `"SOL"`（デフォルト）または`"USD1"`。 |
+| `mode`                  | `string` | いいえ | ルーティングモードヒント。有効値: `"fast"`、`"secure"`。デフォルト: `"fast"`。 |
+| `send_mode`             | `string` | いいえ | トランザクション送信モード: `"helius_sender"`、`"astralane"`、または`"rpc"`。 |
+| `tip_lamports`          | `number` | いいえ | lamportでのオプションの優先度手数料チップ。 |
+| `partner_fee_recipient` | `string` | いいえ | パートナーフィー受取ウォレット（base58 pubkey）。 |
+| `partner_fee_bps`       | `number` | いいえ | ベーシスポイントでのパートナーフィー（最大50 = 0.5%）。`partner_fee_lamports`と排他的。 |
+| `partner_fee_lamports`  | `number` | いいえ | フラットSOL lamportでのパートナーフィー（最大50,000,000）。`partner_fee_bps`と排他的。 |
+
+<Note>
+**\*** `amount`または`amount_in_total`のいずれか1つのみを指定する必要があります。`amount`は`input`アセットに基づいてatomic unitsに自動変換されます（SOL: 10^9、USD1: 10^6）。
+</Note>
+
+## レスポンス: `BuildTxResponse`
+
+| フィールド | 型 | 説明 |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64エンコードされた未署名Solana `VersionedTransaction`。 |
+| `route` | `object` | オプションのルーティングメタデータ。 |
+| `debug` | `object` | オプションのデバッグ情報。 |
+
+## curl例
+
+人間可読な`amount`を使用:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+atomic `amount_in_total`を使用:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## SDK例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## エラーレスポンス
+
+完全なエラーエンベロープ仕様とリトライ可能なエラーロジックについては[エラー処理](/api/exit-api/error-handling)を参照してください。

@@ -1,0 +1,61 @@
+---
+title: "Límites de tasa y niveles"
+description: "Entiende la capacidad por nivel, el objeto limits de hello_ok y cómo manejar respuestas 429."
+---
+
+## Niveles de precios
+
+LaserSell ofrece cuatro niveles. Cada nivel determina tus límites de tasa tanto para la API REST como para el Exit Intelligence Stream.
+
+| Nivel | Nombre | Precio |
+|------|------|-------|
+| 0 | Personal | Gratis |
+| 1 | Professional | $99/mes |
+| 2 | Advanced Exit Engine | $249/mes |
+| 3 | Enterprise | Personalizado |
+
+## Límites del Exit Intelligence Stream por nivel
+
+| Límite | Personal (Gratis) | Professional | Advanced | Enterprise |
+|-------|-----------------|-------------|----------|------------|
+| Wallets por sesión | 1 | 5 | 200 | Personalizado |
+| Posiciones por wallet | 2 | 100 | 100 | Personalizado |
+| Posiciones por sesión | 2 | 500 | 20,000 | Personalizado |
+| Sesiones por clave API | 1 | 1 | 1 | Personalizado |
+| Buffer de alta prioridad (`hi_capacity`) | 256 | 256 | 256 | Personalizado |
+| Intervalo de flush de PnL (`pnl_flush_ms`) | 100 ms | 100 ms | 100 ms | Personalizado |
+| Timeout de inactividad | 45 min | Ninguno | Ninguno | Ninguno |
+| [Instantáneas de liquidez](/api/stream/server-events#liquidity_snapshot) | No | Sí | Sí | Sí |
+| Comisiones de partner | No | No | Sí | Sí |
+
+## Límites de tasa de la API REST
+
+La API REST (`/v1/sell`, `/v1/buy`) aplica un límite de solicitudes por clave usando una ventana deslizante.
+
+| Nivel | Solicitudes por minuto |
+|------|-------------------|
+| Personal (Gratis) | 60 |
+| Professional | 60 |
+| Advanced | 60 |
+| Enterprise | Personalizado |
+
+## Leer tus límites al conectar
+
+Cuando te conectas al Exit Intelligence Stream, el mensaje `hello_ok` incluye un objeto `limits` que refleja el nivel de tu clave API.
+
+## Manejo de respuestas 429
+
+Cuando excedes el límite de tasa de la API REST, el servidor responde con HTTP `429 Too Many Requests`. Los SDKs reintentan automáticamente las respuestas `429` usando la política de reintentos integrada. Si ves errores 429 persistentes:
+
+1. **Verifica la frecuencia de tus solicitudes.** Reduce la tasa de llamadas a la API.
+2. **Agrupa solicitudes.** Si construyes múltiples transacciones, espácialas.
+3. **Aumenta el backoff de reintentos.** Configura un backoff más largo para darle tiempo al servidor de recuperarse.
+
+Ver [Manejo de errores](/api/exit-api/error-handling) para detalles sobre personalizar la política de reintentos.
+
+## Mejores prácticas
+
+- **Lee los límites al conectar.** Usa el objeto `limits` para validar tu configuración antes de enviar posiciones.
+- **Monitorea errores de capacidad.** Registra y alerta sobre mensajes `error` con códigos relacionados con capacidad.
+- **Usa lane splitting (TypeScript).** Para conteos altos de posiciones, usa `connectLanes()` para evitar que los mensajes `pnl_update` bloqueen eventos sensibles al tiempo.
+- **Respeta las respuestas 429.** No reintentar inmediatamente; usa backoff exponencial.

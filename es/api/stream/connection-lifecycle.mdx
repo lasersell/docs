@@ -1,0 +1,160 @@
+---
+title: "Ciclo de vida de la conexión"
+description: "Handshake WebSocket, hello_ok, límites, comportamiento de reconexión, ping/pong y la abstracción StreamClient vs StreamSession para el Exit Intelligence Stream."
+---
+
+## Pasos de conexión
+
+### 1. Abrir WebSocket
+
+Conéctate al endpoint del Exit Intelligence Stream con tu clave API en el encabezado `x-api-key`:
+
+```
+wss://stream.lasersell.io/v1/ws
+```
+
+### 2. Recibir `hello_ok`
+
+Inmediatamente después de que la conexión se abre, el servidor envía un mensaje `hello_ok`:
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+El objeto `limits` refleja la capacidad de tu nivel. Ver [Límites de tasa y niveles](/api/reference/rate-limits) para detalles.
+
+### 3. Enviar `configure`
+
+Después de recibir `hello_ok`, envía un mensaje `configure` con tus wallets y estrategia:
+
+```json
+{
+  "type": "configure",
+  "wallet_pubkeys": ["WALLET_PUBKEY_1", "WALLET_PUBKEY_2"],
+  "strategy": {
+    "target_profit_pct": 5.0,
+    "stop_loss_pct": 1.5,
+    "trailing_stop_pct": 3.0
+  },
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000
+}
+```
+
+### 4. Recibir confirmación
+
+El servidor responde con mensajes iniciales de `balance_update` para tokens que ya se mantienen en las wallets configuradas. Si se detecta una posición, también recibirás `position_opened`.
+
+## El objeto `limits`
+
+| Campo                        | Tipo     | Descripción                                    |
+|------------------------------|----------|------------------------------------------------|
+| `hi_capacity`                | `number` | Máximo de mensajes de alta prioridad almacenados en buffer. |
+| `pnl_flush_ms`              | `number` | Intervalo en que se envían las actualizaciones de PnL (ms). |
+| `max_positions_per_session`  | `number` | Máximo de posiciones rastreadas por sesión.      |
+| `max_wallets_per_session`    | `number` | Máximo de wallets por sesión.                    |
+| `max_positions_per_wallet`   | `number` | Máximo de posiciones rastreadas por wallet.      |
+| `max_sessions_per_api_key`   | `number` | Máximo de sesiones concurrentes por clave API.   |
+
+## Reconexión
+
+Los SDKs manejan la reconexión automáticamente. Cuando el WebSocket se desconecta:
+
+1. El cliente espera con backoff exponencial comenzando en 100 ms.
+2. El backoff se duplica en cada intento hasta un máximo de 2,000 ms.
+3. Al reconectar exitosamente, el cliente reenvía el mensaje `configure`.
+4. El servidor reemitirá eventos `balance_update` y `position_opened` para holdings existentes.
+
+No necesitas implementar la lógica de reconexión tú mismo.
+
+## Ping y Pong
+
+### Ping del cliente
+
+Envía un `ping` para medir la latencia de ida y vuelta:
+
+```json
+{
+  "type": "ping",
+  "client_time_ms": 1706000000000
+}
+```
+
+El servidor responde con `pong`:
+
+```json
+{
+  "type": "pong",
+  "server_time_ms": 1706000000001
+}
+```
+
+### Ping del servidor
+
+El servidor también puede enviar pings a nivel de protocolo WebSocket. Los SDKs responden con frames pong automáticamente.
+
+## StreamClient vs StreamSession
+
+### `StreamClient`
+
+El cliente de bajo nivel gestiona la conexión WebSocket cruda:
+
+- Maneja conexión, reconexión y enmarcado de mensajes.
+- Devuelve objetos `ServerMessage` crudos desde `recv()`.
+- Proporciona un `StreamSender` para enviar mensajes del cliente.
+- Soporta **lane splitting** a través de `connectLanes()` que separa mensajes de alta prioridad (señales de salida, eventos de posición) de mensajes de baja prioridad (`pnl_update`).
+
+### `StreamSession`
+
+La sesión de alto nivel envuelve `StreamClient` con:
+
+- **Seguimiento de posiciones**: Mantiene automáticamente un mapa de posiciones abiertas por ID y cuenta de tokens.
+- **Eventos tipados**: Devuelve objetos `StreamEvent` con un `PositionHandle` adjunto.
+- **Temporizadores de deadline**: Solicita automáticamente señales de salida después de `deadline_timeout_sec`.
+- **Actualizaciones de estrategia**: Métodos `updateStrategy()` y `updateStrategyOptional()`.
+
+Para la mayoría de las integraciones, usa `StreamSession`.
+
+## Lanes
+
+El lane splitting separa el flujo de mensajes en dos receptores:
+
+- **Lane de alta prioridad**: `hello_ok`, `error`, `balance_update`, `position_opened`, `position_closed`, `exit_signal_with_tx`
+- **Lane de baja prioridad**: `pnl_update`
+
+Esto evita que las actualizaciones frecuentes de PnL bloqueen las señales de salida sensibles al tiempo.
+
+El lane splitting actualmente está disponible solo en el **SDK de TypeScript** a través de `connectLanes()`:
+
+```typescript
+const client = new StreamClient("YOUR_API_KEY");
+const connection = await client.connectLanes(configure, {
+  lowPriorityCapacity: 512,
+});
+
+const [sender, highRx, lowRx] = connection.split();
+
+// Process high priority in main loop
+for await (const msg of highRx) {
+  // exit signals, position events...
+}
+
+// Process low priority in background
+for await (const msg of lowRx) {
+  // pnl_update...
+}
+```
+
+Cuando el buffer de baja prioridad está lleno, el mensaje más antiguo se descarta para mantener el Exit Intelligence Stream responsivo.

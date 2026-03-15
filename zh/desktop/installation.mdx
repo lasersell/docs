@@ -1,0 +1,38 @@
+---
+title: "安装"
+description: "在 macOS 上下载并安装 LaserSell 桌面应用。"
+---
+
+## 系统要求
+
+- **macOS 10.15**（Catalina）或更高版本
+- 同时支持 Apple Silicon（M1/M2/M3/M4）和 Intel Mac
+- 需要互联网连接用于实时仓位监控
+
+## 下载
+
+从 [lasersell.io](https://www.lasersell.io) 下载最新版本。
+
+应用已通过 Apple 代码签名和公证。
+
+## 自动更新
+
+LaserSell Desktop 自动检查更新。当有新版本可用时，你会在应用中看到提示。更新在安装前经过签名验证。
+
+你也可以从应用菜单手动检查：**LaserSell > Check for Updates**。
+
+## 卸载
+
+要卸载，将应用拖入废纸篓。如果你还想删除本地数据（钱包、配置、活动日志），请删除 `~/.lasersell-app/` 目录：
+
+```bash
+rm -rf ~/.lasersell-app
+```
+
+<Warning>
+这将永久删除你的加密钱包密钥库文件。在删除此目录之前，请确保你已备份了私钥。
+</Warning>
+
+## 下一步
+
+安装后，打开应用并按照[引导指南](/desktop/onboarding)登录并设置你的第一个钱包。

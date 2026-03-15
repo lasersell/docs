@@ -1,0 +1,27 @@
+---
+title: "Market Context"
+description: "サポートされる各DEXプロトコルのネストされたオブジェクトを含む完全なMarketContextMsgスキーマ。"
+---
+
+## 概要
+
+`MarketContextMsg`は、トークンのマーケットに使用されるDEXプールとプロトコルを記述します。以下に含まれます:
+
+- `position_opened`サーバーイベント
+- `exit_signal_with_tx`サーバーイベント
+- `BuildSellTxRequest`（オプション、サーバー側の解決をスキップするため）
+
+ビルドリクエストから省略された場合、サーバーがコンテキストを自動解決します。
+
+## `market_type`値
+
+| 値 | プロトコル |
+|----------------------|-----------------------|
+| `pump_fun`           | Pump.fun              |
+| `pump_swap`          | PumpSwap              |
+| `meteora_dbc`        | Meteora DBC           |
+| `meteora_damm_v2`    | Meteora DAMM V2       |
+| `raydium_launchpad`  | Raydium Launchpad     |
+| `raydium_cpmm`       | Raydium CPMM          |
+
+各プロトコルのネストされたコンテキストオブジェクトの完全なスキーマ、JSON例、ビルドリクエストでのマーケットコンテキストの渡し方、TypeScript型リファレンスについては、[英語版ドキュメント](/api/reference/market-context)を参照してください。

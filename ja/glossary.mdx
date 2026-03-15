@@ -1,0 +1,227 @@
+---
+title: "用語集"
+description: "LaserSellドキュメント全体で使用される主要な用語、略語、概念の定義。"
+---
+
+## A
+
+**AMM (Automated Market Maker)**
+オーダーブックを使用せず、プールのリザーブに基づいてトークン価格を決定する数学的な公式を使用する分散型取引所プロトコルです。PumpSwap、Meteora DAMM V2、Raydium CPMMはLaserSellがサポートするAMMの例です。
+
+**Argon2id**
+LaserSellがパスフレーズから暗号化鍵を導出するために使用するメモリハードなパスワードハッシングアルゴリズムです。キーストアに対するブルートフォース攻撃を計算上高コストにします。
+
+**Associated Token Account (ATA)**
+特定のウォレットアドレスの特定のSPLトークンを保持する、派生されたオンチェーンアカウントです。ウォレットが初めてトークンを受け取るときに自動的に作成されます。
+
+**Astralane Iris**
+レイテンシ最適化のためのリージョナルエンドポイントをサポートするトランザクション送信ゲートウェイです。LaserSell SDKで利用可能な[送信ターゲット](/api/transactions/send-targets)の一つです。Astralane APIキーが必要です。
+
+**Atomic Units**
+トークンの最小の不可分単位です。SOLの場合、atomic unitはlamport（1 SOL = 1,000,000,000 lamports）です。他のトークンは独自の小数精度を定義します。
+
+## B
+
+**Balance Update**
+Exit Intelligence Streamが、ウォレットのSOLまたはトークン残高が変更されたときに送信するサーバーイベント（`balance_update`）です。[サーバーイベント](/api/stream/server-events)を参照してください。
+
+**Basis Points (BPS)**
+1%の1/100に等しい単位です。100 bps = 1%。LaserSell API全体でスリッページ許容値やパートナーフィー設定に使用されます。
+
+**Bonding Curve**
+Pump.funなどのローンチパッドが、循環供給量に基づいてトークンの価格を決定するために使用する数学的な公式です。ボンディングカーブ上のトークンは、まだAMMプールに移行していません。
+
+## C
+
+**Cold Storage**
+長期保有のためのオフラインウォレットストレージ（ハードウェアウォレットなど）です。ホットウォレットから定期的にコールドストレージに利益を掃引してください。
+
+**Configure Message**
+Exit Intelligence Streamに接続した後に送信する最初のクライアントメッセージです。ウォレットアドレスと戦略パラメータを指定します。サーバーは`configured`イベントで応答します。[クライアントメッセージ](/api/stream/client-messages)を参照してください。
+
+## D
+
+**Deadline Timeout**
+設定した時間（秒）内にテイクプロフィット、ストップロス、トレーリングストップなどの条件が発動しなかった場合に、自動エグジットを強制する時間制限です。停滞したポジションに資本がロックされるのを防ぎます。
+
+## E
+
+**Exit Intelligence**
+LaserSellのコア技術です。ウォレットポジションを監視し、すべての価格更新で戦略条件を評価し、閾値に達したときに事前構築された未署名エグジットトランザクションを配信するリアルタイムシステムです。
+
+**Exit Intelligence Stream**
+`wss://stream.lasersell.io/v1/ws`への持続的なWebSocket接続で、リアルタイムのポジション追跡、PnL更新、自動エグジットシグナルを提供します。[Stream概要](/api/stream/overview)を参照してください。
+
+**Exit Signal**
+戦略条件が満たされたときに発火する、事前構築された未署名売却トランザクションを含むサーバーイベント（`exit_signal_with_tx`）です。Exit Intelligence Streamで最も重要なイベントです。[サーバーイベント](/api/stream/server-events)を参照してください。
+
+**ExitApiClient**
+`/v1/buy`と`/v1/sell`を通じてオンデマンドで売買トランザクションを構築するためのREST API呼び出しを行うSDKクライアントです。
+
+## G
+
+**Graduation**
+トークンがボンディングカーブ（例: Pump.fun）からAMMプール（例: PumpSwap）に移行する瞬間です。卒業時に価格動態が大きく変化することがよくあります。
+
+## H
+
+**`hello_ok`**
+Exit Intelligence Streamに接続した後に受信する最初のサーバーメッセージです。セッションIDとティアレート制限が含まれています。[接続ライフサイクル](/api/stream/connection-lifecycle)を参照してください。
+
+**Helius Sender**
+Solanaでの最適化されたトランザクションランディングのためにHeliusの`/fast`エンドポイントを経由するトランザクション送信サービスです。APIキー不要。LaserSellのデフォルト[送信ターゲット](/api/transactions/send-targets)です。
+
+**Hot Wallet**
+アクティブな取引のためにインターネットに接続されたウォレットです。LaserSellは高速な取引実行のためにマシン上にローカルホットウォレットを作成します。
+
+## J
+
+**Jito Tip**
+同じブロック内の他のトランザクションよりも優先するためのSolanaバリデーターへの直接支払いです。LaserSellの手数料ではなく、ネットワークコストです。
+
+## K
+
+**Keystore**
+秘密鍵をローカルに保存するためにLaserSellクライアントが使用する暗号化ファイル形式です。Argon2id派生鍵によるXChaCha20-Poly1305暗号化を使用します。[ウォレット暗号化](/security/wallet-encryption)を参照してください。
+
+## L
+
+**Lamport**
+SOLの最小単位です。1 SOL = 1,000,000,000 lamports。`amount_in_total`、`tip_lamports`、`partner_fee_lamports`などのAPIフィールドはlamport単位です。
+
+**Lane Splitting**
+Exit Intelligence Streamを2つのレシーバーに分離する機能（TypeScript SDKのみ）。エグジットシグナルとポジションイベント用の高優先度レーンと、PnL更新用の低優先度レーンです。頻繁なPnL更新が時間に敏感なエグジットシグナルをブロックするのを防ぎます。
+
+## M
+
+**Market Context**
+トークンのマーケットに使用されるDEXプールとプロトコルを記述するメタデータで、プールアドレスと設定を含みます。ストリームイベントで返され、オプションでビルドリクエストに渡すことでサーバー側の解決をスキップできます。[Market Context](/api/reference/market-context)を参照してください。
+
+**Memecoin**
+インターネット文化にインスピレーションを受けることが多い暗号通貨で、高いボラティリティと投機的取引が特徴です。LaserSellが設計された主要な市場セグメントです。
+
+**Meteora DBC (Dynamic Bonding Curve)**
+初期ローンチフェーズのトークン向けのMeteoraのボンディングカーブプロトコルです。LaserSellでサポートされています。
+
+**Meteora DAMM V2 (Dynamic AMM V2)**
+ボンディングカーブから移行したトークン向けのMeteoraのダイナミックAMMです。LaserSellでサポートされています。
+
+**Mode (Routing)**
+`/v1/buy`と`/v1/sell`リクエストの`"fast"`または`"secure"`の値を持つフィールドです。Fastモードは速度を最適化し、secureモードは追加の確認チェックを加えます。Send Modeとは異なります。
+
+## N
+
+**Non-Custodial**
+ユーザーが秘密鍵と資金の完全な管理を保持するアーキテクチャです。LaserSellはサーバーに鍵を保存しません。すべてのトランザクションは未署名で返され、ユーザーまたはそのアプリケーションによってローカルで署名されます。
+
+## P
+
+**Partner Fee**
+インテグレーターが売買トランザクションに追加できるオプションの手数料で、オンチェーンスワップの一部として指定のウォレットにアトミックにルーティングされます。リクエストごとにベーシスポイントまたはフラットなlamportで設定可能です。AdvancedおよびEnterpriseティアで利用可能です。[パートナーフィー](/api/reference/partner-fees)を参照してください。
+
+**Passphrase**
+暗号化されたキーストアをアンロックするために必要なユーザー定義のパスワードです。このパスフレーズを紛失するとウォレットは復号できません。
+
+**PnL (Profit and Loss)**
+ポジションの現在の推定損益です。Exit Intelligence Streamは定期的に更新された値を含む`pnl_update`イベントを配信します。
+
+**`pnl_update`**
+追跡中のポジションの最新PnL計算を含むサーバーイベントです。定期的に配信されます。高頻度の配信がレーンスプリッティングが存在する理由です。[サーバーイベント](/api/stream/server-events)を参照してください。
+
+**Position Handle**
+`StreamSession`イベントが返す参照オブジェクトで、ID、トークンアカウント、ミント、ウォレットによって追跡中のポジションを識別します。ポジションのクローズやエグジットシグナルのリクエストに使用されます。
+
+**`position_opened`**
+Exit Intelligence Streamが追跡中のウォレットで新しいトークン購入を検出したときに発火するサーバーイベントです。ポジションID、ミント、コストベース、マーケットコンテキストを含みます。[サーバーイベント](/api/stream/server-events)を参照してください。
+
+**`position_closed`**
+追跡中のポジションが完全にエグジットまたは削除されたときに発火するサーバーイベントです。[サーバーイベント](/api/stream/server-events)を参照してください。
+
+**Priority Fee**
+計算の優先度のためにバリデーターに支払われる標準的なSolanaブロックチェーン手数料です。Jito tipとは別です。
+
+**Private Key**
+ウォレットの資産に対する管理権を付与する暗号鍵です。LaserSellクライアントはこれをローカルで暗号化し、送信しません。APIとSDKは秘密鍵を要求しません。すべてのトランザクションは未署名で返されます。
+
+**Pump.fun**
+ボンディングカーブで取引を開始してからAMMに卒業するSolanaトークンローンチパッドです。
+
+**PumpSwap**
+Pump.funトークンがボンディングカーブから卒業した後に移行するAMMです。LaserSellでサポートされています。
+
+## R
+
+**Rate Limits**
+価格ティアによって決定される、使用できるリクエスト数やリソースの上限です。REST API（1分あたりのリクエスト数）とExit Intelligence Stream（ウォレット数、ポジション数、セッション数）の両方に適用されます。[レート制限とティア](/api/reference/rate-limits)を参照してください。
+
+**Raydium CPMM (Constant Product Market Maker)**
+Raydiumの標準AMMプールです。LaserSellでサポートされています。
+
+**Raydium Launchpad**
+Raydiumのトークンローンチプラットフォームです。LaserSellでサポートされています。
+
+**Routing Fee**
+LaserSell Routerを通じて実行されるすべての注文に適用される取引ごとの手数料です。料率はサブスクリプションティアによって決まります: 2%（Free）、0.9%（Professional）、0.5%（Advanced）、またはカスタム（Enterprise）。オンチェーンでアトミックに適用されます。[料金体系](/pricing/fee-structure)を参照してください。
+
+**RPC (Remote Procedure Call)**
+Solanaブロックチェーンへのゲートウェイとして機能するノードです。LaserSellはチェーンデータの読み取りとトランザクションのブロードキャストにRPC接続を使用します。本番環境ではプライベートRPCエンドポイントの使用を推奨します。
+
+**Rug Pull**
+トークンの流動性が引き出されるか売却が無効化され、価格が暴落するシナリオです。LaserSellのストップロス、トレーリングストップ、卒業時売却機能がエクスポージャーの制限に役立ちます。
+
+## S
+
+**Seed Phrase**
+ウォレットの生成または復元に使用される12語または24語のニーモニックフレーズです。初回ウォレット作成時に一度だけ表示されます。
+
+**Sell on Graduation**
+トークンがボンディングカーブからAMMプールに移行した瞬間にポジションを自動的にエグジットする戦略条件です。卒業後のダンプから保護します。
+
+**Send Mode**
+ビルドリクエストのフィールド（`"rpc"`、`"helius_sender"`、または`"astralane"`）で、どの送信コンテキストに最適化するかをサーバーに伝えます。選択した送信ターゲットと一致させる必要があります。
+
+**Send Target**
+署名済みトランザクションをどこに送信するかをSDKに伝える設定です。オプション: Default RPC、Custom RPC、Helius Sender、Astralane Iris。[送信ターゲット](/api/transactions/send-targets)を参照してください。
+
+**Slippage**
+取引の予想価格と実際の実行価格の差です。高いボラティリティと低い流動性がスリッページを増加させます。
+
+**Stop Loss**
+エントリー価格から設定したパーセンテージ分下落した場合にポジションを自動的に売却する戦略条件です。単一取引のダウンサイドを制限します。
+
+**StreamClient**
+Exit Intelligence Streamの低レベルSDKクライアントです。WebSocket接続、再接続、メッセージフレーミングを管理します。生のサーバーメッセージを返します。[接続ライフサイクル](/api/stream/connection-lifecycle)を参照してください。
+
+**StreamSession**
+`StreamClient`の高レベルSDKラッパーです。自動ポジション追跡、デッドラインタイマー、ポジションハンドル付きの型付きイベント、戦略更新メソッドを提供します。ほとんどの統合で推奨されます。
+
+## T
+
+**Target Profit**
+ポジションのPnLが設定した利益パーセンテージに達したときに自動売却をトリガーする戦略条件です。
+
+**Trailing Stop**
+ポジションが開かれてから観測された最高利益を追跡するダイナミックなストップロスです。利益がそのピークから設定したパーセンテージ分下落すると、エグジットシグナルが発火します。反転前にポンプしたポジションの利益をロックインします。
+
+## U
+
+**USD1**
+売却トランザクションのSOLに代わる出力資産としてサポートされるステーブルコインです。
+
+**Unsigned Transaction**
+LaserSell APIが返すbase64エンコードされたSolana `VersionedTransaction`です。送信前にローカルで秘密鍵で署名する必要があります。LaserSellは署名を行いません。
+
+## V
+
+**VersionedTransaction**
+バージョン管理された命令レイアウトとアドレスルックアップテーブルをサポートするSolanaトランザクション形式です。LaserSell APIが返すすべてのトランザクションはこの形式を使用しています。
+
+## W
+
+**WebSocket (WSS)**
+リアルタイムの双方向データストリームを可能にする通信プロトコルです。Exit Intelligence StreamはWSSを使用して最小レイテンシでポジションイベントとエグジットシグナルを配信します。
+
+## X
+
+**XChaCha20-Poly1305**
+キーストアファイル内の秘密鍵を保護するためにLaserSellクライアントが使用する認証暗号化アルゴリズムです。機密性と完全性の検証の両方を提供します。

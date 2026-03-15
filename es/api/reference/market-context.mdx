@@ -1,0 +1,45 @@
+---
+title: "Market Context"
+description: "Esquema completo de MarketContextMsg con objetos anidados para cada protocolo DEX soportado."
+---
+
+## Resumen
+
+`MarketContextMsg` describe el pool DEX y el protocolo utilizado para el mercado de un token. Aparece en:
+
+- Eventos del servidor `position_opened`
+- Eventos del servidor `exit_signal_with_tx`
+- `BuildSellTxRequest` (opcional, para omitir la resolución del lado del servidor)
+
+Si se omite de una solicitud de construcción, el servidor resuelve el contexto automáticamente.
+
+## Esquema `MarketContextMsg`
+
+| Campo               | Tipo     | Requerido | Descripción                                    |
+|---------------------|----------|----------|------------------------------------------------|
+| `market_type`       | `string` | Sí       | Uno de los tipos de mercado soportados (ver abajo). |
+| `pumpfun`           | `object` | No       | Contexto de curva de vinculación de Pump.fun.  |
+| `pumpswap`          | `object` | No       | Contexto AMM de PumpSwap.                      |
+| `meteora_dbc`       | `object` | No       | Contexto de Meteora DBC.                       |
+| `meteora_damm_v2`   | `object` | No       | Contexto de Meteora DAMM V2.                   |
+| `raydium_launchpad` | `object` | No       | Contexto de Raydium Launchpad.                 |
+| `raydium_cpmm`      | `object` | No       | Contexto de Raydium CPMM.                      |
+
+Exactamente uno de los objetos anidados debe estar presente, coincidiendo con el `market_type`.
+
+<Note>
+El valor de `market_type` usa guiones bajos (por ejemplo, `pump_fun`) mientras que la clave del objeto anidado no (por ejemplo, `pumpfun`). Usa exactamente las mayúsculas/minúsculas mostradas en las tablas a continuación.
+</Note>
+
+## Valores de `market_type`
+
+| Valor                | Protocolo              |
+|----------------------|-----------------------|
+| `pump_fun`           | Pump.fun              |
+| `pump_swap`          | PumpSwap              |
+| `meteora_dbc`        | Meteora DBC           |
+| `meteora_damm_v2`    | Meteora DAMM V2       |
+| `raydium_launchpad`  | Raydium Launchpad     |
+| `raydium_cpmm`       | Raydium CPMM          |
+
+Para los esquemas anidados completos de cada protocolo (`PumpFunContextMsg`, `PumpSwapContextMsg`, `MeteoraDbcContextMsg`, `MeteoraDammV2ContextMsg`, `RaydiumLaunchpadContextMsg`, `RaydiumCpmmContextMsg`) y ejemplos de código en los 4 SDKs, consulta la [documentación en inglés](/api/reference/market-context).

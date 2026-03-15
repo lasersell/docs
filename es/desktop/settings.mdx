@@ -1,0 +1,109 @@
+---
+title: "Configuración"
+description: "Configura tu conexión, preferencias de visualización, parámetros de trading, seguridad, idioma y más."
+---
+
+La página de Configuración te permite personalizar cada aspecto de la aplicación. Los cambios se guardan automáticamente.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Settings.mp4"
+/>
+
+## Conexión y cuenta
+
+- **Estado de conexión** — Muestra si la aplicación está conectada al stream de LaserSell (verde = conectado, rojo = desconectado).
+- **Nivel de cuenta** — Tu suscripción actual: Personal (Gratis), Professional o Advanced.
+- **Pausar monitoreo** — Detener temporalmente todo el monitoreo del stream y las auto ventas sin desconectar. Útil cuando quieres mantener posiciones manualmente.
+
+## Red
+
+### Clave API
+
+Tu clave API de LaserSell. Enmascarada por defecto con un interruptor para revelar, y un botón de copiar. Si necesitas una nueva clave, usa el flujo de inicio de sesión para generar una.
+
+### URL de RPC
+
+Tu endpoint RPC de Solana. Si tienes un RPC dedicado de un proveedor como Helius, QuickNode o Triton, configúralo aquí para transacciones más rápidas y confiables. El predeterminado es un endpoint público.
+
+### Modo de envío
+
+Cómo LaserSell envía transacciones a la red:
+
+- **RPC** (predeterminado) — Envío directo a través de tu endpoint RPC. Sin comisiones adicionales.
+- **Helius Sender** — Entrega optimizada de transacciones a través de Helius para mejores tasas de aterrizaje. Requiere una clave API de Helius y un tip para el constructor (recomendado: 0.001 SOL).
+- **Astralane Iris** — Enrutamiento de transacciones con protección MEV. Requiere una clave API de Astralane y selección de región (Frankfurt, Amsterdam, New York, San Francisco, Tokyo, Singapore y más).
+
+## Visualización
+
+- **Moneda** — Elige tu moneda de visualización para valores de portafolio y PnL. Soporta 20 monedas en Américas, Europa, Asia Pacífico y Medio Oriente.
+- **Mostrar USD1** — Muestra tu saldo de stablecoin USD1 en la barra lateral.
+- **Mirror USD1 Trading** — Habilita copy trading denominado en USD1.
+- **Icono de barra de menú** — Muestra LaserSell en la barra de menú de macOS para acceso rápido.
+- **Sonido de notificación** — Reproduce un sonido de moneda cuando se ejecutan operaciones.
+- **Conectar al inicio** — Conectar automáticamente al stream cuando la aplicación se inicia. Deshabilita esto si quieres usar la aplicación como una wallet independiente sin monitoreo del stream.
+
+## Trading
+
+- **Montos de compra rápida (SOL)** — Montos preestablecidos de SOL para los botones de compra rápida (por ejemplo, 0.1, 0.5, 1.0 SOL).
+- **Montos de compra rápida (USD1)** — Montos preestablecidos de USD1 (se muestran cuando la compra en USD1 está habilitada).
+- **Porcentajes de venta rápida** — Porcentajes preestablecidos de venta para ventas parciales (por ejemplo, 10%, 25%, 50%, 100%).
+- **Tolerancia de slippage** — Slippage máximo permitido en las operaciones, en puntos base.
+
+## Seguridad
+
+Ver [Seguridad](/desktop/security) para detalles sobre Touch ID, auto bloqueo y cifrado.
+
+## Idioma y soporte internacional
+
+LaserSell está diseñado para traders en todas partes. Toda la interfaz de la aplicación está completamente localizada en 7 idiomas, y el diseño se adapta automáticamente a cada uno.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell International.mp4"
+/>
+
+**Idiomas soportados:**
+
+- English
+- Chinese (中文)
+- Japanese (日本語)
+- Korean (한국어)
+- Spanish (Español)
+- Russian (Русский)
+- Arabic (العربية)
+
+Cambiar de idioma es instantáneo. Cada pantalla, cada etiqueta, cada notificación se actualiza de inmediato sin necesidad de reiniciar.
+
+### Soporte de derecha a izquierda
+
+LaserSell soporta completamente diseños de derecha a izquierda (RTL) para árabe. Cuando cambias a árabe, toda la interfaz se refleja: la navegación se mueve a la derecha, el texto se alinea de derecha a izquierda y cada componente se reorganiza de forma natural. Esto no es un simple intercambio de texto. Todo el diseño, incluyendo la barra lateral, las listas de posiciones, los paneles de estrategia, las vistas de wallet y los gráficos de analíticas, se reconstruye para el orden de lectura RTL. Los traders de habla árabe obtienen la misma experiencia pulida y nativa que cualquier otro idioma.
+
+### Visualización en múltiples monedas
+
+Los valores de tu portafolio, PnL y montos de operaciones pueden mostrarse en cualquiera de 20 monedas:
+
+- **Américas** — USD, CAD
+- **Europa** — EUR, GBP, CHF
+- **Asia Pacífico** — JPY, CNY, KRW, INR, SGD, HKD, AUD, NZD
+- **Medio Oriente y África** — AED, SAR, KWD, BHD, QAR, OMR, EGP
+
+Todos los valores se actualizan en tiempo real a medida que cambian los tipos de cambio. Elige tu moneda local y ve tu rendimiento en los números que te importan.
+
+## Privacidad
+
+- **Reportes de fallos** — Activa o desactiva reportes anónimos de errores a través de Sentry. No se incluyen datos de wallet ni información de operaciones.
+
+## Acerca de
+
+- **Versión** — La versión actual de la aplicación.
+- **Plataforma** — Tu sistema operativo.
+- **Obtener ayuda** — Enlace a recursos de soporte.
+- **Copiar reporte de error** — Formatea errores recientes para compartir con soporte.
+- **Cerrar sesión** — Borra tu clave API y regresa a la pantalla de inicio de sesión.

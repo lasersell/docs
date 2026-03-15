@@ -1,0 +1,138 @@
+---
+title: "POST /v1/sell"
+description: "LaserSell APIを通じてトークンをSOLまたはUSD1にスワップするための未署名売却トランザクションを構築します。"
+---
+
+## エンドポイント
+
+```
+POST https://api.lasersell.io/v1/sell
+```
+
+## ヘッダー
+
+| ヘッダー | 必須 | 説明 |
+|----------------|----------|---------------------------------|
+| `Content-Type` | はい | `application/json`である必要があります |
+| `x-api-key`    | はい | LaserSell APIキー |
+
+## リクエストボディ: `BuildSellTxRequest`
+
+| フィールド | 型 | 必須 | 説明 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | はい | トークンミントアドレス（base58）。 |
+| `user_pubkey`           | `string` | はい | ウォレット公開鍵（base58）。 |
+| `amount_tokens`         | `number` | はい | トークンのatomic unitsでの売却量。 |
+| `output`                | `string` | はい | 出力アセット: `"SOL"`または`"USD1"`。 |
+| `slippage_bps`          | `number` | はい | ベーシスポイントでの最大スリッページ許容値（例: `2000` = 20%）。 |
+| `mode`                  | `string` | いいえ | ルーティングモードヒント。有効値: `"fast"`、`"secure"`。デフォルト: `"fast"`。 |
+| `market_context`        | `object` | いいえ | 事前解決済みマーケットコンテキスト。省略するとサーバーが自動解決。 |
+| `send_mode`             | `string` | いいえ | トランザクション送信モード: `"helius_sender"`、`"astralane"`、または`"rpc"`。 |
+| `tip_lamports`          | `number` | いいえ | lamportでのオプションの優先度手数料チップ。 |
+| `partner_fee_recipient` | `string` | いいえ | パートナーフィー受取ウォレット（base58 pubkey）。 |
+| `partner_fee_bps`       | `number` | いいえ | ベーシスポイントでのパートナーフィー（最大50 = 0.5%）。`partner_fee_lamports`と排他的。 |
+| `partner_fee_lamports`  | `number` | いいえ | フラットSOL lamportでのパートナーフィー（最大50,000,000）。`partner_fee_bps`と排他的。 |
+
+## レスポンス: `BuildTxResponse`
+
+| フィールド | 型 | 説明 |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64エンコードされた未署名Solana `VersionedTransaction`。 |
+| `route` | `object` | オプションのルーティングメタデータ。 |
+| `debug` | `object` | オプションのデバッグ情報。 |
+
+## curl例
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_tokens": 1000000,
+    "slippage_bps": 2000,
+    "output": "SOL"
+  }'
+```
+
+## SDK例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildSellTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildSellTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+};
+
+const response = await client.buildSellTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+
+// Or get just the base64 string:
+const txB64 = await client.buildSellTxB64(request);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildSellTxRequest, SellOutput
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildSellTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount_tokens=1_000_000,
+    slippage_bps=2_000,
+    output=SellOutput.SOL,
+)
+
+response = await client.build_sell_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildSellTxRequest, SellOutput};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildSellTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount_tokens: 1_000_000,
+    output: SellOutput::Sol,
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_sell_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+    Mint:         "TOKEN_MINT_ADDRESS",
+    UserPubkey:   "YOUR_WALLET_PUBKEY",
+    AmountTokens: 1_000_000,
+    Output:       lasersell.SellOutputSOL,
+    SlippageBps:  2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## エラーレスポンス
+
+完全なエラーエンベロープ仕様とリトライ可能なエラーロジックについては[エラー処理](/api/exit-api/error-handling)を参照してください。

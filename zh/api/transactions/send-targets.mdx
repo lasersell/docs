@@ -1,0 +1,66 @@
+---
+title: "发送目标"
+description: "选择如何提交已签名交易：默认 RPC、自定义 RPC、Helius Sender 或 Astralane Iris。"
+---
+
+## 什么是发送目标？
+
+`SendTarget` 告诉 SDK 将已签名交易提交到哪里。LaserSell SDK 支持四种目标，每种针对不同用例优化。
+
+## 可用目标
+
+### 默认 RPC
+
+使用 Solana 公共主网端点（`https://api.mainnet-beta.solana.com`）。此端点有速率限制，仅适合测试。
+
+### 自定义 RPC
+
+指定你自己的 RPC 端点 URL。建议在生产环境使用来自 Helius 或 Chainstack 等私有 RPC 提供商（免费层可用）。
+
+### Helius Sender
+
+通过 Helius Sender `/fast` 端点路由以优化交易落地。无需 API 密钥。
+
+### Astralane Iris
+
+通过 Astralane Iris 网关路由。需要 Astralane API 密钥，支持区域端点以优化延迟。
+
+## 可用区域（Astralane）
+
+| 代码  | 位置       | 备注             |
+|-------|----------------|-------------------|
+| `fr`  | 法兰克福      | 推荐       |
+| `fr2` | 法兰克福 2    |                   |
+| `ams` | 阿姆斯特丹      | 推荐       |
+| `ams2`| 阿姆斯特丹 2    |                   |
+| `la`  | 旧金山  |                   |
+| `ny`  | 纽约       |                   |
+| `jp`  | 东京          |                   |
+| `sg`  | 新加坡      |                   |
+| `lim` | 林堡        |                   |
+| `lit` | 立陶宛      |                   |
+
+如果未指定区域，SDK 默认为 `fr`（法兰克福）。
+
+## 建议
+
+| 用例                        | 推荐目标    |
+|---------------------------------|-----------------------|
+| 测试和开发         | 默认 RPC           |
+| 生产（通用）            | Helius Sender         |
+| 生产（延迟敏感）  | Astralane Iris        |
+| 生产（现有 RPC 设置） | 自定义 RPC            |
+
+对于自动交易机器人，**Helius Sender** 或 **Astralane Iris** 提供最佳的交易落地率。避免在生产中使用公共 Solana RPC，因为它有严格的速率限制。
+
+## 发送模式 vs 发送目标
+
+`BuildSellTxRequest` 和 `BuildBuyTxRequest` 上的 `send_mode` 字段告诉**服务器**为哪个端点上下文优化交易。`SendTarget` 控制**你的客户端**将已签名交易提交到哪里。为获得最佳结果，保持两者对齐：
+
+| `send_mode`（服务器） | `SendTarget`（客户端）      |
+|-----------------------|----------------------------|
+| `"rpc"`               | `sendTargetRpc(url)`       |
+| `"helius_sender"`     | `sendTargetHeliusSender()` |
+| `"astralane"`         | `sendTargetAstralane(...)` |
+
+关于每种发送目标在所有 4 种 SDK 语言中的完整代码示例，请参阅[英文版](/api/transactions/send-targets)。

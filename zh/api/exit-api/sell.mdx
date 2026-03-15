@@ -1,0 +1,138 @@
+---
+title: "POST /v1/sell"
+description: "通过 LaserSell API 构建未签名的卖出交易，将代币兑换为 SOL 或 USD1。"
+---
+
+## 端点
+
+```
+POST https://api.lasersell.io/v1/sell
+```
+
+## 请求头
+
+| Header         | 必需 | 说明                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | 是      | 必须为 `application/json`      |
+| `x-api-key`    | 是      | 你的 LaserSell API 密钥          |
+
+## 请求体：`BuildSellTxRequest`
+
+| 字段                   | 类型     | 必需 | 说明                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | 是      | 代币地址（base58）。                                                |
+| `user_pubkey`           | `string` | 是      | 你的钱包公钥（base58）。                                            |
+| `amount_tokens`         | `number` | 是      | 卖出数量，以代币的原子单位计。                                 |
+| `output`                | `string` | 是      | 期望的输出资产：`"SOL"` 或 `"USD1"`。                                  |
+| `slippage_bps`          | `number` | 是      | 最大滑点容忍度，基点（例如 `2000` = 20%）。            |
+| `mode`                  | `string` | 否       | 路由模式提示。有效值：`"fast"`、`"secure"`。默认 `"fast"`。 |
+| `market_context`        | `object` | 否       | 预解析的市场上下文。省略则让服务器自动解析。  |
+| `send_mode`             | `string` | 否       | 交易发送模式：`"helius_sender"`、`"astralane"` 或 `"rpc"`。        |
+| `tip_lamports`          | `number` | 否       | 可选的优先费小费（lamports）。                                      |
+| `partner_fee_recipient` | `string` | 否       | 合作伙伴费用接收钱包（base58 公钥）。                               |
+| `partner_fee_bps`       | `number` | 否       | 合作伙伴费用（基点，最大 50 = 0.5%）。与 `partner_fee_lamports` 互斥。 |
+| `partner_fee_lamports`  | `number` | 否       | 合作伙伴费用（固定 SOL lamports，最大 50,000,000）。与 `partner_fee_bps` 互斥。 |
+
+## 响应：`BuildTxResponse`
+
+| 字段   | 类型     | 说明                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64 编码的未签名 Solana `VersionedTransaction`。 |
+| `route` | `object` | 可选的路由元数据。                      |
+| `debug` | `object` | 可选的调试信息。                     |
+
+## curl 示例
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_tokens": 1000000,
+    "slippage_bps": 2000,
+    "output": "SOL"
+  }'
+```
+
+## SDK 示例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildSellTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildSellTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+};
+
+const response = await client.buildSellTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+
+// Or get just the base64 string:
+const txB64 = await client.buildSellTxB64(request);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildSellTxRequest, SellOutput
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildSellTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount_tokens=1_000_000,
+    slippage_bps=2_000,
+    output=SellOutput.SOL,
+)
+
+response = await client.build_sell_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildSellTxRequest, SellOutput};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildSellTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount_tokens: 1_000_000,
+    output: SellOutput::Sol,
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_sell_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+    Mint:         "TOKEN_MINT_ADDRESS",
+    UserPubkey:   "YOUR_WALLET_PUBKEY",
+    AmountTokens: 1_000_000,
+    Output:       lasersell.SellOutputSOL,
+    SlippageBps:  2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## 错误响应
+
+参见[错误处理](/api/exit-api/error-handling)了解完整的错误信封规范和可重试错误逻辑。

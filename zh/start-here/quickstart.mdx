@@ -1,0 +1,93 @@
+---
+title: "快速入门"
+description: "安装 LaserSell 并在 5 分钟内开始自动卖出。"
+---
+
+## 前提条件
+
+- **私有 RPC 端点。** 我们建议从 [Helius](https://helius.dev)、[Shyft](https://shyft.to) 或 [Chainstack](https://chainstack.com) 注册免费的 RPC。私有 RPC 比公共 Solana RPC 提供更快的余额更新和更可靠的交易确认。
+- **LaserSell API 密钥。** 在 [app.lasersell.io](https://app.lasersell.io) 注册以创建免费 API 密钥。免费等级对大多数用户足够。
+
+## 安装
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+验证是否成功：
+
+```shellscript
+lasersell --version
+```
+
+需要特定平台的说明？参见[安装概览](/installation/overview)。
+
+## 设置
+
+运行 LaserSell。设置向导在首次启动时自动开始：
+
+```shellscript
+lasersell
+```
+
+向导会要求你提供 RPC URL、API 密钥、策略设置、钱包（创建新钱包或导入现有钱包）以及加密密钥库的密码短语。
+
+<Warning>
+没有"忘记密码"功能。如果你丢失了密码短语，密钥库将无法恢复。
+</Warning>
+
+详细的每个提示操作说明，参见[初始设置](/onboarding/initial-setup)。
+
+## 验证
+
+运行健康检查以确认一切已连接：
+
+```shellscript
+lasersell --smoke
+```
+
+你应该看到 `SMOKE OK`。然后启动 LaserSell：
+
+```shellscript
+lasersell
+```
+
+LaserSell 现在正在监控你的钱包。
+
+## 接下来会发生什么
+
+LaserSell 是一个**被动监控器**。它不会替你下单。它监控你的钱包中的新代币购买，并自动处理卖出。
+
+1. 你使用你已经在用的任何平台买入代币（Photon、BullX、Phantom、Jupiter 等）
+2. LaserSell 在几秒内自动检测到买入
+3. CLI 记录仓位为活跃状态并提供实时盈亏更新
+4. 当任何退出条件触发（止盈、止损、追踪止损、截止时间或毕业），LaserSell 自动构建并签名卖出交易
+5. 你继续交易。LaserSell 继续卖出。
+
+## 你的第一次自动退出
+
+完整走一遍循环以观察 LaserSell 的运作：
+
+1. **LaserSell 正在运行。** 你看到日志输出确认流已连接且你的钱包已注册。
+2. **买入一个小仓位**，在任何支持的平台上。从小额开始，这样你可以在不冒真实资金风险的情况下观察机制。
+3. **观察日志。** 在几秒内，你会看到新仓位的 `session_started` 和 `pnl_update` 事件。
+4. **退出触发。** 当你的止盈、止损、追踪止损或截止时间条件触发时，你会看到 `sell_scheduled` 然后是带链上签名的 `sell_complete`。
+
+这就是整个循环。你正常交易，LaserSell 处理每次退出。
+
+## 调整你的策略
+
+编辑 `~/.lasersell/config.yml` 来调整你的策略，然后重启守护进程。或者重新运行设置向导：
+
+```shellscript
+lasersell --setup
+```
+
+完整配置参考，参见[示例配置](/onboarding/example-configuration)。
+
+## 后续步骤
+
+- [CLI 参考](/onboarding/lasersell-ui)：日志事件、CLI 标志、无头运行和跟单交易
+- [示例配置](/onboarding/example-configuration)：包含所有可用字段的完整配置参考
+- [初始设置](/onboarding/initial-setup)：使用 `lasersell --setup` 重新运行设置向导
+- [密钥安全](/security/key-safety)：保护你的密钥

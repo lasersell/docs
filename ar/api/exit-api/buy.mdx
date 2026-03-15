@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "بناء معاملة شراء غير موقعة لمبادلة SOL مقابل رموز عبر LaserSell API."
+---
+
+<Warning>
+إذا كنت تخطط لتتبع هذا الشراء مع بث ذكاء الخروج، يجب عليك توصيل البث **قبل** تقديم معاملة الشراء. يكتشف البث المراكز الجديدة من خلال مراقبة وصول الرموز على السلسلة في الوقت الفعلي. إذا لم يكن البث متصلاً عند هبوط الشراء، لن يتم تتبع المركز ولن تُولّد إشارات خروج له.
+</Warning>
+
+## نقطة النهاية
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## الترويسات
+
+| Header         | Required | Description                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | Yes      | Must be `application/json`      |
+| `x-api-key`    | Yes      | Your LaserSell API key          |
+
+## جسم الطلب: `BuildBuyTxRequest`
+
+| Field                   | Type     | Required | Description                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | Yes      | عنوان الرمز للشراء (base58).                                         |
+| `user_pubkey`           | `string` | Yes      | المفتاح العام لمحفظتك (base58).                                            |
+| `amount`                | `number` | No*      | مبلغ مقروء للإنفاق (مثلاً `0.1` لـ 0.1 SOL، `10.0` لـ 10 USD1). متبادل الاستبعاد مع `amount_in_total`. |
+| `amount_in_total`       | `number` | No*      | مبلغ الإنفاق بالوحدات الذرية لأصل الإدخال (مثلاً lamports لـ SOL). متبادل الاستبعاد مع `amount`. |
+| `slippage_bps`          | `number` | Yes      | أقصى تحمل للانزلاق بنقاط أساس (مثلاً `2000` = 20%).            |
+| `input`                 | `string` | No       | أصل الإدخال: `"SOL"` (افتراضي) أو `"USD1"`.                                 |
+| `mode`                  | `string` | No       | تلميح وضع التوجيه. القيم: `"fast"`, `"secure"`. الافتراضي `"fast"`. |
+| `send_mode`             | `string` | No       | وضع إرسال المعاملة: `"helius_sender"`, `"astralane"`, أو `"rpc"`.        |
+| `tip_lamports`          | `number` | No       | إكرامية رسوم أولوية اختيارية بـ lamports.                                      |
+| `partner_fee_recipient` | `string` | No       | محفظة مستلم رسوم الشريك (مفتاح عام base58).                               |
+| `partner_fee_bps`       | `number` | No       | رسوم الشريك بنقاط أساس (أقصى 50 = 0.5%). متبادل الاستبعاد مع `partner_fee_lamports`. |
+| `partner_fee_lamports`  | `number` | No       | رسوم الشريك كمبلغ ثابت بـ SOL lamports (أقصى 50,000,000). متبادل الاستبعاد مع `partner_fee_bps`. |
+
+<Note>
+**\*** يجب توفير واحد بالضبط من `amount` أو `amount_in_total`. يتم تحويل `amount` تلقائياً إلى وحدات ذرية بناءً على أصل `input` (SOL: 10^9, USD1: 10^6).
+</Note>
+
+## الاستجابة: `BuildTxResponse`
+
+| Field   | Type     | Description                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | معاملة Solana `VersionedTransaction` غير موقعة مشفرة بـ Base64. |
+| `route` | `object` | بيانات توجيه وصفية اختيارية.                      |
+| `debug` | `object` | معلومات تصحيح اختيارية.                     |
+
+## أمثلة curl
+
+باستخدام `amount` المقروء:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+باستخدام `amount_in_total` الذري:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## أمثلة حزمة التطوير
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## استجابات الأخطاء
+
+راجع [معالجة الأخطاء](/api/exit-api/error-handling) لمواصفات مغلف الأخطاء الكامل ومنطق الأخطاء القابلة لإعادة المحاولة.

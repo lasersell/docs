@@ -1,0 +1,90 @@
+---
+title: "Logros"
+description: "Rastrea tus hitos de trading en 10 categorías con niveles de rareza desde Común hasta Legendario."
+---
+
+LaserSell rastrea tus hitos de trading y otorga logros a medida que los alcanzas. Hay más de 60 logros en 10 categorías, desde hitos comunes que cualquiera puede alcanzar hasta logros legendarios que requieren un rendimiento excepcional.
+
+<Note>
+Los logros desbloqueados serán canjeables por recompensas diferentes a cualquier cosa ofrecida a los traders anteriormente. No hay un token de LaserSell y no habrá un airdrop.
+</Note>
+
+## Cómo funcionan los logros
+
+Los logros se verifican automáticamente en un ciclo por hora. Solo las operaciones enrutadas a través del protocolo LaserSell cuentan para el progreso de los logros. Cuando desbloqueas un nuevo logro, la aplicación envía una notificación.
+
+Los logros ocultos no revelan sus condiciones hasta que los desbloqueas.
+
+## Niveles de rareza
+
+| Rareza | Descripción |
+| :--- | :--- |
+| **Común** | Hitos de nivel inicial. Los desbloquearás naturalmente al comenzar a operar. |
+| **Poco común** | Logros moderados que requieren actividad de trading sostenida. |
+| **Raro** | Logros significativos que requieren compromiso real o habilidad. |
+| **Épico** | Hitos excepcionales alcanzados por un pequeño porcentaje de traders. |
+| **Legendario** | Los logros más raros del sistema. Requieren un volumen extraordinario, consistencia o un único momento de rendimiento excepcional. |
+
+## Categorías
+
+### Volumen
+
+Hitos de volumen de trading acumulado. Cuanto más operes a través de LaserSell, más alto llegarás.
+
+### Operaciones
+
+Hitos de operaciones completadas totales, desde tu primera operación hasta los miles.
+
+### Racha
+
+Hitos de días de trading consecutivos. Un día de racha se cuenta cuando completas al menos una operación enrutada a través de LaserSell. Faltar un día reinicia tu racha actual.
+
+Tu racha actual y la racha más larga se muestran en la parte superior de la pestaña de Logros en la aplicación.
+
+### Ganancias
+
+Hitos de ganancias realizadas acumuladas en SOL.
+
+### Velocidad
+
+Logros por operaciones rentables completadas en plazos cortos. Estos premian la ejecución rápida y las salidas veloces.
+
+### Operación individual
+
+Logros basados en el rendimiento de una sola posición, desde retornos sólidos hasta multiplicadores extraordinarios.
+
+### Tasa de victorias
+
+Hitos de tasa de victorias con requisitos mínimos de operaciones para prevenir manipulación. Mantener una tasa de victorias alta durante cientos de operaciones es una de las cosas más difíciles de lograr.
+
+### Mirror
+
+Logros para [Mirror Trading](/desktop/mirror-trading). Rastrea tu actividad y rendimiento de copy trading en wallets observadas.
+
+### Secreto
+
+Logros ocultos con condiciones que no se revelan hasta que los desbloqueas. Los descubrirás naturalmente mientras operas.
+
+### Maestría
+
+Meta logros otorgados por completar todos los logros de una categoría. Hay un logro de Maestría por cada una de las otras categorías. Completar todos los logros Secretos otorga la única Maestría de nivel Legendario.
+
+## Rachas
+
+Tu racha de trading rastrea los días consecutivos con al menos una operación completada enrutada a través de LaserSell.
+
+- **Racha actual** — Cuántos días consecutivos has operado, contando hoy.
+- **Racha más larga** — Tu récord de todos los tiempos.
+- **Fecha de última operación** — Cuándo se registró tu operación más reciente.
+
+Faltar un solo día reinicia tu racha actual a cero. Tu racha más larga se conserva permanentemente.
+
+## Acceso por API
+
+Los logros están disponibles programáticamente:
+
+```
+GET /v1/achievements
+```
+
+Devuelve todos los logros con su estado de desbloqueo y marcas de tiempo. Los logros bloqueados en la categoría Secreto devuelven descripciones enmascaradas.

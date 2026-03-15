@@ -1,0 +1,21 @@
+---
+title: "클라이언트 메시지"
+description: "Exit Intelligence Stream에 전송되는 모든 클라이언트 메시지 타입의 전체 스키마 및 JSON 예제."
+---
+
+전체 클라이언트 메시지 참조는 영문 문서 [Client Messages](/api/stream/client-messages)를 참조하세요. 모든 JSON 스키마, 필드 설명, SDK 코드 예제는 영문 원본과 동일합니다.
+
+## 메시지 타입
+
+| 타입                   | 설명                                        |
+|------------------------|----------------------------------------------------|
+| `ping`                 | 레이턴시 측정; 서버가 `pong`으로 응답.        |
+| `configure`            | 지갑 및 전략으로 초기 세션 설정.   |
+| `update_strategy`      | 세션 중 전략 매개변수 변경.            |
+| `close_position`       | 추적에서 포지션 제거.                   |
+| `request_exit_signal`  | 수동으로 청산 트랜잭션 요청.              |
+| `update_wallets`       | 세션 중 지갑 추가 또는 제거.                 |
+| `update_position_strategy` | 단일 포지션에 대한 전략 오버라이드.    |
+| `update_watch_wallets`     | 카피 트레이딩을 위한 감시 지갑 추가 또는 업데이트.|
+
+전체 JSON 스키마와 각 메시지의 필드별 설명, SDK 코드 예제는 영문 원본 문서를 참조하세요.

@@ -1,0 +1,85 @@
+---
+title: "Coding Skills"
+description: "Instala conocimiento preempaquetado del SDK en tu asistente de codificación con IA para que pueda escribir integraciones de LaserSell con contexto completo sobre patrones, firmas de métodos, ejemplos y solución de problemas."
+---
+
+Los coding skills le dan a tu asistente de codificación con IA conocimiento profundo e integrado del SDK de LaserSell. En lugar de buscar documentación bajo demanda, el asistente carga patrones del SDK, firmas de métodos, ejemplos funcionales, configuraciones de estrategia y guías de solución de problemas directamente en su ventana de contexto. Esto significa que puede escribir código correcto de LaserSell desde el inicio, sin necesidad de buscar nada.
+
+## Skills vs MCP
+
+LaserSell ofrece dos vías de integración con IA. Sirven propósitos diferentes y funcionan mejor juntas.
+
+| | Servidor MCP | Coding Skills |
+|---|---|---|
+| **Cómo funciona** | Busca documentación de LaserSell bajo demanda cuando el asistente necesita consultar algo | Carga conocimiento profundo del SDK directamente en el contexto del asistente antes de que comience a escribir código |
+| **Ideal para** | Consultar esquemas de API, encontrar páginas de documentación específicas, responder preguntas sobre LaserSell | Escribir integraciones con SDK, construir transacciones, conectar al stream, manejar errores |
+| **Cuándo está disponible el conocimiento** | Bajo demanda (el asistente debe pedirlo) | Inmediatamente (el asistente ya lo tiene en contexto) |
+| **Configuración** | Añadir configuración del servidor MCP a tu editor | Instalar el paquete del skill |
+
+El servidor MCP es excelente para descubrimiento y consultas de referencia. Los coding skills son excelentes para escribir código que se integre con el SDK. Usa ambos para la mejor experiencia.
+
+## Qué incluye
+
+El coding skill de LaserSell incluye un árbol de conocimiento estructurado que el asistente carga cuando trabaja en código de LaserSell:
+
+- **SKILL.md** — archivo raíz del skill con un resumen del SDK, conceptos clave y referencias a documentación detallada
+- **Ejemplos funcionales en 4 lenguajes** — ejemplos en TypeScript, Python, Rust y Go que cubren transacciones de compra/venta, conexiones al stream, configuración de estrategia y envío de transacciones
+- **Guía de estrategia** — referencia detallada para configuración de take profit, stop loss, trailing stop, venta por graduación y deadline timeout
+- **Guía de solución de problemas** — errores comunes, sus causas y soluciones
+- **Referencias de API y tipos** — esquemas de solicitud/respuesta, valores de enumeraciones y descripciones de campos para cada endpoint
+- **Referencia del protocolo del stream** — formato completo de mensajes del Exit Intelligence Stream, tipos de eventos y ciclo de vida de la conexión
+- **Plantillas** — plantillas de código inicial para patrones de integración comunes
+
+## Instalación
+
+### Opción 1: npx (Recomendado)
+
+```bash
+npx skills add lasersell/skills
+```
+
+Esto descarga e instala el coding skill de LaserSell en tu proyecto. El asistente lo detecta automáticamente en la siguiente sesión.
+
+### Opción 2: CLI de Claude Code
+
+```bash
+claude install-skill https://github.com/lasersell/skills/tree/main/skills/lasersell
+```
+
+### Opción 3: Manual
+
+Copia el directorio `skills/lasersell/` del [repositorio de skills de LaserSell](https://github.com/lasersell/skills) a la carpeta `.claude/skills/` de tu proyecto:
+
+```bash
+mkdir -p .claude/skills
+cp -r path/to/skills/lasersell .claude/skills/
+```
+
+El asistente detectará los archivos del skill y los cargará en contexto cuando trabajes en código de LaserSell.
+
+## Qué cubre el skill
+
+Una vez instalado, tu asistente de IA tiene contexto completo sobre estos temas:
+
+**Construcción de transacciones de compra y venta.** El asistente sabe cómo construir objetos `BuildBuyTxRequest` y `BuildSellTxRequest`, llamar a LaserSell API y manejar la respuesta en los cuatro lenguajes del SDK. Entiende tipos de salida (SOL vs USD1), configuración de slippage y ventas parciales.
+
+**Exit Intelligence Stream.** El asistente puede escribir código de conexión al stream, configurar parámetros de estrategia, manejar todos los tipos de eventos del servidor (`pnl_update`, `exit_signal_with_tx`, `position_opened`, `position_closed`, `liquidity_snapshot`) y procesar señales de salida de principio a fin.
+
+**Ventas parciales y multi tramo.** El asistente entiende cómo consultar bandas de slippage, determinar la cantidad máxima vendible en un umbral de slippage dado y construir transacciones de venta parcial. También puede construir secuencias de venta multi tramo para posiciones grandes.
+
+**Instantáneas de liquidez.** El asistente sabe cómo leer bandas de slippage, interpretar tendencias de liquidez (`growing`, `stable`, `draining`) y usar datos de instantáneas para dimensionar ventas óptimamente.
+
+**Firma y envío de transacciones.** El asistente puede escribir código para firma local de transacciones y entiende todos los send targets: default RPC, custom RPC y Helius Sender. Sabe cuándo usar cada uno y cómo configurarlos.
+
+**Manejo de errores.** El asistente tiene contexto sobre códigos de error comunes, patrones de reintento, fallos de slippage y recuperación de conexión tanto para la API REST como para el stream.
+
+## Combinando Skills y MCP
+
+Para la mejor experiencia de codificación con IA, usa tanto el coding skill como el servidor MCP juntos:
+
+1. **Instala el coding skill** para que tu asistente tenga conocimiento profundo del SDK cargado en contexto cuando escribas código de LaserSell.
+2. **Conecta el servidor MCP** para que tu asistente pueda buscar la documentación completa cuando necesite consultar algo fuera del alcance del skill, como detalles de comisiones de partner, niveles de límites de tasa o entradas del registro de cambios.
+
+Con ambos activos, el asistente puede escribir código SDK correcto inmediatamente (desde el skill) y buscar información complementaria bajo demanda (desde MCP).
+
+Ver [Servidor MCP](/ai-agents/mcp-server) para instrucciones de configuración de MCP.

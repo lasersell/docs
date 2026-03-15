@@ -1,0 +1,91 @@
+---
+title: "المصادقة"
+description: "احصل على مفتاح API من لوحة معلومات LaserSell وقم بمصادقة الطلبات عبر حزم التطوير الأربع."
+---
+
+## الحصول على مفتاح API
+
+1. سجّل الدخول في [app.lasersell.io](https://app.lasersell.io).
+2. انتقل إلى **Settings > API Keys**.
+3. انقر **Create API Key** وأعطه اسماً وانسخ القيمة.
+
+خزّن المفتاح بأمان. لا يمكن عرضه مرة أخرى بعد الإنشاء.
+
+## مصادقة الطلبات
+
+كل طلب إلى LaserSell API وكل اتصال WebSocket ببث ذكاء الخروج يتطلب مفتاح API يُمرر عبر ترويسة `x-api-key` HTTP.
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### أمثلة حزمة التطوير
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### مصادقة بث ذكاء الخروج
+
+يستخدم بث ذكاء الخروج WebSocket أيضاً `x-api-key`. تتعامل حزمة التطوير مع هذا تلقائياً عند إنشاء `StreamClient`:
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## أفضل ممارسات الأمان
+
+- **لا تودع مفتاح API أبداً** في التحكم بالإصدارات. استخدم متغيرات البيئة أو مدير أسرار.
+- **دوّر المفاتيح** دورياً من خلال لوحة المعلومات.
+- **حدد نطاق الوصول** بإنشاء مفاتيح منفصلة لروبوتات أو بيئات مختلفة.
+- إذا تم اختراق مفتاح، أبطله فوراً من لوحة المعلومات وأنشئ بديلاً.

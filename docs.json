@@ -6,189 +6,1341 @@
     "primary": "#0D9373"
   },
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Docs",
-        "groups": [
+        "language": "en",
+        "default": true,
+        "tabs": [
           {
-            "group": "Start Here",
-            "pages": [
-              "start-here/what-is-lasersell",
-              "start-here/integrate-lasersell"
+            "tab": "Docs",
+            "groups": [
+              {
+                "group": "Start Here",
+                "pages": [
+                  "start-here/what-is-lasersell",
+                  "start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "Analytics & Achievements",
+                "pages": [
+                  "features/analytics",
+                  "features/insights",
+                  "features/achievements"
+                ]
+              },
+              {
+                "group": "Benchmarks",
+                "pages": [
+                  "benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "Security",
+                "pages": [
+                  "security/key-safety",
+                  "getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "Fees & Policies",
+                "pages": [
+                  "pricing/fee-structure",
+                  "how-to-win/risk-disclosures-and-responsible-trading",
+                  "security/privacy"
+                ]
+              },
+              {
+                "group": "AI Agents",
+                "pages": [
+                  "ai-agents/overview",
+                  "ai-agents/build-a-trading-agent",
+                  "ai-agents/mcp-server",
+                  "ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "Getting Support",
+                "pages": [
+                  "getting-support/support",
+                  "glossary",
+                  "community",
+                  "getting-support/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "Analytics & Achievements",
-            "pages": [
-              "features/analytics",
-              "features/insights",
-              "features/achievements"
+            "tab": "Desktop",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "desktop/overview",
+                  "desktop/installation",
+                  "desktop/onboarding"
+                ]
+              },
+              {
+                "group": "Trading",
+                "pages": [
+                  "desktop/active-positions",
+                  "desktop/exit-strategy",
+                  "desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "Wallet",
+                "pages": [
+                  "desktop/wallet"
+                ]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "desktop/activity-log",
+                  "desktop/analytics",
+                  "desktop/settings",
+                  "desktop/security"
+                ]
+              }
             ]
           },
           {
-            "group": "Benchmarks",
-            "pages": [
-              "benchmarks/tx-build-latency"
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "start-here/quickstart",
+                  "installation/installation"
+                ]
+              },
+              {
+                "group": "Onboarding",
+                "pages": [
+                  "onboarding/initial-setup",
+                  "onboarding/lasersell-ui",
+                  "onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "Supported Platforms",
+                "pages": [
+                  "onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "Security",
+                "pages": [
+                  "security/wallet-encryption"
+                ]
+              }
             ]
           },
           {
-            "group": "Security",
-            "pages": [
-              "security/key-safety",
-              "getting-support/report-a-bug"
-            ]
-          },
-          {
-            "group": "Fees & Policies",
-            "pages": [
-              "pricing/fee-structure",
-              "how-to-win/risk-disclosures-and-responsible-trading",
-              "security/privacy"
-            ]
-          },
-          {
-            "group": "AI Agents",
-            "pages": [
-              "ai-agents/overview",
-              "ai-agents/build-a-trading-agent",
-              "ai-agents/mcp-server",
-              "ai-agents/coding-skills"
-            ]
-          },
-          {
-            "group": "Getting Support",
-            "pages": [
-              "getting-support/support",
-              "glossary",
-              "community",
-              "getting-support/changelog"
+            "tab": "API",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "api/overview",
+                  "api/authentication",
+                  "api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "api/exit-api/sell",
+                  "api/exit-api/buy",
+                  "api/exit-api/account",
+                  "api/exit-api/history",
+                  "api/exit-api/wallets",
+                  "api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "api/stream/overview",
+                  "api/stream/connection-lifecycle",
+                  "api/stream/strategy-configuration",
+                  "api/stream/server-events",
+                  "api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "Transaction Submission",
+                "pages": [
+                  "api/transactions/signing",
+                  "api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "SDK Guides",
+                "pages": [
+                  "api/sdk/typescript",
+                  "api/sdk/python",
+                  "api/sdk/rust",
+                  "api/sdk/go"
+                ]
+              },
+              {
+                "group": "Reference",
+                "pages": [
+                  "api/reference/supported-dexs",
+                  "api/reference/partner-fees",
+                  "api/reference/rate-limits",
+                  "api/reference/market-context"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Desktop",
-        "groups": [
+        "language": "zh",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "desktop/overview",
-              "desktop/installation",
-              "desktop/onboarding"
+            "tab": "文档",
+            "groups": [
+              {
+                "group": "开始",
+                "pages": [
+                  "zh/start-here/what-is-lasersell",
+                  "zh/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "分析与成就",
+                "pages": [
+                  "zh/features/analytics",
+                  "zh/features/insights",
+                  "zh/features/achievements"
+                ]
+              },
+              {
+                "group": "基准测试",
+                "pages": [
+                  "zh/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "安全",
+                "pages": [
+                  "zh/security/key-safety",
+                  "zh/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "费用与政策",
+                "pages": [
+                  "zh/pricing/fee-structure",
+                  "zh/how-to-win/risk-disclosures-and-responsible-trading",
+                  "zh/security/privacy"
+                ]
+              },
+              {
+                "group": "AI 代理",
+                "pages": [
+                  "zh/ai-agents/overview",
+                  "zh/ai-agents/build-a-trading-agent",
+                  "zh/ai-agents/mcp-server",
+                  "zh/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "获取支持",
+                "pages": [
+                  "zh/getting-support/support",
+                  "zh/glossary",
+                  "zh/community",
+                  "zh/getting-support/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "Trading",
-            "pages": [
-              "desktop/active-positions",
-              "desktop/exit-strategy",
-              "desktop/mirror-trading"
+            "tab": "桌面应用",
+            "groups": [
+              {
+                "group": "入门",
+                "pages": [
+                  "zh/desktop/overview",
+                  "zh/desktop/installation",
+                  "zh/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "交易",
+                "pages": [
+                  "zh/desktop/active-positions",
+                  "zh/desktop/exit-strategy",
+                  "zh/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "钱包",
+                "pages": [
+                  "zh/desktop/wallet"
+                ]
+              },
+              {
+                "group": "工具",
+                "pages": [
+                  "zh/desktop/activity-log",
+                  "zh/desktop/analytics",
+                  "zh/desktop/settings",
+                  "zh/desktop/security"
+                ]
+              }
             ]
           },
           {
-            "group": "Wallet",
-            "pages": [
-              "desktop/wallet"
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "入门",
+                "pages": [
+                  "zh/start-here/quickstart",
+                  "zh/installation/installation"
+                ]
+              },
+              {
+                "group": "引导设置",
+                "pages": [
+                  "zh/onboarding/initial-setup",
+                  "zh/onboarding/lasersell-ui",
+                  "zh/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "支持的平台",
+                "pages": [
+                  "zh/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "安全",
+                "pages": [
+                  "zh/security/wallet-encryption"
+                ]
+              }
             ]
           },
           {
-            "group": "Tools",
-            "pages": [
-              "desktop/activity-log",
-              "desktop/analytics",
-              "desktop/settings",
-              "desktop/security"
+            "tab": "API",
+            "groups": [
+              {
+                "group": "入门",
+                "pages": [
+                  "zh/api/overview",
+                  "zh/api/authentication",
+                  "zh/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "zh/api/exit-api/sell",
+                  "zh/api/exit-api/buy",
+                  "zh/api/exit-api/account",
+                  "zh/api/exit-api/history",
+                  "zh/api/exit-api/wallets",
+                  "zh/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "zh/api/stream/overview",
+                  "zh/api/stream/connection-lifecycle",
+                  "zh/api/stream/strategy-configuration",
+                  "zh/api/stream/server-events",
+                  "zh/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "交易提交",
+                "pages": [
+                  "zh/api/transactions/signing",
+                  "zh/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "SDK 指南",
+                "pages": [
+                  "zh/api/sdk/typescript",
+                  "zh/api/sdk/python",
+                  "zh/api/sdk/rust",
+                  "zh/api/sdk/go"
+                ]
+              },
+              {
+                "group": "参考",
+                "pages": [
+                  "zh/api/reference/supported-dexs",
+                  "zh/api/reference/partner-fees",
+                  "zh/api/reference/rate-limits",
+                  "zh/api/reference/market-context"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "CLI",
-        "groups": [
+        "language": "ja",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "start-here/quickstart",
-              "installation/installation"
+            "tab": "ドキュメント",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/start-here/what-is-lasersell",
+                  "ja/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "分析と実績",
+                "pages": [
+                  "ja/features/analytics",
+                  "ja/features/insights",
+                  "ja/features/achievements"
+                ]
+              },
+              {
+                "group": "ベンチマーク",
+                "pages": [
+                  "ja/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "セキュリティ",
+                "pages": [
+                  "ja/security/key-safety",
+                  "ja/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "料金とポリシー",
+                "pages": [
+                  "ja/pricing/fee-structure",
+                  "ja/how-to-win/risk-disclosures-and-responsible-trading",
+                  "ja/security/privacy"
+                ]
+              },
+              {
+                "group": "AIエージェント",
+                "pages": [
+                  "ja/ai-agents/overview",
+                  "ja/ai-agents/build-a-trading-agent",
+                  "ja/ai-agents/mcp-server",
+                  "ja/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "サポート",
+                "pages": [
+                  "ja/getting-support/support",
+                  "ja/glossary",
+                  "ja/community",
+                  "ja/getting-support/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "Onboarding",
-            "pages": [
-              "onboarding/initial-setup",
-              "onboarding/lasersell-ui",
-              "onboarding/example-configuration"
+            "tab": "デスクトップ",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/desktop/overview",
+                  "ja/desktop/installation",
+                  "ja/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "トレーディング",
+                "pages": [
+                  "ja/desktop/active-positions",
+                  "ja/desktop/exit-strategy",
+                  "ja/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "ウォレット",
+                "pages": [
+                  "ja/desktop/wallet"
+                ]
+              },
+              {
+                "group": "ツール",
+                "pages": [
+                  "ja/desktop/activity-log",
+                  "ja/desktop/analytics",
+                  "ja/desktop/settings",
+                  "ja/desktop/security"
+                ]
+              }
             ]
           },
           {
-            "group": "Supported Platforms",
-            "pages": [
-              "onboarding/platform-and-coin-support"
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/start-here/quickstart",
+                  "ja/installation/installation"
+                ]
+              },
+              {
+                "group": "オンボーディング",
+                "pages": [
+                  "ja/onboarding/initial-setup",
+                  "ja/onboarding/lasersell-ui",
+                  "ja/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "対応プラットフォーム",
+                "pages": [
+                  "ja/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "セキュリティ",
+                "pages": [
+                  "ja/security/wallet-encryption"
+                ]
+              }
             ]
           },
           {
-            "group": "Security",
-            "pages": [
-              "security/wallet-encryption"
+            "tab": "API",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/api/overview",
+                  "ja/api/authentication",
+                  "ja/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "ja/api/exit-api/sell",
+                  "ja/api/exit-api/buy",
+                  "ja/api/exit-api/account",
+                  "ja/api/exit-api/history",
+                  "ja/api/exit-api/wallets",
+                  "ja/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "ja/api/stream/overview",
+                  "ja/api/stream/connection-lifecycle",
+                  "ja/api/stream/strategy-configuration",
+                  "ja/api/stream/server-events",
+                  "ja/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "トランザクション送信",
+                "pages": [
+                  "ja/api/transactions/signing",
+                  "ja/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "SDKガイド",
+                "pages": [
+                  "ja/api/sdk/typescript",
+                  "ja/api/sdk/python",
+                  "ja/api/sdk/rust",
+                  "ja/api/sdk/go"
+                ]
+              },
+              {
+                "group": "リファレンス",
+                "pages": [
+                  "ja/api/reference/supported-dexs",
+                  "ja/api/reference/partner-fees",
+                  "ja/api/reference/rate-limits",
+                  "ja/api/reference/market-context"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API",
-        "groups": [
+        "language": "ko",
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "api/overview",
-              "api/authentication",
-              "api/quickstart"
+            "tab": "문서",
+            "groups": [
+              {
+                "group": "시작하기",
+                "pages": [
+                  "ko/start-here/what-is-lasersell",
+                  "ko/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "분석 및 업적",
+                "pages": [
+                  "ko/features/analytics",
+                  "ko/features/insights",
+                  "ko/features/achievements"
+                ]
+              },
+              {
+                "group": "벤치마크",
+                "pages": [
+                  "ko/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "보안",
+                "pages": [
+                  "ko/security/key-safety",
+                  "ko/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "요금 및 정책",
+                "pages": [
+                  "ko/pricing/fee-structure",
+                  "ko/how-to-win/risk-disclosures-and-responsible-trading",
+                  "ko/security/privacy"
+                ]
+              },
+              {
+                "group": "AI 에이전트",
+                "pages": [
+                  "ko/ai-agents/overview",
+                  "ko/ai-agents/build-a-trading-agent",
+                  "ko/ai-agents/mcp-server",
+                  "ko/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "지원",
+                "pages": [
+                  "ko/getting-support/support",
+                  "ko/glossary",
+                  "ko/community",
+                  "ko/getting-support/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "LaserSell API",
-            "pages": [
-              "api/exit-api/sell",
-              "api/exit-api/buy",
-              "api/exit-api/account",
-              "api/exit-api/history",
-              "api/exit-api/wallets",
-              "api/exit-api/error-handling"
+            "tab": "데스크톱",
+            "groups": [
+              {
+                "group": "시작하기",
+                "pages": [
+                  "ko/desktop/overview",
+                  "ko/desktop/installation",
+                  "ko/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "트레이딩",
+                "pages": [
+                  "ko/desktop/active-positions",
+                  "ko/desktop/exit-strategy",
+                  "ko/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "지갑",
+                "pages": [
+                  "ko/desktop/wallet"
+                ]
+              },
+              {
+                "group": "도구",
+                "pages": [
+                  "ko/desktop/activity-log",
+                  "ko/desktop/analytics",
+                  "ko/desktop/settings",
+                  "ko/desktop/security"
+                ]
+              }
             ]
           },
           {
-            "group": "Exit Intelligence Stream",
-            "pages": [
-              "api/stream/overview",
-              "api/stream/connection-lifecycle",
-              "api/stream/strategy-configuration",
-              "api/stream/server-events",
-              "api/stream/client-messages"
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "시작하기",
+                "pages": [
+                  "ko/start-here/quickstart",
+                  "ko/installation/installation"
+                ]
+              },
+              {
+                "group": "온보딩",
+                "pages": [
+                  "ko/onboarding/initial-setup",
+                  "ko/onboarding/lasersell-ui",
+                  "ko/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "지원 플랫폼",
+                "pages": [
+                  "ko/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "보안",
+                "pages": [
+                  "ko/security/wallet-encryption"
+                ]
+              }
             ]
           },
           {
-            "group": "Transaction Submission",
-            "pages": [
-              "api/transactions/signing",
-              "api/transactions/send-targets"
+            "tab": "API",
+            "groups": [
+              {
+                "group": "시작하기",
+                "pages": [
+                  "ko/api/overview",
+                  "ko/api/authentication",
+                  "ko/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "ko/api/exit-api/sell",
+                  "ko/api/exit-api/buy",
+                  "ko/api/exit-api/account",
+                  "ko/api/exit-api/history",
+                  "ko/api/exit-api/wallets",
+                  "ko/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "ko/api/stream/overview",
+                  "ko/api/stream/connection-lifecycle",
+                  "ko/api/stream/strategy-configuration",
+                  "ko/api/stream/server-events",
+                  "ko/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "트랜잭션 제출",
+                "pages": [
+                  "ko/api/transactions/signing",
+                  "ko/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "SDK 가이드",
+                "pages": [
+                  "ko/api/sdk/typescript",
+                  "ko/api/sdk/python",
+                  "ko/api/sdk/rust",
+                  "ko/api/sdk/go"
+                ]
+              },
+              {
+                "group": "레퍼런스",
+                "pages": [
+                  "ko/api/reference/supported-dexs",
+                  "ko/api/reference/partner-fees",
+                  "ko/api/reference/rate-limits",
+                  "ko/api/reference/market-context"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "tabs": [
+          {
+            "tab": "Documentación",
+            "groups": [
+              {
+                "group": "Empezar",
+                "pages": [
+                  "es/start-here/what-is-lasersell",
+                  "es/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "Analíticas y Logros",
+                "pages": [
+                  "es/features/analytics",
+                  "es/features/insights",
+                  "es/features/achievements"
+                ]
+              },
+              {
+                "group": "Benchmarks",
+                "pages": [
+                  "es/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "Seguridad",
+                "pages": [
+                  "es/security/key-safety",
+                  "es/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "Tarifas y Políticas",
+                "pages": [
+                  "es/pricing/fee-structure",
+                  "es/how-to-win/risk-disclosures-and-responsible-trading",
+                  "es/security/privacy"
+                ]
+              },
+              {
+                "group": "Agentes IA",
+                "pages": [
+                  "es/ai-agents/overview",
+                  "es/ai-agents/build-a-trading-agent",
+                  "es/ai-agents/mcp-server",
+                  "es/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "Soporte",
+                "pages": [
+                  "es/getting-support/support",
+                  "es/glossary",
+                  "es/community",
+                  "es/getting-support/changelog"
+                ]
+              }
             ]
           },
           {
-            "group": "SDK Guides",
-            "pages": [
-              "api/sdk/typescript",
-              "api/sdk/python",
-              "api/sdk/rust",
-              "api/sdk/go"
+            "tab": "Escritorio",
+            "groups": [
+              {
+                "group": "Empezar",
+                "pages": [
+                  "es/desktop/overview",
+                  "es/desktop/installation",
+                  "es/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "Trading",
+                "pages": [
+                  "es/desktop/active-positions",
+                  "es/desktop/exit-strategy",
+                  "es/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "Billetera",
+                "pages": [
+                  "es/desktop/wallet"
+                ]
+              },
+              {
+                "group": "Herramientas",
+                "pages": [
+                  "es/desktop/activity-log",
+                  "es/desktop/analytics",
+                  "es/desktop/settings",
+                  "es/desktop/security"
+                ]
+              }
             ]
           },
           {
-            "group": "Reference",
-            "pages": [
-              "api/reference/supported-dexs",
-              "api/reference/partner-fees",
-              "api/reference/rate-limits",
-              "api/reference/market-context"
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "Empezar",
+                "pages": [
+                  "es/start-here/quickstart",
+                  "es/installation/installation"
+                ]
+              },
+              {
+                "group": "Configuración",
+                "pages": [
+                  "es/onboarding/initial-setup",
+                  "es/onboarding/lasersell-ui",
+                  "es/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "Plataformas Soportadas",
+                "pages": [
+                  "es/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "Seguridad",
+                "pages": [
+                  "es/security/wallet-encryption"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "groups": [
+              {
+                "group": "Empezar",
+                "pages": [
+                  "es/api/overview",
+                  "es/api/authentication",
+                  "es/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "es/api/exit-api/sell",
+                  "es/api/exit-api/buy",
+                  "es/api/exit-api/account",
+                  "es/api/exit-api/history",
+                  "es/api/exit-api/wallets",
+                  "es/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "es/api/stream/overview",
+                  "es/api/stream/connection-lifecycle",
+                  "es/api/stream/strategy-configuration",
+                  "es/api/stream/server-events",
+                  "es/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "Envío de Transacciones",
+                "pages": [
+                  "es/api/transactions/signing",
+                  "es/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "Guías SDK",
+                "pages": [
+                  "es/api/sdk/typescript",
+                  "es/api/sdk/python",
+                  "es/api/sdk/rust",
+                  "es/api/sdk/go"
+                ]
+              },
+              {
+                "group": "Referencia",
+                "pages": [
+                  "es/api/reference/supported-dexs",
+                  "es/api/reference/partner-fees",
+                  "es/api/reference/rate-limits",
+                  "es/api/reference/market-context"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ru",
+        "tabs": [
+          {
+            "tab": "Документация",
+            "groups": [
+              {
+                "group": "Начало",
+                "pages": [
+                  "ru/start-here/what-is-lasersell",
+                  "ru/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "Аналитика и Достижения",
+                "pages": [
+                  "ru/features/analytics",
+                  "ru/features/insights",
+                  "ru/features/achievements"
+                ]
+              },
+              {
+                "group": "Бенчмарки",
+                "pages": [
+                  "ru/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "Безопасность",
+                "pages": [
+                  "ru/security/key-safety",
+                  "ru/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "Тарифы и Политика",
+                "pages": [
+                  "ru/pricing/fee-structure",
+                  "ru/how-to-win/risk-disclosures-and-responsible-trading",
+                  "ru/security/privacy"
+                ]
+              },
+              {
+                "group": "ИИ Агенты",
+                "pages": [
+                  "ru/ai-agents/overview",
+                  "ru/ai-agents/build-a-trading-agent",
+                  "ru/ai-agents/mcp-server",
+                  "ru/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "Поддержка",
+                "pages": [
+                  "ru/getting-support/support",
+                  "ru/glossary",
+                  "ru/community",
+                  "ru/getting-support/changelog"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Десктоп",
+            "groups": [
+              {
+                "group": "Начало",
+                "pages": [
+                  "ru/desktop/overview",
+                  "ru/desktop/installation",
+                  "ru/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "Торговля",
+                "pages": [
+                  "ru/desktop/active-positions",
+                  "ru/desktop/exit-strategy",
+                  "ru/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "Кошелёк",
+                "pages": [
+                  "ru/desktop/wallet"
+                ]
+              },
+              {
+                "group": "Инструменты",
+                "pages": [
+                  "ru/desktop/activity-log",
+                  "ru/desktop/analytics",
+                  "ru/desktop/settings",
+                  "ru/desktop/security"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "Начало",
+                "pages": [
+                  "ru/start-here/quickstart",
+                  "ru/installation/installation"
+                ]
+              },
+              {
+                "group": "Настройка",
+                "pages": [
+                  "ru/onboarding/initial-setup",
+                  "ru/onboarding/lasersell-ui",
+                  "ru/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "Поддерживаемые платформы",
+                "pages": [
+                  "ru/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "Безопасность",
+                "pages": [
+                  "ru/security/wallet-encryption"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "groups": [
+              {
+                "group": "Начало",
+                "pages": [
+                  "ru/api/overview",
+                  "ru/api/authentication",
+                  "ru/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "ru/api/exit-api/sell",
+                  "ru/api/exit-api/buy",
+                  "ru/api/exit-api/account",
+                  "ru/api/exit-api/history",
+                  "ru/api/exit-api/wallets",
+                  "ru/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "ru/api/stream/overview",
+                  "ru/api/stream/connection-lifecycle",
+                  "ru/api/stream/strategy-configuration",
+                  "ru/api/stream/server-events",
+                  "ru/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "Отправка транзакций",
+                "pages": [
+                  "ru/api/transactions/signing",
+                  "ru/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "Руководства SDK",
+                "pages": [
+                  "ru/api/sdk/typescript",
+                  "ru/api/sdk/python",
+                  "ru/api/sdk/rust",
+                  "ru/api/sdk/go"
+                ]
+              },
+              {
+                "group": "Справочник",
+                "pages": [
+                  "ru/api/reference/supported-dexs",
+                  "ru/api/reference/partner-fees",
+                  "ru/api/reference/rate-limits",
+                  "ru/api/reference/market-context"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ar",
+        "tabs": [
+          {
+            "tab": "المستندات",
+            "groups": [
+              {
+                "group": "ابدأ هنا",
+                "pages": [
+                  "ar/start-here/what-is-lasersell",
+                  "ar/start-here/integrate-lasersell"
+                ]
+              },
+              {
+                "group": "التحليلات والإنجازات",
+                "pages": [
+                  "ar/features/analytics",
+                  "ar/features/insights",
+                  "ar/features/achievements"
+                ]
+              },
+              {
+                "group": "اختبارات الأداء",
+                "pages": [
+                  "ar/benchmarks/tx-build-latency"
+                ]
+              },
+              {
+                "group": "الأمان",
+                "pages": [
+                  "ar/security/key-safety",
+                  "ar/getting-support/report-a-bug"
+                ]
+              },
+              {
+                "group": "الرسوم والسياسات",
+                "pages": [
+                  "ar/pricing/fee-structure",
+                  "ar/how-to-win/risk-disclosures-and-responsible-trading",
+                  "ar/security/privacy"
+                ]
+              },
+              {
+                "group": "وكلاء الذكاء الاصطناعي",
+                "pages": [
+                  "ar/ai-agents/overview",
+                  "ar/ai-agents/build-a-trading-agent",
+                  "ar/ai-agents/mcp-server",
+                  "ar/ai-agents/coding-skills"
+                ]
+              },
+              {
+                "group": "الدعم",
+                "pages": [
+                  "ar/getting-support/support",
+                  "ar/glossary",
+                  "ar/community",
+                  "ar/getting-support/changelog"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "سطح المكتب",
+            "groups": [
+              {
+                "group": "البداية",
+                "pages": [
+                  "ar/desktop/overview",
+                  "ar/desktop/installation",
+                  "ar/desktop/onboarding"
+                ]
+              },
+              {
+                "group": "التداول",
+                "pages": [
+                  "ar/desktop/active-positions",
+                  "ar/desktop/exit-strategy",
+                  "ar/desktop/mirror-trading"
+                ]
+              },
+              {
+                "group": "المحفظة",
+                "pages": [
+                  "ar/desktop/wallet"
+                ]
+              },
+              {
+                "group": "الأدوات",
+                "pages": [
+                  "ar/desktop/activity-log",
+                  "ar/desktop/analytics",
+                  "ar/desktop/settings",
+                  "ar/desktop/security"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "البداية",
+                "pages": [
+                  "ar/start-here/quickstart",
+                  "ar/installation/installation"
+                ]
+              },
+              {
+                "group": "الإعداد",
+                "pages": [
+                  "ar/onboarding/initial-setup",
+                  "ar/onboarding/lasersell-ui",
+                  "ar/onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "المنصات المدعومة",
+                "pages": [
+                  "ar/onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "الأمان",
+                "pages": [
+                  "ar/security/wallet-encryption"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API",
+            "groups": [
+              {
+                "group": "البداية",
+                "pages": [
+                  "ar/api/overview",
+                  "ar/api/authentication",
+                  "ar/api/quickstart"
+                ]
+              },
+              {
+                "group": "LaserSell API",
+                "pages": [
+                  "ar/api/exit-api/sell",
+                  "ar/api/exit-api/buy",
+                  "ar/api/exit-api/account",
+                  "ar/api/exit-api/history",
+                  "ar/api/exit-api/wallets",
+                  "ar/api/exit-api/error-handling"
+                ]
+              },
+              {
+                "group": "Exit Intelligence Stream",
+                "pages": [
+                  "ar/api/stream/overview",
+                  "ar/api/stream/connection-lifecycle",
+                  "ar/api/stream/strategy-configuration",
+                  "ar/api/stream/server-events",
+                  "ar/api/stream/client-messages"
+                ]
+              },
+              {
+                "group": "إرسال المعاملات",
+                "pages": [
+                  "ar/api/transactions/signing",
+                  "ar/api/transactions/send-targets"
+                ]
+              },
+              {
+                "group": "أدلة SDK",
+                "pages": [
+                  "ar/api/sdk/typescript",
+                  "ar/api/sdk/python",
+                  "ar/api/sdk/rust",
+                  "ar/api/sdk/go"
+                ]
+              },
+              {
+                "group": "المرجع",
+                "pages": [
+                  "ar/api/reference/supported-dexs",
+                  "ar/api/reference/partner-fees",
+                  "ar/api/reference/rate-limits",
+                  "ar/api/reference/market-context"
+                ]
+              }
             ]
           }
         ]

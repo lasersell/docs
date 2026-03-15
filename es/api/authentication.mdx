@@ -1,0 +1,91 @@
+---
+title: "Autenticación"
+description: "Obtén tu clave API del dashboard de LaserSell y autentica solicitudes en los cuatro SDKs."
+---
+
+## Obtener tu clave API
+
+1. Inicia sesión en [app.lasersell.io](https://app.lasersell.io).
+2. Navega a **Settings > API Keys**.
+3. Haz clic en **Create API Key**, dale un nombre y copia el valor.
+
+Almacena la clave de forma segura. No se puede mostrar nuevamente después de la creación.
+
+## Autenticación de solicitudes
+
+Cada solicitud a LaserSell API y cada conexión WebSocket al Exit Intelligence Stream requiere una clave API pasada a través del encabezado HTTP `x-api-key`.
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### Ejemplos de SDK
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### Autenticación del Exit Intelligence Stream
+
+El WebSocket del Exit Intelligence Stream también usa `x-api-key`. El SDK lo maneja automáticamente cuando construyes un `StreamClient`:
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## Mejores prácticas de seguridad
+
+- **Nunca comprometas tu clave API** en el control de versiones. Usa variables de entorno o un gestor de secretos.
+- **Rota las claves** periódicamente a través del dashboard.
+- **Delimita el acceso** creando claves separadas para diferentes bots o entornos.
+- Si una clave está comprometida, revócala inmediatamente desde el dashboard y crea un reemplazo.

@@ -1,0 +1,30 @@
+---
+title: "SDK de Rust"
+description: "Instala, configura y usa el SDK de Rust de LaserSell con async/.await para construir transacciones y transmitir posiciones."
+---
+
+## Instalación
+
+```bash
+cargo add lasersell-sdk
+cargo add tokio --features full
+```
+
+## Módulos
+
+| Módulo                        | Propósito                                |
+|-------------------------------|----------------------------------------|
+| `lasersell_sdk::exit_api`     | `ExitApiClient`, tipos de solicitud/respuesta, `ExitApiError` |
+| `lasersell_sdk::tx`           | `SendTarget`, `sign_unsigned_tx`, `send_transaction` |
+| `lasersell_sdk::stream::client` | `StreamClient`, `StreamConfigure`, `StreamConnection`, `StreamSender` |
+| `lasersell_sdk::stream::session` | `StreamSession`, seguimiento de posiciones |
+| `lasersell_sdk::stream::proto`  | Tipos de mensajes (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+| `lasersell_sdk::retry`        | Configuración de `RetryPolicy`          |
+
+Todos los métodos son `async` y devuelven `Result<T, ExitApiError>`.
+
+Para ejemplos completos de código, consulta la [documentación en inglés](/api/sdk/rust).
+
+## Ejemplo completo
+
+Ver el [Inicio rápido](/api/quickstart) para un ejemplo completo funcional.

@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "LaserSell APIからアカウントのページ分割された取引履歴を取得します。"
+---
+
+## エンドポイント
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## ヘッダー
+
+| ヘッダー | 必須 | 説明 |
+|-------------|----------|------------------------|
+| `x-api-key` | はい | LaserSell APIキー |
+
+## クエリパラメータ
+
+| パラメータ | 型 | デフォルト | 説明 |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit`   | `number` | `50`    | 返す取引の最大数（上限200）。 |
+| `offset`  | `number` | `0`     | ページネーション用にスキップする取引数。 |
+| `mint`    | `string` | —       | 特定のトークンミントアドレスでフィルター（base58）。 |
+| `wallet`  | `string` | —       | 特定のウォレット公開鍵でフィルター（base58）。 |
+
+## レスポンス: `TradeHistoryResponse`
+
+| フィールド | 型 | 説明 |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | 最新のものから順に並んだ取引レコードの配列。 |
+| `total`  | `number \| null` | ページネーション用の一致する取引の推定合計数。 |
+
+### `TradeHistoryItem`オブジェクト
+
+| フィールド | 型 | 説明 |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id`                         | `number`         | 一意の取引レコード識別子。 |
+| `session_id`                 | `number`         | この取引を生成したストリームセッション。 |
+| `position_id`                | `number`         | セッション内のポジション識別子。 |
+| `wallet_pubkey`              | `string`         | ポジションを保有するウォレット公開鍵（base58）。 |
+| `mint`                       | `string`         | トークンミントアドレス（base58）。 |
+| `entry_quote_units`          | `number`         | クォートアセットのatomic unitsでのポジションオープン時の使用金額。 |
+| `exit_quote_units`           | `number \| null` | クォートアセットのatomic unitsでのクローズ時の受取収益。 |
+| `profit_quote_units`         | `number \| null` | クォートアセットのatomic unitsでの純損益。 |
+| `tokens`                     | `number`         | atomic unitsでのエントリー時の取得トークン数。 |
+| `exit_reason`                | `string \| null` | ポジションがクローズされた理由（例: `target_profit`、`stop_loss`、`trailing_stop`、`manual`）。 |
+| `market_kind`                | `string \| null` | トークンが取引されたDEXまたはローンチパッド（例: `PumpFun`、`RaydiumCpmm`）。 |
+| `strategy_target_profit_pct` | `number \| null` | ポジションオープン時に設定されたテイクプロフィットパーセンテージ。 |
+| `strategy_stop_loss_pct`     | `number \| null` | ポジションオープン時に設定されたストップロスパーセンテージ。 |
+| `strategy_trailing_stop_pct` | `number \| null` | ポジションオープン時に設定されたトレーリングストップパーセンテージ。 |
+| `opened_at`                  | `string`         | ポジションがオープンされたISO 8601タイムスタンプ。 |
+| `closed_at`                  | `string \| null` | ポジションがクローズされたISO 8601タイムスタンプ。 |
+
+## curl例
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+フィルター付き:
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## レスポンス例
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## エラーレスポンス
+
+完全なエラーエンベロープ仕様とリトライ可能なエラーロジックについては[エラー処理](/api/exit-api/error-handling)を参照してください。

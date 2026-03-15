@@ -1,0 +1,44 @@
+---
+title: "Seguridad de claves"
+description: "Cómo LaserSell protege tus claves privadas y mejores prácticas para la seguridad de wallets."
+---
+
+## Diseño no custodial
+
+Tus claves privadas nunca salen de tu máquina. LaserSell firma todas las transacciones localmente y nunca transmite las claves a ningún servidor.
+
+- Las claves se generan y almacenan localmente
+- Toda la firma de transacciones ocurre en tu dispositivo
+- LaserSell no puede congelar fondos, iniciar retiros ni ejecutar operaciones sin tu comando
+
+## Almacén de claves cifrado
+
+LaserSell cifra tu wallet con cifrado autenticado **XChaCha20-Poly1305** y deriva la clave usando **Argon2id**, una función con uso intensivo de memoria que hace que los ataques de fuerza bruta sean prohibitivamente costosos.
+
+Si tienes un archivo `wallet.json` heredado en texto plano de otra herramienta, LaserSell te ofrecerá migrarlo al formato de almacén de claves cifrado automáticamente.
+
+<Warning>
+No hay "olvidé mi contraseña." Si pierdes tu frase de contraseña, el almacén de claves no se puede descifrar. Tu ruta de recuperación es reimportar desde tu frase semilla o clave privada.
+</Warning>
+
+## Higiene de memoria
+
+Durante el desbloqueo, tu frase de contraseña y los intermediarios de descifrado se mantienen en memoria solo por el instante en que se necesitan. Se borran explícitamente con ceros inmediatamente después, previniendo el raspado de credenciales por malware.
+
+## Mejores prácticas
+
+**Trata LaserSell como una hot wallet.** No mantengas saldos grandes en tu wallet de trading. Solo finánciala con lo que pretendas operar.
+
+**Mueve las ganancias regularmente.** Transfiere las ganancias a una hardware wallet o almacenamiento en frío. No dejes que las ganancias se acumulen en una hot wallet.
+
+**Usa una frase de contraseña fuerte.** La seguridad de tu almacén de claves depende enteramente de la fortaleza de la frase de contraseña.
+
+## Anti phishing
+
+El soporte de LaserSell **nunca** te pedirá tu:
+
+- Clave privada o frase semilla
+- Frase de contraseña del almacén de claves
+- "Validación" o "sincronización" de wallet en ningún sitio web
+
+Cualquiera que solicite esto es un estafador. Bloquéalo y repórtalo inmediatamente.

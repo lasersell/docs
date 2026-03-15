@@ -1,0 +1,227 @@
+---
+title: "Glosario"
+description: "Definiciones de términos clave, acrónimos y conceptos utilizados en la documentación de LaserSell."
+---
+
+## A
+
+**AMM (Automated Market Maker)**
+Un protocolo de intercambio descentralizado que utiliza fórmulas matemáticas para determinar los precios de tokens basándose en las reservas del pool, permitiendo intercambios de tokens sin libros de órdenes. PumpSwap, Meteora DAMM V2 y Raydium CPMM son ejemplos de AMMs soportados por LaserSell.
+
+**Argon2id**
+Un algoritmo de hash de contraseñas con uso intensivo de memoria utilizado por LaserSell para derivar claves de cifrado de tu frase de contraseña. Hace que los ataques de fuerza bruta contra tu almacén de claves sean computacionalmente costosos.
+
+**Associated Token Account (ATA)**
+Una cuenta derivada en cadena que contiene un token SPL específico para una dirección de wallet dada. Se crea automáticamente cuando una wallet recibe un token por primera vez.
+
+**Astralane Iris**
+Una pasarela de envío de transacciones que soporta endpoints regionales para optimización de latencia. Uno de los [send targets](/api/transactions/send-targets) disponibles en los SDKs de LaserSell. Requiere una clave API de Astralane.
+
+**Atomic Units**
+La unidad indivisible más pequeña de un token. Para SOL, la unidad atómica es un lamport (1 SOL = 1,000,000,000 lamports). Otros tokens definen su propia precisión decimal.
+
+## B
+
+**Balance Update**
+Un evento del servidor (`balance_update`) enviado por el Exit Intelligence Stream cuando el saldo de SOL o tokens de tu wallet cambia. Ver [Eventos del servidor](/api/stream/server-events).
+
+**Basis Points (BPS)**
+Una unidad igual a 1/100 de un porcentaje. 100 bps = 1%. Utilizado en toda LaserSell API para la tolerancia al slippage y la configuración de comisiones de partner.
+
+**Bonding Curve**
+Una fórmula matemática utilizada por launchpads como Pump.fun para determinar el precio de un token basándose en su oferta circulante. Los tokens en una curva de vinculación aún no han migrado a un pool AMM.
+
+## C
+
+**Cold Storage**
+Almacenamiento de wallet fuera de línea (como una hardware wallet) utilizado para holdings a largo plazo. Mueve las ganancias de tu hot wallet a almacenamiento en frío regularmente.
+
+**Configure Message**
+El primer mensaje del cliente enviado después de conectarse al Exit Intelligence Stream. Especifica tus direcciones de wallet y parámetros de estrategia. El servidor responde con un evento `configured`. Ver [Mensajes del cliente](/api/stream/client-messages).
+
+## D
+
+**Deadline Timeout**
+Un límite de tiempo (en segundos) que fuerza una salida automática si ninguna otra condición de estrategia (take profit, stop loss, trailing stop) se activa dentro de la duración configurada. Evita que el capital quede atrapado en posiciones estancadas.
+
+## E
+
+**Exit Intelligence**
+La tecnología central de LaserSell. Un sistema en tiempo real que monitorea las posiciones de wallets, evalúa las condiciones de estrategia en cada actualización de precio y entrega transacciones de salida sin firmar preconstruidas cuando se alcanzan los umbrales.
+
+**Exit Intelligence Stream**
+Una conexión WebSocket persistente a `wss://stream.lasersell.io/v1/ws` que proporciona seguimiento de posiciones en tiempo real, actualizaciones de PnL y señales de salida automatizadas. Ver [Resumen del Stream](/api/stream/overview).
+
+**Exit Signal**
+Un evento del servidor (`exit_signal_with_tx`) que contiene una transacción de venta sin firmar preconstruida, disparado cuando se cumple una condición de estrategia. El evento más importante en el Exit Intelligence Stream. Ver [Eventos del servidor](/api/stream/server-events).
+
+**ExitApiClient**
+El cliente del SDK para hacer llamadas REST API para construir transacciones de compra y venta bajo demanda a través de `/v1/buy` y `/v1/sell`.
+
+## G
+
+**Graduation**
+El momento en que un token migra de una curva de vinculación (por ejemplo, Pump.fun) a un pool AMM (por ejemplo, PumpSwap). La dinámica de precios a menudo cambia significativamente en la graduación.
+
+## H
+
+**`hello_ok`**
+El primer mensaje del servidor recibido después de conectarse al Exit Intelligence Stream. Contiene tu ID de sesión y los límites de tasa de tu nivel. Ver [Ciclo de vida de la conexión](/api/stream/connection-lifecycle).
+
+**Helius Sender**
+Un servicio de envío de transacciones que enruta a través del endpoint `/fast` de Helius para un aterrizaje optimizado de transacciones en Solana. No requiere clave API. El [send target](/api/transactions/send-targets) predeterminado para LaserSell.
+
+**Hot Wallet**
+Cualquier wallet conectada a Internet para trading activo. LaserSell crea una hot wallet local en tu máquina para ejecución rápida de operaciones.
+
+## J
+
+**Jito Tip**
+Un pago directo a los validadores de Solana para priorizar tu transacción por encima de otras en el mismo bloque. Este es un costo de red, no una comisión de LaserSell.
+
+## K
+
+**Keystore**
+Un formato de archivo cifrado utilizado por el cliente LaserSell para almacenar tus claves privadas localmente. Usa cifrado XChaCha20-Poly1305 con una clave derivada por Argon2id. Ver [Cifrado de wallet](/security/wallet-encryption).
+
+## L
+
+**Lamport**
+La unidad más pequeña de SOL. 1 SOL = 1,000,000,000 lamports. Los campos de la API como `amount_in_total`, `tip_lamports` y `partner_fee_lamports` están denominados en lamports.
+
+**Lane Splitting**
+Una funcionalidad (solo en el SDK de TypeScript) que separa el Exit Intelligence Stream en dos receptores: un canal de alta prioridad para señales de salida y eventos de posición, y un canal de baja prioridad para actualizaciones de PnL. Evita que las actualizaciones frecuentes de PnL bloqueen las señales de salida sensibles al tiempo.
+
+## M
+
+**Market Context**
+Metadatos que describen el pool DEX y el protocolo utilizado para el mercado de un token, incluyendo direcciones de pool y configuración. Devuelto en eventos del stream y opcionalmente pasado a solicitudes de construcción para omitir la resolución del lado del servidor. Ver [Market Context](/api/reference/market-context).
+
+**Memecoin**
+Una criptomoneda a menudo inspirada en la cultura de Internet, caracterizada por alta volatilidad y trading especulativo. El segmento de mercado principal para el que LaserSell está diseñado.
+
+**Meteora DBC (Dynamic Bonding Curve)**
+El protocolo de curva de vinculación de Meteora para tokens en su fase inicial de lanzamiento. Soportado por LaserSell.
+
+**Meteora DAMM V2 (Dynamic AMM V2)**
+El market maker automatizado dinámico de Meteora para tokens que han migrado de su curva de vinculación. Soportado por LaserSell.
+
+**Mode (Routing)**
+Un campo en las solicitudes `/v1/buy` y `/v1/sell` con valores `"fast"` o `"secure"`. El modo rápido optimiza para velocidad; el modo seguro añade verificaciones de confirmación adicionales. No confundir con Send Mode.
+
+## N
+
+**Non-Custodial**
+Una arquitectura donde los usuarios mantienen el control total de sus claves privadas y fondos. LaserSell nunca almacena claves en sus servidores. Todas las transacciones se devuelven sin firmar y se firman localmente por el usuario o su aplicación.
+
+## P
+
+**Partner Fee**
+Una comisión opcional que los integradores pueden añadir a cualquier transacción de compra o venta, enrutada atómicamente a una wallet especificada como parte de la instrucción de swap en cadena. Configurable en puntos base o lamports fijos por solicitud. Disponible en los niveles Advanced y Enterprise. Ver [Comisiones de partner](/api/reference/partner-fees).
+
+**Passphrase**
+La contraseña definida por el usuario requerida para desbloquear un almacén de claves cifrado. Si se pierde esta frase de contraseña, la wallet no se puede descifrar.
+
+**PnL (Profit and Loss)**
+La ganancia o pérdida estimada actual de una posición. El Exit Intelligence Stream entrega eventos `pnl_update` a intervalos regulares con valores actualizados.
+
+**`pnl_update`**
+Un evento del servidor que contiene el último cálculo de PnL para una posición rastreada. Se entrega a intervalos regulares. La entrega de alta frecuencia es la razón por la que existe el lane splitting. Ver [Eventos del servidor](/api/stream/server-events).
+
+**Position Handle**
+Un objeto de referencia devuelto por eventos de `StreamSession` que identifica una posición rastreada por su ID, cuenta de tokens, mint y wallet. Utilizado para cerrar posiciones y solicitar señales de salida.
+
+**`position_opened`**
+Un evento del servidor disparado cuando el Exit Intelligence Stream detecta una nueva compra de tokens en una wallet rastreada. Contiene el ID de posición, mint, costo base y contexto de mercado. Ver [Eventos del servidor](/api/stream/server-events).
+
+**`position_closed`**
+Un evento del servidor disparado cuando una posición rastreada se cierra completamente o se elimina. Ver [Eventos del servidor](/api/stream/server-events).
+
+**Priority Fee**
+Una comisión estándar de blockchain de Solana pagada a los validadores por prioridad computacional. Separada de los tips de Jito.
+
+**Private Key**
+La clave criptográfica que otorga control sobre los activos de una wallet. El cliente LaserSell la cifra localmente y nunca la transmite. La API y los SDKs nunca requieren una clave privada; todas las transacciones se devuelven sin firmar.
+
+**Pump.fun**
+Un launchpad de tokens de Solana donde los tokens comienzan a operar en una curva de vinculación antes de graduarse a un AMM.
+
+**PumpSwap**
+El AMM al que los tokens de Pump.fun migran después de graduarse de la curva de vinculación. Soportado por LaserSell.
+
+## R
+
+**Rate Limits**
+Límites en cuántas solicitudes o recursos puedes usar, determinados por tu nivel de precios. Se aplica tanto a la API REST (solicitudes por minuto) como al Exit Intelligence Stream (wallets, posiciones, sesiones). Ver [Límites de tasa y niveles](/api/reference/rate-limits).
+
+**Raydium CPMM (Constant Product Market Maker)**
+Los pools AMM estándar de Raydium. Soportado por LaserSell.
+
+**Raydium Launchpad**
+La plataforma de lanzamiento de tokens de Raydium. Soportado por LaserSell.
+
+**Routing Fee**
+Una comisión por operación aplicada a cada orden ejecutada a través del LaserSell Router. La tasa depende de tu nivel de suscripción: 2% (Gratis), 0.9% (Professional), 0.5% (Advanced) o personalizada (Enterprise). Se aplica atómicamente en cadena. Ver [Estructura de comisiones](/pricing/fee-structure).
+
+**RPC (Remote Procedure Call)**
+Un nodo que sirve como pasarela a la blockchain de Solana. LaserSell usa una conexión RPC para leer datos de la cadena y transmitir transacciones. Se recomienda un endpoint RPC privado para uso en producción.
+
+**Rug Pull**
+Un escenario donde la liquidez de un token se retira o la venta se deshabilita, causando que el precio colapse. Las funciones de stop loss, trailing stop y venta por graduación de LaserSell ayudan a limitar la exposición.
+
+## S
+
+**Seed Phrase**
+Una frase mnemónica de 12 o 24 palabras utilizada para generar o restaurar una wallet. Se muestra solo una vez durante la creación inicial de la wallet.
+
+**Sell on Graduation**
+Una condición de estrategia que automáticamente sale de una posición en el momento en que su token migra de una curva de vinculación a un pool AMM. Protege contra las caídas posteriores a la graduación.
+
+**Send Mode**
+Un campo en las solicitudes de construcción (`"rpc"`, `"helius_sender"` o `"astralane"`) que indica al servidor para qué contexto de envío optimizar la transacción. Debe coincidir con tu send target elegido.
+
+**Send Target**
+Una configuración que indica al SDK dónde enviar una transacción firmada. Opciones: Default RPC, Custom RPC, Helius Sender, Astralane Iris. Ver [Send Targets](/api/transactions/send-targets).
+
+**Slippage**
+La diferencia entre el precio esperado de una operación y el precio de ejecución real. La alta volatilidad y la baja liquidez aumentan el slippage.
+
+**Stop Loss**
+Una condición de estrategia que vende automáticamente una posición cuando el precio cae un porcentaje configurado desde el precio de entrada. Limita las pérdidas en cualquier operación individual.
+
+**StreamClient**
+El cliente de bajo nivel del SDK para el Exit Intelligence Stream. Gestiona la conexión WebSocket, la reconexión y el enmarcado de mensajes. Devuelve mensajes crudos del servidor. Ver [Ciclo de vida de la conexión](/api/stream/connection-lifecycle).
+
+**StreamSession**
+El envoltorio de alto nivel del SDK sobre `StreamClient`. Proporciona seguimiento automático de posiciones, temporizadores de deadline, eventos tipados con handles de posición y métodos de actualización de estrategia. Recomendado para la mayoría de las integraciones.
+
+## T
+
+**Target Profit**
+Una condición de estrategia que activa una venta automática cuando el PnL de una posición alcanza un porcentaje de ganancia configurado.
+
+**Trailing Stop**
+Un stop loss dinámico que rastrea la ganancia más alta observada desde que se abrió una posición. Si la ganancia cae desde ese pico por un porcentaje configurado, se dispara una señal de salida. Asegura ganancias en posiciones que suben antes de revertirse.
+
+## U
+
+**USD1**
+Una stablecoin soportada como activo de salida alternativo para transacciones de venta (en lugar de SOL).
+
+**Unsigned Transaction**
+Una `VersionedTransaction` de Solana codificada en base64 devuelta por LaserSell API. Debe firmarse localmente con tu clave privada antes del envío. LaserSell nunca maneja la firma.
+
+## V
+
+**VersionedTransaction**
+Un formato de transacción de Solana que soporta diseños de instrucciones versionados y tablas de búsqueda de direcciones. Todas las transacciones devueltas por LaserSell API usan este formato.
+
+## W
+
+**WebSocket (WSS)**
+Un protocolo de comunicación que permite flujos de datos bidireccionales en tiempo real. El Exit Intelligence Stream usa WSS para entregar eventos de posición y señales de salida con latencia mínima.
+
+## X
+
+**XChaCha20-Poly1305**
+El algoritmo de cifrado autenticado utilizado por el cliente LaserSell para proteger las claves privadas dentro del archivo de almacén de claves. Proporciona tanto confidencialidad como verificación de integridad.

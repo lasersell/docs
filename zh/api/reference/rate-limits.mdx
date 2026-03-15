@@ -1,0 +1,77 @@
+---
+title: "速率限制和等级"
+description: "了解等级容量、hello_ok 中的 limits 对象以及如何处理 429 响应。"
+---
+
+## 定价等级
+
+LaserSell 提供四个等级。每个等级决定你在 REST API 和退出智能流上的速率限制。
+
+| 等级 | 名称 | 价格 |
+|------|------|-------|
+| 0 | Personal | 免费 |
+| 1 | Professional | $99/月 |
+| 2 | Advanced Exit Engine | $249/月 |
+| 3 | Enterprise | 自定义 |
+
+## 退出智能流按等级限制
+
+| 限制 | Personal（免费） | Professional | Advanced | Enterprise |
+|-------|-----------------|-------------|----------|------------|
+| 每会话钱包数 | 1 | 5 | 200 | 自定义 |
+| 每钱包仓位数 | 2 | 100 | 100 | 自定义 |
+| 每会话仓位数 | 2 | 500 | 20,000 | 自定义 |
+| 每 API 密钥会话数 | 1 | 1 | 1 | 自定义 |
+| 高优先级缓冲（`hi_capacity`） | 256 | 256 | 256 | 自定义 |
+| 盈亏刷新间隔（`pnl_flush_ms`） | 100 ms | 100 ms | 100 ms | 自定义 |
+| 不活动超时 | 45 分钟 | 无 | 无 | 无 |
+| [流动性快照](/api/stream/server-events#liquidity_snapshot) | 否 | 是 | 是 | 是 |
+| 合作伙伴费用 | 否 | 否 | 是 | 是 |
+
+## REST API 速率限制
+
+REST API（`/v1/sell`、`/v1/buy`）使用滑动窗口对每个密钥执行请求限制。
+
+| 等级 | 每分钟请求数 |
+|------|-------------------|
+| Personal（免费） | 60 |
+| Professional | 60 |
+| Advanced | 60 |
+| Enterprise | 自定义 |
+
+## 连接时读取限制
+
+连接退出智能流时，`hello_ok` 消息包含反映你 API 密钥等级的 `limits` 对象。
+
+关于 `LimitsMsg` 模式和在所有 4 种 SDK 语言中读取限制的代码示例，请参阅[英文版](/api/reference/rate-limits)。
+
+## 处理 429 响应
+
+当你超过 REST API 速率限制时，服务器响应 HTTP `429 Too Many Requests`。SDK 使用内置重试策略自动重试 `429` 响应。如果持续看到 429 错误：
+
+1. **检查请求频率。** 减少 API 调用速率。
+2. **批量请求。** 构建多个交易时，间隔发送。
+3. **增加重试退避。** 配置更长的退避以给服务器恢复时间。
+
+参见[错误处理](/api/exit-api/error-handling)了解自定义重试策略的详情。
+
+## 退出智能流容量
+
+如果超过退出智能流的容量限制（如仓位或钱包过多），服务器发送 `error` 消息：
+
+```json
+{
+  "type": "error",
+  "code": "capacity_exceeded",
+  "message": "max_positions_per_session limit reached"
+}
+```
+
+流连接保持打开。使用 `close_position` 移除仓位或使用 `update_wallets` 减少钱包以释放容量。
+
+## 最佳实践
+
+- **连接时读取限制。** 使用 `limits` 对象在发送仓位前验证你的配置。
+- **监控容量错误。** 记录和告警容量相关代码的 `error` 消息。
+- **使用通道分离（TypeScript）。** 对于高仓位数量，使用 `connectLanes()` 防止 `pnl_update` 消息阻塞时间敏感的事件。
+- **尊重 429 响应。** 不要立即重试；使用指数退避。

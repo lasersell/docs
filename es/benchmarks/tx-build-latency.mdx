@@ -1,0 +1,108 @@
+---
+title: "Latencia de construcción de transacciones"
+description: "Benchmarks de código abierto comparando la latencia de construcción de transacciones en Solana entre LaserSell API, PumpFun SDK, PumpPortal API y Jupiter Metis API."
+---
+
+Cuando LaserSell detecta una condición de salida, la transacción de venta necesita construirse y devolverse lo más rápido posible. Cada milisegundo de latencia de construcción es un milisegundo en que tu transacción no está en camino a la red.
+
+Publicamos nuestros benchmarks de construcción de transacciones como código abierto para que cualquiera pueda verificar estos números. Los benchmarks comparan cuatro métodos de construcción de transacciones de swap en Solana: LaserSell API, PumpFun SDK, PumpPortal API y Jupiter Metis API.
+
+Todos los benchmarks ejecutan 20 iteraciones con una ronda de calentamiento, midiendo el tiempo desde la solicitud hasta recibir una transacción sin firmar.
+
+## Servidor coubicado (Exit Intelligence Stream)
+
+Esta es la latencia que importa para las salidas automatizadas. Cuando el Exit Intelligence Stream detecta que tu take profit, stop loss o trailing stop se ha activado, llama a LaserSell API a través de la red coubicada para construir la transacción de venta. La transacción se devuelve entonces a tu cliente para su firma.
+
+### Construcción de transacción de compra
+
+Compra de 0.01 SOL, 20% de slippage, 20 iteraciones:
+
+| Método | Promedio | Mínimo | Máximo | Mediana |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **4.53 ms** | **3.39 ms** | **6.84 ms** | **4.10 ms** |
+| PumpPortal API | 65.24 ms | 26.18 ms | 264.29 ms | 46.34 ms |
+| Jupiter Metis API | 95.03 ms | 79.30 ms | 115.76 ms | 93.73 ms |
+| PumpFun SDK | 123.34 ms | 103.46 ms | 208.71 ms | 118.24 ms |
+
+### Construcción de transacción de venta
+
+1,000,000 tokens, 20% de slippage, 20 iteraciones:
+
+| Método | Promedio | Mínimo | Máximo | Mediana |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **5.32 ms** | **3.38 ms** | **15.03 ms** | **4.46 ms** |
+| PumpPortal API | 80.74 ms | 27.75 ms | 576.28 ms | 38.18 ms |
+| PumpFun SDK | 120.81 ms | 96.53 ms | 143.23 ms | 121.65 ms |
+| Jupiter Metis API | 168.84 ms | 159.10 ms | 177.35 ms | 169.11 ms |
+
+En la ruta coubicada, LaserSell construye transacciones en menos de 5 ms en promedio. El siguiente método más rápido es más de 12 veces más lento. Esta es la ruta utilizada por el Exit Intelligence Stream para salidas automatizadas.
+
+## Internet público (SDK y API)
+
+Latencia estándar de la API a través de Internet público, medida desde un MacBook Pro. Esto representa la latencia experimentada por los desarrolladores que realizan llamadas REST API directas desde sus propias aplicaciones.
+
+Los usuarios de la aplicación de escritorio no experimentan estos números. La aplicación de escritorio recibe transacciones de salida preconstruidas a través del Exit Intelligence Stream, que construye las transacciones en la ruta coubicada (los números de menos de 5 ms mostrados arriba) y las envía al cliente a través de una conexión WebSocket persistente.
+
+### Construcción de transacción de compra
+
+Compra de 0.01 SOL, 20% de slippage, 20 iteraciones:
+
+| Método | Promedio | Mínimo | Máximo | Mediana |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **71.21 ms** | **62.77 ms** | **81.30 ms** | **71.16 ms** |
+| PumpPortal API | 151.08 ms | 120.96 ms | 246.40 ms | 141.44 ms |
+| Jupiter Metis API | 179.83 ms | 153.17 ms | 370.01 ms | 168.11 ms |
+| PumpFun SDK | 790.94 ms | 278.57 ms | 4,570.26 ms | 364.92 ms |
+
+### Construcción de transacción de venta
+
+1,000,000 tokens, 20% de slippage, 20 iteraciones:
+
+| Método | Promedio | Mínimo | Máximo | Mediana |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **74.77 ms** | **65.13 ms** | **108.67 ms** | **71.72 ms** |
+| PumpPortal API | 152.08 ms | 111.91 ms | 554.96 ms | 120.59 ms |
+| Jupiter Metis API | 181.73 ms | 155.88 ms | 222.54 ms | 174.92 ms |
+| PumpFun SDK | 541.00 ms | 277.65 ms | 2,029.10 ms | 317.28 ms |
+
+A través de Internet público, LaserSell es consistentemente el más rápido con la varianza más ajustada. El PumpFun SDK muestra la mayor volatilidad, con latencias en el peor caso superiores a 4 segundos en compras y 2 segundos en ventas. Estos números son relevantes para integradores de SDK y API que construyen sus propias herramientas.
+
+## Qué se está comparando
+
+Cada método toma un enfoque diferente para construir una transacción de swap:
+
+| Método | Enfoque |
+| :--- | :--- |
+| **LaserSell API** | Una sola llamada API. El servidor construye la transacción completa y la devuelve lista para firmar. |
+| **PumpFun SDK** | Construcción local. Hace múltiples llamadas RPC para obtener el estado en cadena, luego ensambla las instrucciones localmente. |
+| **PumpPortal API** | Una sola llamada API a PumpPortal. |
+| **Jupiter Metis API** | Dos llamadas API. Primero una solicitud de cotización, luego una solicitud de construcción de swap. |
+
+La arquitectura de llamada única de LaserSell elimina los viajes de ida y vuelta, por eso supera consistentemente los enfoques de múltiples pasos.
+
+## Por qué esto importa
+
+En el trading automatizado, la latencia de construcción de transacciones afecta directamente la calidad de ejecución. Cuando una memecoin comienza a caer, la diferencia entre una construcción de 5 ms y una de 170 ms puede determinar si tu salida aterriza en el mismo bloque que el disparador o varios bloques después, cuando el precio ya se ha movido más en tu contra.
+
+Para el Exit Intelligence Stream, esto significa que tus salidas automatizadas se disparan con una sobrecarga mínima entre la detección y la transmisión. Para los usuarios de SDK y API que construyen sus propias herramientas, significa viajes de ida y vuelta más rápidos y aplicaciones más responsivas.
+
+## Ejecuta los benchmarks tú mismo
+
+Los benchmarks son de código abierto. Clona el repositorio y ejecútalos contra tu propia infraestructura:
+
+```bash
+git clone https://github.com/lasersell/benchmarks
+cd benchmarks
+
+# Buy transaction build
+cd buy-tx-build
+npm install && npm run build
+npm run bench
+
+# Sell transaction build
+cd ../sell-tx-build
+npm install && npm run build
+npm run bench
+```
+
+Necesitarás una clave API de LaserSell (gratis en [app.lasersell.io](https://app.lasersell.io)), una URL de RPC de Solana y una dirección mint de un token de Pump.fun. Consulta el README del repositorio para opciones completas de configuración.

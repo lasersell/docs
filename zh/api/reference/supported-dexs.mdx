@@ -1,0 +1,51 @@
+---
+title: "支持的 DEX"
+description: "LaserSell 兑换路由支持的协议、市场类型、毕业支持和发射台覆盖。"
+---
+
+## 支持的协议
+
+LaserSell 通过多个 Solana DEX 协议路由兑换。`MarketContextMsg` 中的 `market_type` 字段标识给定代币使用的协议。
+
+| `market_type`        | 协议              | 类型            | 说明                                     |
+|----------------------|-----------------------|-----------------|-------------------------------------------------|
+| `pump_fun`           | Pump.fun              | 联合曲线   | 原始 Pump.fun 联合曲线。                |
+| `pump_swap`          | PumpSwap              | AMM             | 已毕业的 Pump.fun 代币在 PumpSwap AMM 上。  |
+| `meteora_dbc`        | Meteora DBC           | 动态联合 | Meteora 动态联合曲线池。            |
+| `meteora_damm_v2`    | Meteora DAMM V2       | AMM             | Meteora 动态 AMM V2 池。                   |
+| `raydium_launchpad`  | Raydium Launchpad     | 联合曲线   | Raydium 发射台联合曲线代币。         |
+| `raydium_cpmm`       | Raydium CPMM          | AMM             | Raydium 恒定乘积做市商池。    |
+
+## 联合曲线 vs AMM 池
+
+**联合曲线**协议（`pump_fun`、`meteora_dbc`、`raydium_launchpad`）使用数学曲线确定价格。联合曲线上的代币可能后续**毕业**到完整的 AMM 池。
+
+**AMM** 协议（`pump_swap`、`meteora_damm_v2`、`raydium_cpmm`）使用恒定乘积或动态流动性池。它们提供更深的流动性和标准的兑换机制。
+
+## 毕业
+
+一些代币在联合曲线上发行，当满足某些条件（通常是市值阈值）后"毕业"到 AMM。LaserSell 检测毕业事件，如果策略中设置了 `sell_on_graduation: true`，可以在毕业时自动卖出。
+
+| 来源曲线         | 毕业到            |
+|----------------------|-------------------------|
+| `pump_fun`           | `pump_swap`             |
+| `meteora_dbc`        | `meteora_damm_v2`       |
+| `raydium_launchpad`  | `raydium_cpmm`          |
+
+毕业发生时，退出智能流更新 `market_context` 并继续无缝追踪。
+
+## 发射台覆盖
+
+LaserSell 监控所有主要 Solana 代币发射台：
+
+- **Pump.fun**：最受欢迎的 meme 币发射台。代币从联合曲线开始，毕业到 PumpSwap。
+- **Meteora**：动态联合曲线，毕业到 DAMM V2 池。
+- **Raydium Launchpad**：Raydium 原生发射台，毕业到 CPMM 池。
+
+新协议在 Solana 上获得采用后会被添加。`market_type` 枚举将相应扩展。
+
+## 使用市场上下文
+
+`market_context` 包含在 `position_opened` 和 `exit_signal_with_tx` 事件中。你也可以在 `BuildSellTxRequest` 中传递它以跳过服务器端解析。
+
+参见[市场上下文](/api/reference/market-context)了解每个协议的完整嵌套模式。

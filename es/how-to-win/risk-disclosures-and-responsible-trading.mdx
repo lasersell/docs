@@ -1,0 +1,44 @@
+---
+title: "Divulgación de riesgos"
+description: "Riesgos, configuración responsable y divulgaciones legales para el uso de LaserSell."
+---
+
+<Warning>
+LaserSell es una herramienta de trading automatizado para usuarios experimentados de criptomonedas. Eres el único responsable de la custodia de tus claves privadas y de los resultados financieros de tus operaciones.
+</Warning>
+
+## Riesgos de software y red
+
+- **Fallos de RPC / red**: LaserSell depende de proveedores de RPC de terceros y de la red Solana. La congestión o el tiempo de inactividad pueden retrasar o hacer fallar las órdenes de venta, dejándote en una posición más tiempo del previsto.
+- **Slippage de ejecución**: El precio de llenado puede diferir del precio de activación durante la alta volatilidad. La configuración `slippage_pad_bps` ayuda, pero no puede eliminar el slippage por completo.
+- **Sin garantía**: Este software se proporciona "tal cual." Errores o futuros cambios del protocolo Solana podrían afectar el rendimiento.
+
+## Riesgos de mercado
+
+Los mercados de tokens nuevos son el sector de mayor riesgo en cripto.
+
+- **Riesgo de liquidez**: Los tokens pueden volverse imposibles de vender si se retira la liquidez (rug pull) o la curva de vinculación se estanca.
+- **Pérdida total**: Los valores de memecoins comúnmente caen a cero en minutos. Nunca despliegues capital que no puedas permitirte perder.
+- **Estafas**: LaserSell no puede predecir si un desarrollador venderá la oferta o si los metadatos del token son maliciosos.
+
+## Seguridad de wallet
+
+LaserSell crea una hot wallet en tu máquina, cifrada con Argon2id + XChaCha20-Poly1305.
+
+- La fortaleza del cifrado depende enteramente de tu frase de contraseña.
+- Si tu máquina está comprometida, tu almacén de claves y frase de contraseña pueden ser robados.
+- Ejecuta LaserSell en una máquina dedicada y limpia.
+- No mantengas saldos grandes en tu wallet de trading. Mueve las ganancias a una hardware wallet regularmente.
+
+## Configuración responsable
+
+- **Siempre establece un stop loss.** Depender de la intervención manual es demasiado lento para este mercado.
+- **Usa un deadline timeout.** Si una operación no ha funcionado en un número determinado de segundos, salir preserva el capital.
+- **Empieza pequeño.** Verifica que LaserSell ejecuta como se espera con montos mínimos antes de aumentar el tamaño de las posiciones.
+
+## Cumplimiento regulatorio
+
+- Eres responsable de asegurar que tus actividades de trading cumplan con las leyes y regulaciones locales.
+- El trading automatizado genera un alto volumen de eventos tributables. Eres responsable de rastrear y reportar las transacciones.
+
+*Al ejecutar LaserSell, afirmas que has leído esta divulgación y aceptas estos riesgos.*

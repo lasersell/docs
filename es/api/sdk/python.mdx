@@ -1,0 +1,41 @@
+---
+title: "SDK de Python"
+description: "Instala, configura y usa el SDK de Python de LaserSell con patrones async para construir transacciones y transmitir posiciones."
+---
+
+## Instalación
+
+```bash
+pip install lasersell-sdk
+```
+
+Extras opcionales para funcionalidades adicionales:
+
+```bash
+# Transaction signing (requires solders)
+pip install lasersell-sdk[tx]
+
+# WebSocket stream (requires websockets)
+pip install lasersell-sdk[stream]
+
+# Both
+pip install lasersell-sdk[tx,stream]
+```
+
+## Módulos
+
+| Ruta de import                            | Propósito                                |
+|-------------------------------------------|----------------------------------------|
+| `lasersell_sdk.exit_api`                  | `ExitApiClient`, tipos de solicitud/respuesta, `ExitApiError` |
+| `lasersell_sdk.tx`                        | `sign_unsigned_tx`, `send_transaction`, clases `SendTarget*` |
+| `lasersell_sdk.stream.client`             | `StreamClient`, `StreamConfigure`, `StreamSender` |
+| `lasersell_sdk.stream.session`            | `StreamSession`, `StreamEvent`, `PositionHandle` |
+| `lasersell_sdk.stream.proto`              | Tipos de mensajes (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+
+Todos los métodos del cliente API son `async` y deben ser esperados con `await`.
+
+Para ejemplos completos de código, consulta la [documentación en inglés](/api/sdk/python).
+
+## Ejemplo completo
+
+Ver el [Inicio rápido](/api/quickstart) para un flujo completo de construcción, firma y envío.

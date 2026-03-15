@@ -1,0 +1,57 @@
+---
+title: "GET /v1/account"
+description: "从 LaserSell API 获取你的账户等级、方案名称和使用限制。"
+---
+
+## 端点
+
+```
+GET https://api.lasersell.io/v1/account
+```
+
+## 请求头
+
+| Header      | 必需 | 说明            |
+|-------------|----------|------------------------|
+| `x-api-key` | 是      | 你的 LaserSell API 密钥 |
+
+## 响应：`AccountResponse`
+
+| 字段       | 类型     | 说明                                      |
+|-------------|----------|--------------------------------------------------|
+| `tier`      | `number` | 数字等级标识符（`0`、`1` 或 `2`）。      |
+| `tier_name` | `string` | 人类可读的方案名称（`free`、`tier_1`、`tier_2`）。 |
+| `limits`    | `object` | 你的方案的使用限制（见下文）。          |
+
+### `limits` 对象
+
+| 字段                       | 类型     | 说明                                           |
+|-----------------------------|----------|-------------------------------------------------------|
+| `max_wallets`               | `number` | 可同时追踪的最大钱包数。         |
+| `max_positions_per_wallet`  | `number` | 每个钱包的最大未平仓位数。                    |
+| `max_positions_per_session` | `number` | 所有钱包的最大未平仓位总数。      |
+
+## curl 示例
+
+```bash
+curl https://api.lasersell.io/v1/account \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## 示例响应
+
+```json
+{
+  "tier": 1,
+  "tier_name": "tier_1",
+  "limits": {
+    "max_wallets": 5,
+    "max_positions_per_wallet": 100,
+    "max_positions_per_session": 500
+  }
+}
+```
+
+## 错误响应
+
+参见[错误处理](/api/exit-api/error-handling)了解完整的错误信封规范和可重试错误逻辑。

@@ -1,0 +1,40 @@
+---
+title: "Insights"
+description: "Análisis de trading personalizado que detecta patrones de comportamiento, errores de configuración de estrategia y oportunidades perdidas en tu historial de trading."
+---
+
+Todo trader tiene puntos ciegos. Los Insights encuentran los tuyos.
+
+LaserSell analiza tu historial de trading y genera insights que están personalizados específicamente para ti. No son consejos genéricos ni recomendaciones universales. Son observaciones específicas extraídas de tus operaciones reales, tus patrones y la configuración de tu estrategia.
+
+Los Insights están disponibles para el nivel Professional y superior.
+
+## Cómo funcionan los Insights
+
+LaserSell estudia tus operaciones cerradas durante un período configurable (24 horas, 7 días, 30 días, 90 días o todo el tiempo) y busca patrones que puedan estar ayudando o perjudicando tu rendimiento. Cuando se encuentra algo que vale la pena destacar, recibes un insight con un nivel de severidad y una sugerencia de qué cambiar.
+
+Los Insights se actualizan a medida que se cierran nuevas operaciones. No son estáticos. Evolucionan con tu trading.
+
+## Niveles de severidad
+
+Cada insight está etiquetado con una severidad que indica cuánto puede estar afectando tu rendimiento:
+
+- **Alto** — Impacto significativo en tu PnL. Aborda estos primero.
+- **Medio** — Patrón notable que podría mejorarse.
+- **Bajo** — Observación menor o tendencia positiva.
+
+## Qué esperar
+
+Los Insights cubren una amplia gama de tu comportamiento de trading. Pueden decirte que un hábito que no habías notado te está costando dinero, que una configuración en tu estrategia no está calibrada para cómo realmente operas, que rindes mejor en ciertos momentos o en ciertos mercados, o que tu trayectoria general va en la dirección equivocada.
+
+Algunos insights son alentadores. La mayoría son constructivos. Todos están basados en lo que tus datos realmente muestran, no en suposiciones sobre cómo deberías operar.
+
+## Acceso por API
+
+Los Insights están disponibles programáticamente:
+
+```
+GET /v1/insights?period=7d
+```
+
+Períodos soportados: `24h`, `7d`, `30d`, `90d`, `all`. Requiere nivel Professional o superior. El nivel gratuito devuelve una respuesta vacía con `capped: true`.

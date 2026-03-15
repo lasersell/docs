@@ -1,0 +1,57 @@
+---
+title: "GET /v1/account"
+description: "LaserSell APIからアカウントティア、プラン名、使用制限を取得します。"
+---
+
+## エンドポイント
+
+```
+GET https://api.lasersell.io/v1/account
+```
+
+## ヘッダー
+
+| ヘッダー | 必須 | 説明 |
+|-------------|----------|------------------------|
+| `x-api-key` | はい | LaserSell APIキー |
+
+## レスポンス: `AccountResponse`
+
+| フィールド | 型 | 説明 |
+|-------------|----------|--------------------------------------------------|
+| `tier`      | `number` | ティア識別子（`0`、`1`、または`2`）。 |
+| `tier_name` | `string` | プラン名（`free`、`tier_1`、`tier_2`）。 |
+| `limits`    | `object` | プランの使用制限（以下参照）。 |
+
+### `limits`オブジェクト
+
+| フィールド | 型 | 説明 |
+|-----------------------------|----------|-------------------------------------------------------|
+| `max_wallets`               | `number` | 同時に追跡できる最大ウォレット数。 |
+| `max_positions_per_wallet`  | `number` | ウォレットあたりの最大オープンポジション数。 |
+| `max_positions_per_session` | `number` | すべてのウォレットにわたる最大オープンポジション数。 |
+
+## curl例
+
+```bash
+curl https://api.lasersell.io/v1/account \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## レスポンス例
+
+```json
+{
+  "tier": 1,
+  "tier_name": "tier_1",
+  "limits": {
+    "max_wallets": 5,
+    "max_positions_per_wallet": 100,
+    "max_positions_per_session": 500
+  }
+}
+```
+
+## エラーレスポンス
+
+完全なエラーエンベロープ仕様とリトライ可能なエラーロジックについては[エラー処理](/api/exit-api/error-handling)を参照してください。

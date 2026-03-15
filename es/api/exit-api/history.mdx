@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "Obtén el historial de operaciones paginado de tu cuenta desde LaserSell API."
+---
+
+## Endpoint
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## Encabezados
+
+| Encabezado  | Requerido | Descripción            |
+|-------------|----------|------------------------|
+| `x-api-key` | Sí       | Tu clave API de LaserSell |
+
+## Parámetros de consulta
+
+| Parámetro | Tipo     | Por defecto | Descripción                                                       |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit`   | `number` | `50`    | Número máximo de operaciones a devolver (tope de 200).            |
+| `offset`  | `number` | `0`     | Número de operaciones a omitir para paginación.                   |
+| `mint`    | `string` | —       | Filtrar resultados por una dirección mint de token específica (base58). |
+| `wallet`  | `string` | —       | Filtrar resultados por una clave pública de wallet específica (base58). |
+
+## Respuesta: `TradeHistoryResponse`
+
+| Campo    | Tipo            | Descripción                                          |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | Array de registros de operaciones, ordenados por el más reciente primero. |
+| `total`  | `number \| null` | Número total estimado de operaciones coincidentes para paginación. |
+
+### Objeto `TradeHistoryItem`
+
+| Campo                        | Tipo             | Descripción                                                        |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id`                         | `number`         | Identificador único del registro de operación.                     |
+| `session_id`                 | `number`         | Sesión del stream que produjo esta operación.                      |
+| `position_id`                | `number`         | Identificador de posición dentro de la sesión.                     |
+| `wallet_pubkey`              | `string`         | Clave pública de la wallet que mantuvo la posición (base58).       |
+| `mint`                       | `string`         | Dirección mint del token (base58).                                 |
+| `entry_quote_units`          | `number`         | Cantidad gastada para abrir la posición en unidades atómicas del activo de cotización. |
+| `exit_quote_units`           | `number \| null` | Ingresos recibidos al cerrar en unidades atómicas del activo de cotización. |
+| `profit_quote_units`         | `number \| null` | Ganancia o pérdida neta en unidades atómicas del activo de cotización. |
+| `tokens`                     | `number`         | Número de tokens adquiridos en la entrada en unidades atómicas.    |
+| `exit_reason`                | `string \| null` | Por qué se cerró la posición (por ejemplo, `target_profit`, `stop_loss`, `trailing_stop`, `manual`). |
+| `market_kind`                | `string \| null` | DEX o launchpad donde se operó el token (por ejemplo, `PumpFun`, `RaydiumCpmm`). |
+| `strategy_target_profit_pct` | `number \| null` | Porcentaje de take profit configurado cuando se abrió la posición. |
+| `strategy_stop_loss_pct`     | `number \| null` | Porcentaje de stop loss configurado cuando se abrió la posición.   |
+| `strategy_trailing_stop_pct` | `number \| null` | Porcentaje de trailing stop configurado cuando se abrió la posición. |
+| `opened_at`                  | `string`         | Marca de tiempo ISO 8601 cuando se abrió la posición.              |
+| `closed_at`                  | `string \| null` | Marca de tiempo ISO 8601 cuando se cerró la posición.              |
+
+## Ejemplo con curl
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+Con filtros:
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## Respuesta de ejemplo
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## Respuestas de error
+
+Ver [Manejo de errores](/api/exit-api/error-handling) para la especificación completa del formato de error y la lógica de errores reintentables.

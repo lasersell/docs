@@ -1,0 +1,101 @@
+---
+title: "CLI 参考"
+description: "LaserSell CLI 指南：守护进程行为、日志输出和配置。"
+---
+
+LaserSell CLI 作为守护进程运行，监控你的钱包并在策略条件满足时自动执行退出。
+
+## 工作原理
+
+解锁钱包后，CLI 连接到 LaserSell 流并开始监控。所有活动通过结构化日志输出记录到终端。
+
+```shellscript
+lasersell
+```
+
+守护进程运行直到你按 **Ctrl+C** 优雅关闭。
+
+## 日志输出
+
+CLI 在事件发生时输出结构化事件：
+
+| 事件 | 含义 |
+|-------|---------|
+| `startup` | CLI 已启动，钱包已解锁 |
+| `stream_connected` | 已连接到 LaserSell 流 |
+| `wallet_registered` | 钱包所有权已与服务器验证 |
+| `balance_update` | SOL 余额已轮询 |
+| `session_started` | 检测到新仓位并开始监控 |
+| `pnl_update` | 活跃仓位的盈亏更新 |
+| `sell_scheduled` | 退出条件已触发，卖出已排队 |
+| `sell_attempt` | 卖出交易已提交 |
+| `sell_complete` | 卖出已在链上确认 |
+| `session_closed` | 仓位已完全退出 |
+| `liquidity_snapshot` | 池流动性更新（趋势 + 深度带） |
+| `stream_disconnected` | 流连接丢失 |
+
+## CLI 标志
+
+| 标志 | 缩写 | 说明 |
+|------|-------|-------------|
+| `--setup` | | 强制运行引导向导 |
+| `--config <path>` | `-f` | 自定义配置文件路径 |
+| `--debug` | | 将调试级别日志写入 `~/.lasersell/debug.log` |
+| `--smoke` | | 运行连通性健康检查并退出 |
+| `--export-private-key` | | 将钱包的 base58 私钥导出到标准输出 |
+
+`--smoke`、`--setup` 和 `--export-private-key` 互斥。
+
+## 无头运行
+
+CLI 专为无头服务器部署设计。自动解锁时通过环境变量设置密码短语：
+
+```shellscript
+export LASERSELL_WALLET_PASSPHRASE="your-passphrase"
+lasersell
+```
+
+在 VPS 上，使用 `tmux` 或 `screen` 会话运行，或使用 `systemd` 管理进程。
+
+## 退出策略
+
+CLI 支持所有 LaserSell 退出策略，在 `~/.lasersell/config.yml` 中配置：
+
+| 策略 | 配置字段 | 说明 |
+|----------|-------------|-------------|
+| 止盈 | `target_profit` | 利润达到入场价此 % 时退出 |
+| 止损 | `stop_loss` | 亏损达到入场价此 % 时退出 |
+| 追踪止损 | `trailing_stop` | 利润从峰值下降此 % 时退出 |
+| 截止时间 | `deadline_timeout` | N 秒后强制退出 |
+| 毕业即卖 | `sell_on_graduation` | 代币迁移到新 DEX 时退出 |
+| 退出阶梯 | `take_profit_levels` | 在多个利润阈值处卖出部分仓位 |
+| 流动性保护 | `liquidity_guard` | 池流动性低于安全阈值时退出 |
+| 保本追踪 | `breakeven_trail` | 仓位达到保本后激活的追踪止损 |
+
+至少一个退出条件必须启用。参见[示例配置](/onboarding/example-configuration)了解完整配置参考。
+
+## 跟单交易
+
+监控其他钱包并可选在他们买入时自动买入：
+
+```yaml
+watch_wallets:
+  - pubkey: "TraderWallet1..."
+    label: "whale"
+  - pubkey: "TraderWallet2..."
+    auto_buy:
+      amount: 0.1       # SOL
+      amount_usd1: 0.0   # USD1
+```
+
+来自监控钱包的仓位使用与你自己仓位相同的退出策略管理。
+
+## 修改策略
+
+编辑 `~/.lasersell/config.yml` 并重启守护进程。更改在下次启动时生效。
+
+重新运行设置向导：
+
+```shellscript
+lasersell --setup
+```

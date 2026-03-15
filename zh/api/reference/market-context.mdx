@@ -1,0 +1,45 @@
+---
+title: "市场上下文"
+description: "每个支持的 DEX 协议的完整 MarketContextMsg 模式及嵌套对象。"
+---
+
+## 概述
+
+`MarketContextMsg` 描述代币市场使用的 DEX 池和协议。它出现在：
+
+- `position_opened` 服务器事件
+- `exit_signal_with_tx` 服务器事件
+- `BuildSellTxRequest`（可选，跳过服务器端解析）
+
+如果在构建请求中省略，服务器会自动解析上下文。
+
+## `MarketContextMsg` 模式
+
+| 字段               | 类型     | 必需 | 说明                                    |
+|---------------------|----------|----------|------------------------------------------------|
+| `market_type`       | `string` | 是      | 支持的市场类型之一（见下文）。 |
+| `pumpfun`           | `object` | 否       | Pump.fun 联合曲线上下文。                |
+| `pumpswap`          | `object` | 否       | PumpSwap AMM 上下文。                          |
+| `meteora_dbc`       | `object` | 否       | Meteora DBC 上下文。                           |
+| `meteora_damm_v2`   | `object` | 否       | Meteora DAMM V2 上下文。                       |
+| `raydium_launchpad` | `object` | 否       | Raydium Launchpad 上下文。                     |
+| `raydium_cpmm`      | `object` | 否       | Raydium CPMM 上下文。                          |
+
+嵌套对象中应恰好有一个存在，对应 `market_type`。
+
+<Note>
+`market_type` 值使用下划线（如 `pump_fun`），而嵌套对象键不使用（如 `pumpfun`）。匹配下表中显示的确切大小写。
+</Note>
+
+## `market_type` 值
+
+| 值                | 协议              |
+|----------------------|-----------------------|
+| `pump_fun`           | Pump.fun              |
+| `pump_swap`          | PumpSwap              |
+| `meteora_dbc`        | Meteora DBC           |
+| `meteora_damm_v2`    | Meteora DAMM V2       |
+| `raydium_launchpad`  | Raydium Launchpad     |
+| `raydium_cpmm`       | Raydium CPMM          |
+
+关于每个协议的嵌套上下文对象的完整字段说明和 JSON 示例，以及在构建请求中传递市场上下文的 SDK 代码示例，请参阅[英文版](/api/reference/market-context)。所有字段名和 JSON 结构与英文版完全一致。

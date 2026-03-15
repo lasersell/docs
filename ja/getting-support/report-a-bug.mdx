@@ -1,0 +1,31 @@
+---
+title: "バグを報告する"
+description: "ソフトウェアバグおよびセキュリティ脆弱性をLaserSellチームに報告する方法。"
+---
+
+## セキュリティ脆弱性
+
+LaserSell製品でセキュリティ脆弱性を発見した場合は、責任ある方法で報告してください:
+
+- **メール:** [security@lasersell.io](mailto:security@lasersell.io)
+- **PGP:** [PGPキー](https://www.lasersell.io/lasersell-pgp-key.asc)を使用して報告を暗号化することを推奨します。完全な開示ガイドラインは[www.lasersell.io/.well-known/security.txt](https://www.lasersell.io/.well-known/security.txt)にあります。
+
+セキュリティ脆弱性について公開のGitHub issueを作成**しないでください**。
+
+## ソフトウェアバグ
+
+LaserSellまたはLaserSell SDKのバグについては、以下のチャンネルを使用してください:
+
+- **GitHub Issues:**
+  - [lasersell/lasersell](https://github.com/lasersell/lasersell/issues) (クライアント)
+  - [lasersell/lasersell-sdk](https://github.com/lasersell/lasersell-sdk/issues) (SDK)
+- **Discordチケット:** [discord.gg/lasersell](https://discord.gg/lasersell)でサポートチケットを作成
+
+報告時には、できるだけ詳細な情報を含めてください: 再現手順、エラーメッセージ、OS/プラットフォーム、バージョン（`lasersell --version`）。
+
+### 解決プロセス
+
+確認されたバグは速やかにトリアージし修正することを目指しています。
+
+- **通知:** 修正が実装されたら通知しますので、最新のアップデートを取得できます。
+- **アップデート:** [LaserSell Announcements](https://t.me/lasersell) Telegramチャンネルまたは`#announcements` Discordチャンネルで、修正がビルドに含まれていることを確認してください。

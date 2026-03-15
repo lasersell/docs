@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "LaserSell API를 통해 SOL을 토큰으로 교환하는 서명되지 않은 매수 트랜잭션을 빌드합니다."
+---
+
+<Warning>
+이 매수를 Exit Intelligence Stream으로 추적하려면 매수 트랜잭션을 제출하기 **전에** 반드시 스트림을 **연결**해야 합니다. 스트림은 실시간으로 온체인 토큰 도착을 관찰하여 새 포지션을 감지합니다. 매수가 랜딩될 때 스트림이 연결되어 있지 않으면 포지션이 추적되지 않으며 청산 신호가 생성되지 않습니다.
+</Warning>
+
+## 엔드포인트
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## 헤더
+
+| 헤더         | 필수 | 설명                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | 예      | `application/json`이어야 합니다      |
+| `x-api-key`    | 예      | LaserSell API 키          |
+
+## 요청 본문: `BuildBuyTxRequest`
+
+| 필드                   | 타입     | 필수 | 설명                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | 예      | 매수할 토큰 민트 주소 (base58).                                         |
+| `user_pubkey`           | `string` | 예      | 지갑 공개키 (base58).                                            |
+| `amount`                | `number` | 아니오*      | 사람이 읽을 수 있는 지출 금액 (예: SOL의 경우 `0.1`, USD1의 경우 `10.0`). `amount_in_total`과 상호 배타적. |
+| `amount_in_total`       | `number` | 아니오*      | 입력 자산 원자 단위의 지출 금액 (예: SOL의 경우 lamport). `amount`과 상호 배타적. |
+| `slippage_bps`          | `number` | 예      | 최대 슬리피지 허용 범위(베이시스 포인트) (예: `2000` = 20%).            |
+| `input`                 | `string` | 아니오       | 입력 자산: `"SOL"` (기본값) 또는 `"USD1"`.                                 |
+| `mode`                  | `string` | 아니오       | 라우팅 모드 힌트. 유효 값: `"fast"`, `"secure"`. 기본값: `"fast"`. |
+| `send_mode`             | `string` | 아니오       | 트랜잭션 전송 모드: `"helius_sender"`, `"astralane"` 또는 `"rpc"`.        |
+| `tip_lamports`          | `number` | 아니오       | 선택적 우선 수수료 팁(lamport).                                      |
+| `partner_fee_recipient` | `string` | 아니오       | 파트너 수수료 수신 지갑 (base58 공개키).                               |
+| `partner_fee_bps`       | `number` | 아니오       | 파트너 수수료(베이시스 포인트) (최대 50 = 0.5%). `partner_fee_lamports`와 상호 배타적. |
+| `partner_fee_lamports`  | `number` | 아니오       | 고정 SOL lamport 파트너 수수료 (최대 50,000,000). `partner_fee_bps`와 상호 배타적. |
+
+<Note>
+**\*** `amount` 또는 `amount_in_total` 중 정확히 하나를 제공해야 합니다. `amount`는 `input` 자산에 따라 원자 단위로 자동 변환됩니다 (SOL: 10^9, USD1: 10^6).
+</Note>
+
+## 응답: `BuildTxResponse`
+
+| 필드   | 타입     | 설명                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64로 인코딩된 서명되지 않은 Solana `VersionedTransaction`. |
+| `route` | `object` | 선택적 라우팅 메타데이터.                      |
+| `debug` | `object` | 선택적 디버그 정보.                     |
+
+## curl 예제
+
+사람이 읽을 수 있는 `amount` 사용:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+원자 단위 `amount_in_total` 사용:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## SDK 예제
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## 오류 응답
+
+전체 오류 엔벨로프 사양과 재시도 가능한 오류 로직은 [오류 처리](/api/exit-api/error-handling)를 참조하세요.

@@ -1,0 +1,44 @@
+---
+title: "Eventos del servidor"
+description: "Esquema completo y ejemplos JSON para los 9 tipos de mensajes del servidor enviados por el Exit Intelligence Stream."
+---
+
+## Tipos de mensajes
+
+El servidor envía mensajes con un discriminador `type`. Todos los SDKs los analizan en objetos tipados.
+
+| Tipo                    | Prioridad | Descripción                                    |
+|-------------------------|----------|------------------------------------------------|
+| `hello_ok`              | Alta     | Conexión aceptada, sesión iniciada.            |
+| `pong`                  | Alta     | Respuesta a ping del cliente.                  |
+| `error`                 | Alta     | Notificación de error del servidor.            |
+| `balance_update`        | Alta     | Saldo de tokens cambió para una wallet rastreada. |
+| `position_opened`       | Alta     | Nueva posición detectada y seguimiento iniciado. |
+| `position_closed`       | Alta     | Seguimiento de posición finalizado.            |
+| `exit_signal_with_tx`   | Alta     | Umbral de salida alcanzado; tx sin firmar incluida. |
+| `pnl_update`            | Baja     | Instantánea periódica de ganancias y pérdidas. |
+| `liquidity_snapshot`    | Baja     | Bandas de slippage y tendencia de liquidez (Tier 1+). |
+| `trade_tick`            | Baja     | Notificación de operación en tiempo real para una posición rastreada. |
+
+Para esquemas JSON completos, campos detallados y ejemplos de código para cada tipo de evento, consulta la [documentación en inglés](/api/stream/server-events).
+
+## Eventos clave
+
+### `hello_ok`
+Enviado una vez inmediatamente después de que el WebSocket se abre. Contiene el ID de sesión y los límites del nivel.
+
+### `exit_signal_with_tx`
+El evento más importante. Enviado cuando una posición cumple tus criterios de salida. Incluye una transacción sin firmar preconstruida lista para firmar. Campos clave: `position_id`, `mint`, `reason`, `unsigned_tx_b64`.
+
+### `pnl_update`
+Instantánea periódica de ganancias y pérdidas para una posición rastreada. Se entrega al intervalo definido por `limits.pnl_flush_ms`.
+
+### `liquidity_snapshot`
+<Note>
+**Solo Tier 1+.** Las instantáneas de liquidez se entregan a suscriptores Professional y Advanced. Las sesiones del nivel gratuito solo reciben mensajes `pnl_update`.
+</Note>
+
+Bandas de slippage y tendencia de liquidez en tiempo real para una posición rastreada. Los campos `bands` muestran cuántos tokens son vendibles dentro de cada umbral de slippage. El campo `liquidity_trend` indica si la liquidez está `"growing"`, `"stable"` o `"draining"`.
+
+### `trade_tick`
+Notificación en tiempo real cuando ocurre una operación en el token de una posición rastreada.

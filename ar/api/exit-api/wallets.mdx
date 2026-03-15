@@ -1,0 +1,181 @@
+---
+title: "تسجيل المحافظ"
+description: "سجّل المحافظ لبث ذكاء الخروج باستخدام إثبات ملكية Ed25519."
+---
+
+## نظرة عامة
+
+يثبت تسجيل المحفظة ملكية محفظة Solana لـ LaserSell API. التسجيل مطلوب قبل توصيل المحافظ ببث ذكاء الخروج. يتحقق البث من أن كل محفظة في رسالة `configure` مسجلة لحسابك.
+
+يستخدم التسجيل توقيعات Ed25519 لذا لا حاجة لمعاملة على السلسلة.
+
+## `POST /v1/wallets/register`
+
+سجّل محفظة بإثبات الملكية بتوقيع Ed25519.
+
+### الطلب
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "signature": "base58-encoded-ed25519-signature",
+  "message": "lasersell-register:YourWalletPubkey...:1706000000",
+  "label": "My Trading Wallet"
+}
+```
+
+| Field           | Type     | Required | Description                                            |
+|-----------------|----------|----------|--------------------------------------------------------|
+| `wallet_pubkey` | `string` | Yes      | المفتاح العام لمحفظة Solana للتسجيل.                  |
+| `signature`     | `string` | Yes      | توقيع Ed25519 للرسالة مشفر بـ base58.      |
+| `message`       | `string` | Yes      | رسالة منظمة: `lasersell-register:<pubkey>:<unix_timestamp>`. يجب أن يكون الطابع الزمني ضمن 5 دقائق. |
+| `label`         | `string` | No       | تسمية مقروئة اختيارية للمحفظة.          |
+
+### الاستجابة
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "registered": true
+}
+```
+
+### المصادقة
+
+يتطلب ترويسة `x-api-key` بمفتاح API صالح.
+
+### الأخطاء
+
+| Status | Code | Description |
+|--------|------|-------------|
+| 400 | Bad Request | تنسيق مفتاح عام غير صالح أو رسالة مشوهة أو طابع زمني منتهي (>5 دقائق). |
+| 403 | Forbidden | مفتاح API مفقود أو غير صالح أو فشل التحقق من التوقيع. |
+
+## `DELETE /v1/wallets`
+
+إلغاء تسجيل محفظة.
+
+### الطلب
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey..."
+}
+```
+
+### الاستجابة
+
+```json
+{
+  "wallet_pubkey": "YourWalletPubkey...",
+  "removed": true
+}
+```
+
+## استخدام حزمة التطوير
+
+توفر حزم التطوير الأربع طرقاً مساعدة لتسجيل المحافظ.
+
+### `proveOwnership` / `prove_ownership`
+
+إنشاء `WalletProof` محلياً باستخدام زوج المفاتيح. هذه عملية تشفير بحتة بدون استدعاء شبكة.
+
+<CodeGroup>
+```typescript TypeScript
+import { proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+// proof = { walletPubkey, signature, message }
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+
+proof = prove_ownership(keypair)
+# proof = WalletProof(wallet_pubkey, signature, message)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::prove_ownership;
+
+let proof = prove_ownership(&keypair);
+// proof = WalletProof { wallet_pubkey, signature, message }
+```
+
+```go Go
+proof := lasersell.ProveOwnership(privateKey)
+// proof = WalletProof{WalletPubkey, Signature, Message}
+```
+</CodeGroup>
+
+### `registerWallet` / `register_wallet`
+
+إرسال الإثبات إلى الواجهة البرمجية لتسجيل المحفظة.
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withApiKey(apiKey);
+await client.registerWallet(proof, "My Wallet");
+```
+
+```python Python
+client = ExitApiClient.with_api_key(api_key)
+await client.register_wallet(proof, label="My Wallet")
+```
+
+```rust Rust
+client.register_wallet(&proof, Some("My Wallet")).await?;
+```
+
+```go Go
+client.RegisterWallet(ctx, proof, lasersell.Ptr("My Wallet"))
+```
+</CodeGroup>
+
+### `connectWithWallets` / `connect_with_wallets`
+
+طريقة مختصرة تسجل المحافظ وتتصل بالبث في خطوة واحدة.
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient, proveOwnership } from "@lasersell/lasersell-sdk";
+
+const proof = proveOwnership(keypair);
+const client = new StreamClient(apiKey);
+const session = await client.connectWithWallets(
+  [proof],
+  { target_profit_pct: 50, stop_loss_pct: 10 },
+  120, // deadline_timeout_sec
+);
+```
+
+```python Python
+from lasersell_sdk.exit_api import prove_ownership
+from lasersell_sdk.stream.client import StreamClient
+
+proof = prove_ownership(keypair)
+client = StreamClient(api_key)
+session = await client.connect_with_wallets(
+    [proof],
+    {"target_profit_pct": 50, "stop_loss_pct": 10},
+    deadline_timeout_sec=120,
+)
+```
+
+```rust Rust
+let proof = prove_ownership(&keypair);
+let client = StreamClient::new(api_key);
+let session = client.connect_with_wallets(
+    &[proof],
+    strategy,
+    120,
+).await?;
+```
+
+```go Go
+// Go SDK: register separately, then connect
+proof := lasersell.ProveOwnership(privateKey)
+client.RegisterWallet(ctx, proof, nil)
+session, _ := stream.ConnectSession(ctx, streamClient, configure)
+```
+</CodeGroup>

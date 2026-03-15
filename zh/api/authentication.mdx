@@ -1,0 +1,91 @@
+---
+title: "认证"
+description: "从 LaserSell 仪表板获取 API 密钥并在所有四种 SDK 中进行请求认证。"
+---
+
+## 获取 API 密钥
+
+1. 在 [app.lasersell.io](https://app.lasersell.io) 登录。
+2. 导航到 **Settings > API Keys**。
+3. 点击 **Create API Key**，命名并复制值。
+
+安全存储密钥。创建后无法再次显示。
+
+## 请求认证
+
+对 LaserSell API 的每个请求和对退出智能流的每个 WebSocket 连接都需要通过 `x-api-key` HTTP 头传递 API 密钥。
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### SDK 示例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### 退出智能流认证
+
+退出智能流 WebSocket 同样使用 `x-api-key`。当你构建 `StreamClient` 时，SDK 自动处理：
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## 安全最佳实践
+
+- **永远不要将 API 密钥**提交到版本控制。使用环境变量或密钥管理器。
+- 通过仪表板定期**轮换密钥**。
+- 为不同的机器人或环境创建单独的密钥来**限定访问范围**。
+- 如果密钥被泄露，立即从仪表板撤销并创建新密钥。

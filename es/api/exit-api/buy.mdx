@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "Construye una transacción de compra sin firmar para intercambiar SOL por tokens a través de LaserSell API."
+---
+
+<Warning>
+Si planeas rastrear esta compra con el Exit Intelligence Stream, **debes** conectar el stream **antes** de enviar la transacción de compra. El stream detecta nuevas posiciones observando llegadas de tokens en cadena en tiempo real. Si el stream no está conectado cuando la compra aterriza, la posición no será rastreada y no se generarán señales de salida para ella.
+</Warning>
+
+## Endpoint
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## Encabezados
+
+| Encabezado     | Requerido | Descripción                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | Sí       | Debe ser `application/json`      |
+| `x-api-key`    | Sí       | Tu clave API de LaserSell        |
+
+## Cuerpo de solicitud: `BuildBuyTxRequest`
+
+| Campo                   | Tipo     | Requerido | Descripción                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | Sí       | Dirección mint del token a comprar (base58).                                |
+| `user_pubkey`           | `string` | Sí       | Tu clave pública de wallet (base58).                                        |
+| `amount`                | `number` | No*      | Cantidad legible a gastar (por ejemplo, `0.1` para 0.1 SOL, `10.0` para 10 USD1). Mutuamente excluyente con `amount_in_total`. |
+| `amount_in_total`       | `number` | No*      | Cantidad a gastar en unidades atómicas del activo de entrada (por ejemplo, lamports para SOL). Mutuamente excluyente con `amount`. |
+| `slippage_bps`          | `number` | Sí       | Tolerancia máxima de slippage en puntos base (por ejemplo, `2000` = 20%).   |
+| `input`                 | `string` | No       | Activo de entrada: `"SOL"` (por defecto) o `"USD1"`.                        |
+| `mode`                  | `string` | No       | Sugerencia de modo de enrutamiento. Valores válidos: `"fast"`, `"secure"`. Por defecto `"fast"`. |
+| `send_mode`             | `string` | No       | Modo de envío de transacción: `"helius_sender"`, `"astralane"` o `"rpc"`.   |
+| `tip_lamports`          | `number` | No       | Tip opcional de priority fee en lamports.                                    |
+| `partner_fee_recipient` | `string` | No       | Wallet receptora de comisión de partner (clave pública base58).              |
+| `partner_fee_bps`       | `number` | No       | Comisión de partner en puntos base (máximo 50 = 0.5%). Mutuamente excluyente con `partner_fee_lamports`. |
+| `partner_fee_lamports`  | `number` | No       | Comisión de partner en lamports fijos de SOL (máximo 50,000,000). Mutuamente excluyente con `partner_fee_bps`. |
+
+<Note>
+**\*** Exactamente uno de `amount` o `amount_in_total` debe proporcionarse. `amount` se convierte automáticamente a unidades atómicas según el activo de `input` (SOL: 10^9, USD1: 10^6).
+</Note>
+
+## Respuesta: `BuildTxResponse`
+
+| Campo   | Tipo     | Descripción                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | `VersionedTransaction` de Solana sin firmar codificada en base64. |
+| `route` | `object` | Metadatos opcionales de enrutamiento.            |
+| `debug` | `object` | Información de depuración opcional.              |
+
+## Ejemplos con curl
+
+Usando `amount` legible:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+Usando `amount_in_total` atómico:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## Ejemplos de SDK
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## Respuestas de error
+
+Ver [Manejo de errores](/api/exit-api/error-handling) para la especificación completa del formato de error y la lógica de errores reintentables.

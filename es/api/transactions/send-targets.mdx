@@ -1,0 +1,62 @@
+---
+title: "Send Targets"
+description: "Elige cómo enviar transacciones firmadas: Default RPC, custom RPC, Helius Sender o Astralane Iris."
+---
+
+## ¿Qué es un Send Target?
+
+Un `SendTarget` le dice al SDK dónde enviar tu transacción firmada. Los SDKs de LaserSell soportan cuatro targets, cada uno optimizado para diferentes casos de uso.
+
+## Targets disponibles
+
+### Default RPC
+Usa el endpoint público de Solana mainnet beta (`https://api.mainnet-beta.solana.com`). Este endpoint tiene límites de tasa y es mejor solo para pruebas.
+
+### Custom RPC
+Especifica tu propia URL de endpoint RPC. Recomendado para producción con un proveedor de RPC privado como Helius o Chainstack (niveles gratuitos disponibles).
+
+### Helius Sender
+Enruta a través del endpoint `/fast` de Helius Sender para un aterrizaje optimizado de transacciones. No requiere clave API para Helius Sender.
+
+### Astralane Iris
+Enruta a través de la pasarela Astralane Iris. Requiere una clave API de Astralane y soporta endpoints regionales para optimización de latencia.
+
+## Regiones disponibles (Astralane)
+
+| Código  | Ubicación      | Notas             |
+|---------|----------------|-------------------|
+| `fr`    | Frankfurt      | Recomendado       |
+| `fr2`   | Frankfurt 2    |                   |
+| `ams`   | Amsterdam      | Recomendado       |
+| `ams2`  | Amsterdam 2    |                   |
+| `la`    | San Francisco  |                   |
+| `ny`    | New York       |                   |
+| `jp`    | Tokyo          |                   |
+| `sg`    | Singapore      |                   |
+| `lim`   | Limburg        |                   |
+| `lit`   | Lithuania      |                   |
+
+Si no se especifica región, el SDK usa `fr` (Frankfurt) por defecto.
+
+## Recomendaciones
+
+| Caso de uso                     | Target recomendado    |
+|---------------------------------|-----------------------|
+| Pruebas y desarrollo            | Default RPC           |
+| Producción (general)            | Helius Sender         |
+| Producción (sensible a latencia)| Astralane Iris        |
+| Producción (setup RPC existente)| Custom RPC            |
+
+Para bots de trading automatizado, **Helius Sender** o **Astralane Iris** proporcionan las mejores tasas de aterrizaje de transacciones. Evita usar el RPC público de Solana en producción ya que tiene fuertes límites de tasa.
+
+## Send Mode vs Send Target
+
+El campo `send_mode` en `BuildSellTxRequest` y `BuildBuyTxRequest` le dice al **servidor** para qué contexto de endpoint optimizar la transacción. El `SendTarget` controla dónde **tu cliente** envía la transacción firmada. Para mejores resultados, alinéalos:
+
+| `send_mode` (servidor) | `SendTarget` (cliente)      |
+|-----------------------|----------------------------|
+| `"rpc"`               | `sendTargetRpc(url)`       |
+| `"helius_sender"`     | `sendTargetHeliusSender()` |
+| `"astralane"`         | `sendTargetAstralane(...)` |
+
+Para ejemplos de código completos en los 4 SDKs, consulta la [documentación en inglés](/api/transactions/send-targets).

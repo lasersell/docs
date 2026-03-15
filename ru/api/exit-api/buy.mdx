@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "Создание неподписанной транзакции покупки для обмена SOL на токены через LaserSell API."
+---
+
+<Warning>
+Если вы планируете отслеживать эту покупку с помощью Exit Intelligence Stream, вы **должны** подключить поток **до** отправки транзакции покупки. Поток обнаруживает новые позиции, наблюдая за поступлениями токенов в блокчейне в реальном времени. Если поток не подключён, когда покупка попадает в блокчейн, позиция не будет отслеживаться и для неё не будут генерироваться сигналы выхода.
+</Warning>
+
+## Эндпоинт
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## Заголовки
+
+| Заголовок | Обязательный | Описание |
+|----------------|----------|---------------------------------|
+| `Content-Type` | Да | Должен быть `application/json` |
+| `x-api-key` | Да | Ваш API ключ LaserSell |
+
+## Тело запроса: `BuildBuyTxRequest`
+
+| Поле | Тип | Обязательное | Описание |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint` | `string` | Да | Адрес минта токена для покупки (base58). |
+| `user_pubkey` | `string` | Да | Публичный ключ вашего кошелька (base58). |
+| `amount` | `number` | Нет* | Читаемая сумма для траты (например, `0.1` для 0.1 SOL, `10.0` для 10 USD1). Взаимоисключающе с `amount_in_total`. |
+| `amount_in_total` | `number` | Нет* | Сумма в атомарных единицах входного актива (например, лампорты для SOL). Взаимоисключающе с `amount`. |
+| `slippage_bps` | `number` | Да | Максимальный допуск проскальзывания в базисных пунктах (например, `2000` = 20%). |
+| `input` | `string` | Нет | Входной актив: `"SOL"` (по умолчанию) или `"USD1"`. |
+| `mode` | `string` | Нет | Подсказка режима маршрутизации. Допустимые значения: `"fast"`, `"secure"`. По умолчанию `"fast"`. |
+| `send_mode` | `string` | Нет | Режим отправки транзакции: `"helius_sender"`, `"astralane"` или `"rpc"`. |
+| `tip_lamports` | `number` | Нет | Необязательная приоритетная комиссия в лампортах. |
+| `partner_fee_recipient` | `string` | Нет | Кошелёк получателя партнёрской комиссии (base58 pubkey). |
+| `partner_fee_bps` | `number` | Нет | Партнёрская комиссия в базисных пунктах (макс. 50 = 0.5%). Взаимоисключающе с `partner_fee_lamports`. |
+| `partner_fee_lamports` | `number` | Нет | Партнёрская комиссия фиксированная в лампортах SOL (макс. 50 000 000). Взаимоисключающе с `partner_fee_bps`. |
+
+<Note>
+**\*** Должно быть указано ровно одно из `amount` или `amount_in_total`. `amount` автоматически конвертируется в атомарные единицы на основе входного актива (SOL: 10^9, USD1: 10^6).
+</Note>
+
+## Ответ: `BuildTxResponse`
+
+| Поле | Тип | Описание |
+|---------|----------|-------------------------------------------------|
+| `tx` | `string` | Закодированная в Base64 неподписанная Solana `VersionedTransaction`. |
+| `route` | `object` | Необязательные метаданные маршрутизации. |
+| `debug` | `object` | Необязательная отладочная информация. |
+
+## Примеры curl
+
+С читаемым `amount`:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+С атомарным `amount_in_total`:
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## Примеры SDK
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## Ответы об ошибках
+
+См. [Обработка ошибок](/api/exit-api/error-handling) для полной спецификации конверта ошибок и логики повторных попыток.

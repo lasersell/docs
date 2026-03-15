@@ -1,0 +1,29 @@
+---
+title: "Python SDK"
+description: "安装、配置和使用 LaserSell Python SDK，以异步模式构建交易和流式仓位。"
+---
+
+## 安装
+
+```bash
+pip install lasersell-sdk
+```
+
+可选额外功能：
+
+```bash
+# 交易签名（需要 solders）
+pip install lasersell-sdk[tx]
+
+# WebSocket 流（需要 websockets）
+pip install lasersell-sdk[stream]
+
+# 两者都要
+pip install lasersell-sdk[tx,stream]
+```
+
+关于 API 客户端用法、退出智能流会话、流动性快照、交易辅助函数和错误处理的完整代码示例，请参阅[英文版](/api/sdk/python)。所有 API 方法名和签名与英文版完全一致。
+
+## 完整示例
+
+参见[快速入门](/api/quickstart)了解完整的构建、签名和提交工作流程。

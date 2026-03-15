@@ -1,0 +1,22 @@
+---
+title: "전략 구성"
+description: "Exit Intelligence Stream을 위한 목표 수익, 손절매, 트레일링 스탑, 졸업 시 매도 임계값을 구성합니다."
+---
+
+전체 전략 구성 참조는 영문 문서 [Strategy Configuration](/api/stream/strategy-configuration)을 참조하세요. 이 페이지의 모든 코드 블록, JSON 스키마, SDK 예제는 영문 원본과 동일합니다.
+
+`StrategyConfigMsg`의 주요 필드:
+
+| 필드                | 타입      | 필수 | 설명                                                 |
+|----------------------|-----------|----------|-------------------------------------------------------------|
+| `target_profit_pct`  | `number`  | 예      | 목표 수익 임계값(%) (예: `5` = 5%).      |
+| `stop_loss_pct`      | `number`  | 예      | 손절매 임계값(%) (예: `1.5` = 1.5%).    |
+| `trailing_stop_pct`  | `number`  | 아니오       | 최고점에서의 트레일링 스탑 비율. 포지션이 수익 상태에서만 활성화됩니다. |
+| `sell_on_graduation` | `boolean` | 아니오       | `true`이면 본딩 커브 토큰이 AMM 풀로 졸업할 때 자동 매도합니다. |
+| `take_profit_levels` | `TakeProfitLevelMsg[]` | 아니오 | 청산 래더: 여러 수익 임계값에서 부분 금액을 매도합니다. |
+| `liquidity_guard` | `boolean` | 아니오 | 활성화 시 청산 신호 생성 전 풀 유동성을 확인합니다. 기본값: `false`. |
+| `breakeven_trail_pct` | `number` | 아니오 | 포지션이 손익분기에 도달하면 활성화되는 트레일링 스탑. |
+
+`target_profit_pct`, `stop_loss_pct`, `trailing_stop_pct`, `deadline_timeout_sec` 중 최소 하나가 0보다 커야 합니다.
+
+전체 SDK 예제, 청산 래더 구성, 유동성 가드, 손익분기 트레일, 트레일링 스탑 수치 예시, 세션 중 전략 업데이트, 포지션별 전략 오버라이드에 대한 내용은 영문 원본 문서를 참조하세요. 모든 코드 블록과 JSON 스키마는 영문 원본과 동일합니다.

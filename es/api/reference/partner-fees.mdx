@@ -1,0 +1,56 @@
+---
+title: "Comisiones de partner"
+description: "Configura comisiones de partner en transacciones de compra y venta usando puntos base o cantidades fijas en lamports."
+---
+
+## Resumen
+
+LaserSell API soporta añadir una comisión de partner a cualquier transacción de compra o venta. Esto permite a los integradores cobrar una comisión enrutada a una wallet especificada como parte de la instrucción de swap.
+
+Las comisiones de partner son opcionales y se configuran por solicitud. **No** están relacionadas con la propia comisión de protocolo de LaserSell.
+
+## Modos de comisión
+
+Puedes especificar la comisión de una de dos formas. Estos modos son mutuamente excluyentes; no establezcas ambos en la misma solicitud.
+
+### Modo de puntos base
+
+Establece `partner_fee_bps` para cobrar un porcentaje del valor del swap.
+
+| Campo                   | Tipo     | Descripción                                |
+|-------------------------|----------|--------------------------------------------|
+| `partner_fee_recipient` | `string` | Dirección de wallet receptora (clave pública base58). |
+| `partner_fee_bps`       | `number` | Comisión en puntos base. Máximo `50` (0.5%). |
+
+### Modo de lamports fijos
+
+Establece `partner_fee_lamports` para cobrar una cantidad fija en lamports.
+
+| Campo                   | Tipo     | Descripción                                |
+|-------------------------|----------|--------------------------------------------|
+| `partner_fee_recipient` | `string` | Dirección de wallet receptora (clave pública base58). |
+| `partner_fee_lamports`  | `number` | Comisión en lamports. Máximo `50,000,000` (0.05 SOL). |
+
+## Límites
+
+| Modo       | Valor máximo             | Equivalente        |
+|------------|--------------------------|--------------------|
+| bps        | 50 bps                   | 0.5%               |
+| lamports   | 50,000,000 lamports      | 0.05 SOL           |
+
+Las solicitudes que excedan estos límites serán rechazadas con un error `400`.
+
+## Enterprise: Monetización personalizada
+
+Para partners Enterprise que procesan volumen significativo, ofrecemos acuerdos de monetización personalizados que van más allá del sistema estándar de comisiones de partner. Toda la monetización enterprise se aplica atómicamente en cadena.
+
+Para discutir un acuerdo personalizado, contacta a [sales@lasersell.io](mailto:sales@lasersell.io).
+
+## Notas importantes
+
+- Las comisiones de partner están disponibles en los niveles **Advanced** y **Enterprise**. Ver [Límites de tasa y niveles](/api/reference/rate-limits).
+- La wallet `partner_fee_recipient` debe ser una clave pública de Solana base58 válida.
+- Establecer tanto `partner_fee_bps` como `partner_fee_lamports` en la misma solicitud resultará en un error `400`.
+- Las comisiones de partner se deducen de la salida del swap y se enrutan atómicamente dentro de la misma transacción.
+
+Para ejemplos de código en los 4 SDKs, consulta la [documentación en inglés](/api/reference/partner-fees).

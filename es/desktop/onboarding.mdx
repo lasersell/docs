@@ -1,0 +1,67 @@
+---
+title: "Incorporación"
+description: "Inicia sesión, configura tu wallet, establece tu estrategia de salida inicial y conéctate al stream de LaserSell."
+---
+
+Cuando abres LaserSell Desktop por primera vez, el asistente de incorporación te guía a través de cinco pasos. Todo el proceso toma aproximadamente dos minutos.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Onboarding.mp4"
+/>
+
+## Paso 1: Iniciar sesión
+
+Inicia sesión con tu cuenta de LaserSell para obtener una clave API. Tienes dos opciones:
+
+- **Inicio de sesión en navegador:** Haz clic en "Sign In" y autentícate en tu navegador. La aplicación recibe tu clave API automáticamente a través de un enlace profundo.
+- **Pegado manual:** Si ya tienes una clave API, pégala directamente.
+
+Si aún no tienes una cuenta, haz clic en "Sign Up" para crear una. Las cuentas son gratuitas e instantáneas.
+
+## Paso 2: Configuración de wallet
+
+Necesitas al menos una wallet de Solana para que LaserSell la monitoree. Elige una:
+
+- **Importar una wallet existente.** Pega tu clave privada en Base58. Esto es útil si ya tienes una wallet con fondos con la que operas.
+- **Generar una nueva wallet.** LaserSell crea un nuevo par de claves localmente. Necesitarás financiarla con SOL antes de operar.
+
+En ambos casos, establecerás una frase de contraseña de cifrado (8+ caracteres). Esta frase de contraseña cifra tu clave privada en disco usando XChaCha20Poly1305. LaserSell nunca almacena ni transmite tus claves en texto plano.
+
+<Tip>
+Puedes añadir más wallets después desde la pestaña [Wallet > Gestionar](/desktop/wallet). Tu nivel de cuenta determina cuántas wallets puedes usar simultáneamente.
+</Tip>
+
+## Paso 3: Estrategia inicial
+
+Establece tu estrategia de salida inicial:
+
+- **Target Profit %** — El umbral de ganancia donde LaserSell auto vende (por defecto: 25%).
+- **Stop Loss %** — El umbral de pérdida donde LaserSell corta la posición (por defecto: 15%).
+
+Estos son valores iniciales. Puedes configurar trailing stops, deadlines, venta por graduación, ladders de salida y más desde la página de [Estrategia de salida](/desktop/exit-strategy) después de la incorporación.
+
+## Paso 4: URL de RPC
+
+Opcionalmente establece un endpoint RPC de Solana personalizado. Si tienes un RPC dedicado de Helius, QuickNode, Triton u otro proveedor, pega la URL aquí para una entrega de transacciones más rápida y confiable.
+
+Si omites este paso, la aplicación usa un endpoint público por defecto. Puedes cambiarlo después en [Configuración > Conexión](/desktop/settings).
+
+## Paso 5: Reportes de fallos
+
+Elige si deseas enviar reportes anónimos de fallos. Esto nos ayuda a encontrar y corregir errores. Nunca se incluyen datos de wallet, claves ni información de operaciones. Puedes cambiar esto en cualquier momento en Configuración.
+
+## Desbloqueo
+
+Después de la incorporación, verás la pantalla de desbloqueo en los lanzamientos posteriores. Ingresa tu frase de contraseña de wallet para descifrar tus claves y comenzar el monitoreo.
+
+Si tienes múltiples wallets con diferentes frases de contraseña, puedes desbloquearlas individualmente u omitir wallets que no necesitas para esta sesión.
+
+En macOS, puedes habilitar **Touch ID** en [Configuración > Seguridad](/desktop/security) para un desbloqueo más rápido.
+
+## Qué sucede después
+
+Una vez desbloqueada, la aplicación se conecta al Exit Intelligence Stream de LaserSell y comienza a monitorear tus wallets. Cualquier token que poseas (o compres a partir de este momento) aparecerá en el panel de [Posiciones activas](/desktop/active-positions) con seguimiento de PnL en tiempo real.

@@ -1,0 +1,30 @@
+---
+title: "SDK de TypeScript"
+description: "Instala, configura y usa el SDK de TypeScript de LaserSell para construir transacciones, transmitir posiciones y enviar operaciones."
+---
+
+## Instalación
+
+```bash
+npm install @lasersell/lasersell-sdk
+```
+
+El paquete incluye declaraciones TypeScript y soporta tanto ESM como CommonJS.
+
+Para ejemplos completos de código del cliente API, sesión del Exit Intelligence Stream, lane splitting, instantáneas de liquidez, helpers de transacciones y manejo de errores, consulta la [documentación en inglés](/api/sdk/typescript).
+
+## Módulos
+
+| Import                          | Propósito                                |
+|---------------------------------|----------------------------------------|
+| `ExitApiClient`                 | Construir transacciones de compra/venta sin firmar. |
+| `StreamClient`                  | Cliente WebSocket stream de bajo nivel.  |
+| `StreamSession`                 | Stream de alto nivel con seguimiento de posiciones. |
+| `signUnsignedTx`                | Firmar una transacción base64 sin firmar. |
+| `signUnsignedTxB64Fast`         | Firma rápida in place (devuelve base64). |
+| `sendTransaction`               | Enviar una transacción firmada.          |
+| `sendTargetRpc`, `sendTargetHeliusSender`, `sendTargetAstralane` | Constructores de send target. |
+
+## Ejemplo completo
+
+Ver el [Inicio rápido](/api/quickstart) para un ejemplo completo funcional que construye, firma y envía una transacción de venta.

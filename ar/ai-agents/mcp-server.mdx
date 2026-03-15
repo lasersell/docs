@@ -1,0 +1,108 @@
+---
+title: "خادم MCP"
+description: "اربط وكلاء الذكاء الاصطناعي والعملاء المتوافقين مع MCP بوثائق LaserSell عبر بروتوكول سياق النموذج."
+---
+
+يتيح خادم LaserSell MCP لأي عميل ذكاء اصطناعي متوافق مع MCP البحث واسترجاع وثائق LaserSell في الوقت الفعلي. يمنح هذا وكلاء الذكاء الاصطناعي الوصول إلى مراجع الواجهة البرمجية وأدلة حزمة التطوير وأمثلة الكود وتفاصيل التكامل دون مغادرة سير عملهم.
+
+## عنوان الخادم
+
+```
+https://docs.lasersell.io/mcp
+```
+
+## الأدوات المتاحة
+
+| الأداة | الوصف |
+|------|-------------|
+| `SearchLaserSellDocumentation` | البحث في قاعدة معرفة وثائق LaserSell للعثور على المعلومات ذات الصلة وأمثلة الكود ومراجع الواجهة البرمجية والأدلة. تُعيد محتوى سياقياً مع العناوين والروابط المباشرة لصفحات الوثائق. |
+
+## الإعداد
+
+### Claude Desktop
+
+أضف ما يلي إلى ملف تكوين MCP في Claude Desktop:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+يتطلب تثبيت Node.js 18+ على جهازك. أعد تشغيل Claude Desktop بعد حفظ التكوين.
+
+### Claude Code
+
+```bash
+claude mcp add lasersell-docs -- npx @mintlify/mcp --url https://docs.lasersell.io/mcp
+```
+
+### Cursor
+
+افتح إعدادات Cursor، انتقل إلى **MCP**، انقر **Add new MCP server**، وأدخل:
+
+- **Name:** `lasersell-docs`
+- **Type:** `command`
+- **Command:** `npx @mintlify/mcp --url https://docs.lasersell.io/mcp`
+
+### Windsurf
+
+أضف إلى تكوين MCP في Windsurf:
+
+```json
+{
+  "mcpServers": {
+    "lasersell-docs": {
+      "command": "npx",
+      "args": [
+        "@mintlify/mcp",
+        "--url",
+        "https://docs.lasersell.io/mcp"
+      ]
+    }
+  }
+}
+```
+
+### عملاء MCP أخرى
+
+أي عميل يدعم بروتوكول سياق النموذج يمكنه الاتصال باستخدام عنوان الخادم:
+
+```
+https://docs.lasersell.io/mcp
+```
+
+النقل هو Streamable HTTP. مرر العنوان إلى تكوين الخادم البعيد لعميل MCP الخاص بك.
+
+## ما يمكن للوكلاء البحث عنه
+
+بمجرد الاتصال، تمنح أداة `SearchLaserSellDocumentation` الوكلاء الوصول إلى وثائق LaserSell الكاملة بما في ذلك:
+
+- **مرجع الواجهة البرمجية** لـ `/v1/buy` و`/v1/sell` وWebSocket بث ذكاء الخروج.
+- **أدلة حزمة التطوير** لـ TypeScript وPython وRust وGo مع أمثلة كود.
+- **تكوين الاستراتيجية** لجني الأرباح ووقف الخسارة والوقف المتحرك والبيع عند التخرج ومهلة الموعد النهائي.
+- **توقيع وتقديم المعاملات** عبر Helius Sender وAstralane وRPC مخصص.
+- **تكوين رسوم الشريك** للمدمجين الذين يحققون الدخل عبر LaserSell.
+- **مخططات سياق السوق** لجميع البروتوكولات المدعومة (Pump.fun وPumpSwap وMeteora وRaydium).
+
+## أمثلة على الاستعلامات
+
+بمجرد توصيل خادم MCP، يمكنك طرح أسئلة على عميل الذكاء الاصطناعي مثل:
+
+- "كيف أبني معاملة بيع بحزمة تطوير LaserSell Python؟"
+- "ما هي الحقول في BuildBuyTxRequest؟"
+- "أرني كيف أتصل ببث ذكاء الخروج في TypeScript."
+- "ما أهداف الإرسال المتاحة لتقديم المعاملات؟"
+- "كيف تعمل رسوم الشركاء؟"

@@ -1,0 +1,62 @@
+---
+title: "什么是 LaserSell？"
+description: "LaserSell 是一个非托管的 Solana 自动退出引擎。它检测你的买入操作，实时监控盈亏，并在满足你的条件时自动卖出。"
+---
+
+LaserSell 是 Solana 网络上的自动退出引擎。它在后台运行，检测你买入（或创建）的新代币，实时监控你的盈亏，并在满足你设定的条件时自动执行卖出。你的密钥始终保存在你的设备上，经过加密且完全由你掌控。
+
+## 工作原理
+
+1. **你买入一个代币**，可以在任何平台上操作（Axiom、Photon、BullX、Phantom 或其他任何平台）。
+2. **LaserSell 检测到买入**，通过监控你的链上钱包实现。
+3. **你的退出策略自动运行。** LaserSell 在每次价格更新时评估止盈、止损、追踪止损、截止时间和毕业即卖条件。
+4. **当任一条件满足时，LaserSell 立即卖出。** 交易在本地构建、签名，然后直接广播到 Solana 网络。
+
+无需手动点击，无需确认弹窗，无需在标签页之间切换。
+
+## LaserSell 不是什么
+
+- **不是托管服务。** 你的私钥在你的设备上加密存储。我们永远无法访问它们。
+- **不是需要连接钱包的网站。** LaserSell 是运行在你设备上的本地客户端，或者是你集成到自己应用中的 SDK/API。
+
+## 桌面应用
+
+[LaserSell 桌面应用](/desktop/overview)是使用 LaserSell 的首选方式。它是一款原生 macOS 应用，具备实时持仓监控、多级退出策略、镜像交易（从任意钱包跟单）、内置 Solana 钱包（支持兑换）、每日盈亏图表分析、成就系统、Touch ID 解锁以及 7 种语言支持。
+
+[开始使用桌面应用 →](/desktop/installation)
+
+## 谁在使用 LaserSell
+
+### 交易者
+
+如果你在 Solana 上交易 meme 币，LaserSell 为你提供自动退出功能，让你无需手动监控每个仓位。只需设置一次策略，然后让它自动运行。
+
+- 止盈、止损、追踪止损、截止时间和毕业即卖功能并行运行。
+- 兼容任何入场方式。你可以在 Axiom、Photon、BullX、Terminal 或直接通过 Phantom 买入。
+- 使用[桌面应用](/desktop/overview)获得可视化界面，或使用 [CLI](/start-here/quickstart) 进行无界面操作。
+
+### 发行者
+
+如果你使用 RapidLaunch、Uxento 或 J7 Tracker 等工具发行代币，LaserSell 可以自动化你的个人退出计划，让你专注于发行和社区建设。
+
+### 开发者
+
+驱动 LaserSell 客户端的退出引擎同样通过 [LaserSell SDK 和 API](/api/overview) 提供。你可以在 LaserSell 的实时退出智能、多协议支持和交易构建能力之上，构建自己的交易机器人、平台或自定义策略。
+
+提供 [TypeScript](/api/sdk/typescript)、[Python](/api/sdk/python)、[Rust](/api/sdk/rust) 和 [Go](/api/sdk/go) 版本。
+
+## 支持的协议
+
+LaserSell 覆盖 Solana 上的主要发射台和 DEX：
+
+- Pump.fun 和 PumpSwap
+- Meteora DBC 和 DAMM V2
+- Raydium Launchpad 和 CPMM
+
+详情请参阅：[平台和代币支持](/onboarding/platform-and-coin-support)
+
+## 开始使用
+
+- **桌面应用：** [下载并安装](/desktop/installation)
+- **CLI：** [快速入门](/start-here/quickstart)
+- **API 和 SDK：** [API 概览](/api/overview)

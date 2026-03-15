@@ -1,0 +1,39 @@
+---
+title: "Registro de actividad"
+description: "Visualiza un registro en tiempo real de cada operación, envío y evento de recepción en tus wallets."
+---
+
+El registro de actividad registra cada operación y transferencia que ocurre en tus wallets activas durante tu sesión.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Activity.mp4"
+/>
+
+## Qué se registra
+
+Cada apertura de posición, cierre, envío y evento de recepción aparece como una fila en el registro. Cada entrada muestra:
+
+- **Hora** — Cuándo ocurrió el evento (HH:MM:SS)
+- **Lado** — Compra, Venta, Envío o Recepción
+- **Token** — Símbolo e imagen de la moneda
+- **Wallet** — Qué wallet estuvo involucrada (clave pública truncada)
+- **Razón** — Para auto salidas: qué activó la venta (Target Profit, Stop Loss, Trailing Stop, Graduation, Deadline)
+- **PnL** — Ganancia o pérdida en SOL o USD1 para posiciones cerradas
+
+El tipo de mercado se muestra como una pequeña insignia de color (Pump.fun, PumpSwap, Raydium, Meteora) junto a cada entrada.
+
+## Resumen de sesión
+
+En la parte superior del registro, una línea de resumen muestra tus totales de sesión: cuántas compras, ventas y envíos han ocurrido desde que abriste la aplicación.
+
+## Exportar
+
+Haz clic en el botón de exportar para descargar tu historial de actividad como un archivo CSV. Esto es útil para mantenimiento de registros, reportes fiscales o análisis de tus operaciones en una hoja de cálculo.
+
+## Persistencia
+
+El registro de actividad almacena hasta 500 entradas localmente en `~/.lasersell-app/activity.json`. Las entradas más antiguas se recortan automáticamente cuando se alcanza el límite. El registro persiste entre reinicios de la aplicación.

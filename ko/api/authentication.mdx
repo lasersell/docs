@@ -1,0 +1,91 @@
+---
+title: "인증"
+description: "LaserSell 대시보드에서 API 키를 발급받고 네 가지 SDK 모두에서 요청을 인증하세요."
+---
+
+## API 키 발급
+
+1. [app.lasersell.io](https://app.lasersell.io)에 로그인합니다.
+2. **Settings > API Keys**로 이동합니다.
+3. **Create API Key**를 클릭하고, 이름을 지정하고, 값을 복사합니다.
+
+키를 안전하게 저장하세요. 생성 후 다시 표시할 수 없습니다.
+
+## 요청 인증
+
+LaserSell API에 대한 모든 요청과 Exit Intelligence Stream에 대한 모든 WebSocket 연결에는 `x-api-key` HTTP 헤더를 통해 전달되는 API 키가 필요합니다.
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### SDK 예제
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### Exit Intelligence Stream 인증
+
+Exit Intelligence Stream WebSocket도 `x-api-key`를 사용합니다. SDK는 `StreamClient`를 구성할 때 자동으로 처리합니다:
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## 보안 모범 사례
+
+- **API 키를 절대 버전 관리에 커밋하지 마세요.** 환경 변수 또는 시크릿 관리자를 사용하세요.
+- 대시보드를 통해 주기적으로 **키를 교체**하세요.
+- 다른 봇이나 환경에 대해 별도의 키를 생성하여 **접근 범위를 제한**하세요.
+- 키가 침해되면 즉시 대시보드에서 취소하고 교체를 생성하세요.

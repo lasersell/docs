@@ -1,0 +1,160 @@
+---
+title: "连接生命周期"
+description: "退出智能流的 WebSocket 握手、hello_ok、限制、重连行为、ping/pong，以及 StreamClient 与 StreamSession 的抽象。"
+---
+
+## 连接步骤
+
+### 1. 打开 WebSocket
+
+使用 `x-api-key` 头连接到退出智能流端点：
+
+```
+wss://stream.lasersell.io/v1/ws
+```
+
+### 2. 接收 `hello_ok`
+
+连接打开后，服务器立即发送 `hello_ok` 消息：
+
+```json
+{
+  "type": "hello_ok",
+  "session_id": 42,
+  "server_time_ms": 1706000000000,
+  "limits": {
+    "hi_capacity": 1024,
+    "pnl_flush_ms": 1000,
+    "max_positions_per_session": 100,
+    "max_wallets_per_session": 10,
+    "max_positions_per_wallet": 20,
+    "max_sessions_per_api_key": 5
+  }
+}
+```
+
+`limits` 对象反映你等级的容量。参见[速率限制和等级](/api/reference/rate-limits)了解详情。
+
+### 3. 发送 `configure`
+
+收到 `hello_ok` 后，发送包含钱包和策略的 `configure` 消息：
+
+```json
+{
+  "type": "configure",
+  "wallet_pubkeys": ["WALLET_PUBKEY_1", "WALLET_PUBKEY_2"],
+  "strategy": {
+    "target_profit_pct": 5.0,
+    "stop_loss_pct": 1.5,
+    "trailing_stop_pct": 3.0
+  },
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000
+}
+```
+
+### 4. 接收确认
+
+服务器用已配置钱包中已持有代币的初始 `balance_update` 消息响应。如果检测到仓位，你还会收到 `position_opened`。
+
+## `limits` 对象
+
+| 字段                        | 类型     | 说明                                    |
+|------------------------------|----------|------------------------------------------------|
+| `hi_capacity`                | `number` | 最大高优先级消息缓冲数。        |
+| `pnl_flush_ms`              | `number` | 盈亏更新刷新间隔（毫秒）。 |
+| `max_positions_per_session`  | `number` | 每个会话最大追踪仓位数。              |
+| `max_wallets_per_session`    | `number` | 每个会话最大钱包数。                        |
+| `max_positions_per_wallet`   | `number` | 每个钱包最大追踪仓位数。               |
+| `max_sessions_per_api_key`   | `number` | 每个 API 密钥最大并发会话数。            |
+
+## 重连
+
+SDK 自动处理重连。当 WebSocket 断开时：
+
+1. 客户端以 100 毫秒为起始的指数退避等待。
+2. 退避在每次尝试时翻倍，最大 2,000 毫秒。
+3. 成功重连后，客户端重新发送 `configure` 消息。
+4. 服务器重新发送现有持仓的 `balance_update` 和 `position_opened` 事件。
+
+你不需要自己实现重连逻辑。
+
+## Ping 和 Pong
+
+### 客户端 Ping
+
+发送 `ping` 以测量往返延迟：
+
+```json
+{
+  "type": "ping",
+  "client_time_ms": 1706000000000
+}
+```
+
+服务器用 `pong` 响应：
+
+```json
+{
+  "type": "pong",
+  "server_time_ms": 1706000000001
+}
+```
+
+### 服务器 Ping
+
+服务器也可能发送 WebSocket 协议级别的 ping。SDK 自动响应 pong 帧。
+
+## StreamClient vs StreamSession
+
+### `StreamClient`
+
+底层客户端管理原始 WebSocket 连接：
+
+- 处理连接、重连和消息帧。
+- 从 `recv()` 返回原始 `ServerMessage` 对象。
+- 提供 `StreamSender` 用于发送客户端消息。
+- 支持通过 `connectLanes()` 的**通道分离**，将高优先级消息（退出信号、仓位事件）与低优先级消息（`pnl_update`）分开。
+
+### `StreamSession`
+
+高级会话用以下功能包装 `StreamClient`：
+
+- **仓位追踪**：自动维护按 ID 和代币账户的未平仓位映射。
+- **类型化事件**：返回附带 `PositionHandle` 的 `StreamEvent` 对象。
+- **截止时间计时器**：在 `deadline_timeout_sec` 后自动请求退出信号。
+- **策略更新**：`updateStrategy()` 和 `updateStrategyOptional()` 方法。
+
+大多数集成使用 `StreamSession`。
+
+## 通道
+
+通道分离将消息流分成两个接收器：
+
+- **高优先级通道**：`hello_ok`、`error`、`balance_update`、`position_opened`、`position_closed`、`exit_signal_with_tx`
+- **低优先级通道**：`pnl_update`
+
+这防止高频盈亏更新阻塞时间敏感的退出信号。
+
+通道分离目前仅在 **TypeScript SDK** 中通过 `connectLanes()` 可用：
+
+```typescript
+const client = new StreamClient("YOUR_API_KEY");
+const connection = await client.connectLanes(configure, {
+  lowPriorityCapacity: 512,
+});
+
+const [sender, highRx, lowRx] = connection.split();
+
+// Process high priority in main loop
+for await (const msg of highRx) {
+  // exit signals, position events...
+}
+
+// Process low priority in background
+for await (const msg of lowRx) {
+  // pnl_update...
+}
+```
+
+当低优先级缓冲区满时，最旧的消息被丢弃以保持退出智能流的响应性。

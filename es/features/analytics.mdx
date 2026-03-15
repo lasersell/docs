@@ -1,0 +1,94 @@
+---
+title: "Analíticas"
+description: "Rastrea tu rendimiento de trading en cada período de tiempo con gráficos de PnL, tasa de victorias, volumen, tiempos de retención y desglose de razones de salida."
+---
+
+LaserSell rastrea cada operación que realizas a través del protocolo y la convierte en datos de rendimiento accionables. El panel de analíticas está disponible en la [aplicación de escritorio](/desktop/analytics) y a través de la API.
+
+## Períodos de tiempo
+
+Todas las métricas se pueden ver en cuatro períodos de tiempo:
+
+- **24 horas** — Rendimiento de hoy
+- **7 días** — Resumen semanal
+- **30 días** — Visión general mensual
+- **Todo el tiempo** — Tu historial de trading completo
+
+Cada período calcula su propio conjunto independiente de métricas, para que puedas comparar cómo ha evolucionado tu trading a lo largo del tiempo.
+
+## Métricas clave
+
+### PnL total
+
+Tu ganancia o pérdida neta realizada en todas las posiciones cerradas en el período seleccionado. Es la suma de la ganancia final de cada operación, mostrada en tu moneda de visualización elegida.
+
+### Volumen total
+
+La suma de todos los montos de entrada (el SOL o USD1 que gastaste comprando tokens) durante el período. Esto mide cuánto capital has desplegado, independientemente del resultado.
+
+### Tasa de victorias
+
+El porcentaje de tus operaciones cerradas que terminaron en ganancia.
+
+```
+Tasa de victorias = Operaciones ganadoras / (Operaciones ganadoras + Operaciones perdedoras) × 100
+```
+
+Solo cuentan las posiciones cerradas. Las posiciones abiertas están excluidas del cálculo de la tasa de victorias.
+
+### Operaciones totales
+
+El número de posiciones que se cerraron durante el período seleccionado.
+
+### PnL promedio
+
+Tu ganancia o pérdida promedio por operación cerrada. Esto te dice si tu operación típica es rentable y por cuánto.
+
+### Tiempo de retención promedio
+
+Cuánto tiempo mantienes las posiciones en promedio antes de que se cierren, ya sea por tu estrategia de salida o manualmente. Se muestra en horas y minutos.
+
+Tiempos de retención promedio cortos generalmente indican trading rápido de memecoins. Tiempos de retención más largos pueden indicar que estás operando tokens de mayor capitalización o usando trailing stops más amplios.
+
+### Mejor operación
+
+La operación individual con la mayor ganancia realizada en el período. Útil para entender tu potencial alcista y si tu estrategia permite que las ganadoras corran lo suficiente.
+
+### Peor operación
+
+La operación individual con la pérdida realizada más profunda en el período. Si este número es desproporcionadamente grande comparado con tu PnL promedio, tu stop loss puede necesitar ajuste.
+
+## Gráfico de PnL diario
+
+Un gráfico de barras de 90 días que muestra tu ganancia o pérdida neta diaria. Las barras verdes son días rentables, las barras rojas son días con pérdidas. Pasa el cursor sobre cualquier barra para ver la cifra exacta y el conteo de operaciones de ese día.
+
+Este gráfico te ayuda a identificar patrones: ¿eres consistentemente rentable o unos pocos días grandes cargan el promedio? ¿Tus días perdedores se están reduciendo con el tiempo?
+
+## Desglose de razones de salida
+
+Un desglose visual de qué activó tus salidas durante el período seleccionado:
+
+| Razón | Qué significa |
+| :--- | :--- |
+| **Target Profit** | Se alcanzó tu umbral de take profit |
+| **Trailing Stop** | El precio retrocedió desde su pico por tu porcentaje de trailing |
+| **Stop Loss** | El precio alcanzó tu umbral de stop loss |
+| **Graduation** | El token migró de una curva de vinculación a un DEX |
+| **Deadline** | La posición expiró después de tu deadline configurado |
+
+Este desglose es una de las herramientas más útiles para ajustar tu estrategia. Por ejemplo:
+
+- Si la mayoría de las salidas son **Stop Loss**, tu stop puede estar demasiado ajustado, o puedes estar entrando en malos momentos.
+- Si la mayoría de las salidas son **Deadline**, tus posiciones pueden estar moviéndose lateralmente. Considera si los tokens que operas tienen suficiente volatilidad para tu estrategia.
+- Si **Trailing Stop** domina y tu PnL es saludable, tu estrategia probablemente está funcionando bien, capturando movimientos y saliendo en retrocesos.
+- Si **Target Profit** se activa frecuentemente pero tus mejores operaciones son mucho más altas que tu objetivo, puedes estar dejando dinero en la mesa. Considera ampliar tu objetivo o cambiar a un trailing stop.
+
+## Acceso por API
+
+Las analíticas están disponibles programáticamente a través de LaserSell API:
+
+```
+GET /v1/stats
+```
+
+Devuelve los cuatro períodos de tiempo con cada métrica listada arriba. Consulta la [documentación de la API](/api/exit-api/history) para detalles del formato de respuesta.

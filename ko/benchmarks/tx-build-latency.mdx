@@ -1,0 +1,108 @@
+---
+title: "트랜잭션 빌드 레이턴시"
+description: "LaserSell API, PumpFun SDK, PumpPortal API, Jupiter Metis API 간 Solana 트랜잭션 빌드 레이턴시를 비교하는 오픈소스 벤치마크입니다."
+---
+
+LaserSell이 청산 조건을 감지하면, 매도 트랜잭션은 가능한 한 빠르게 빌드되어 반환되어야 합니다. 빌드 레이턴시의 밀리초 하나하나가 트랜잭션이 네트워크로 가는 길에서 낭비되는 시간입니다.
+
+누구나 이 수치를 검증할 수 있도록 트랜잭션 빌드 벤치마크를 오픈소스로 공개했습니다. 벤치마크는 Solana 스왑 트랜잭션을 빌드하는 네 가지 방법을 비교합니다: LaserSell API, PumpFun SDK, PumpPortal API, Jupiter Metis API.
+
+모든 벤치마크는 웜업 라운드와 함께 20회 반복 실행하며, 요청부터 서명되지 않은 트랜잭션 수신까지의 시간을 측정합니다.
+
+## 코로케이션 서버 (Exit Intelligence Stream)
+
+자동 청산에서 중요한 레이턴시입니다. Exit Intelligence Stream이 목표 수익, 손절매 또는 트레일링 스탑이 트리거된 것을 감지하면, 코로케이션 네트워크를 통해 LaserSell API를 호출하여 매도 트랜잭션을 빌드합니다. 그런 다음 트랜잭션이 클라이언트에 반환되어 서명됩니다.
+
+### 매수 트랜잭션 빌드
+
+0.01 SOL 매수, 20% 슬리피지, 20회 반복:
+
+| 방법 | 평균 | 최소 | 최대 | 중간값 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **4.53 ms** | **3.39 ms** | **6.84 ms** | **4.10 ms** |
+| PumpPortal API | 65.24 ms | 26.18 ms | 264.29 ms | 46.34 ms |
+| Jupiter Metis API | 95.03 ms | 79.30 ms | 115.76 ms | 93.73 ms |
+| PumpFun SDK | 123.34 ms | 103.46 ms | 208.71 ms | 118.24 ms |
+
+### 매도 트랜잭션 빌드
+
+1,000,000 토큰, 20% 슬리피지, 20회 반복:
+
+| 방법 | 평균 | 최소 | 최대 | 중간값 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **5.32 ms** | **3.38 ms** | **15.03 ms** | **4.46 ms** |
+| PumpPortal API | 80.74 ms | 27.75 ms | 576.28 ms | 38.18 ms |
+| PumpFun SDK | 120.81 ms | 96.53 ms | 143.23 ms | 121.65 ms |
+| Jupiter Metis API | 168.84 ms | 159.10 ms | 177.35 ms | 169.11 ms |
+
+코로케이션 경로에서 LaserSell은 평균 5 ms 미만으로 트랜잭션을 빌드합니다. 다음으로 빠른 방법은 12배 이상 느립니다. 이것이 Exit Intelligence Stream이 자동 청산에 사용하는 경로입니다.
+
+## 공용 인터넷 (SDK 및 API)
+
+공용 인터넷을 통한 표준 API 레이턴시로, MacBook Pro에서 측정했습니다. 이 수치는 자체 애플리케이션에서 직접 REST API를 호출하는 개발자가 경험하는 레이턴시를 나타냅니다.
+
+Desktop 앱 사용자는 이 수치를 경험하지 않습니다. Desktop 앱은 Exit Intelligence Stream을 통해 사전 빌드된 청산 트랜잭션을 수신하며, 이 스트림은 코로케이션 경로(위의 5 ms 미만 수치)에서 트랜잭션을 빌드하여 영구 WebSocket 연결을 통해 클라이언트에 푸시합니다.
+
+### 매수 트랜잭션 빌드
+
+0.01 SOL 매수, 20% 슬리피지, 20회 반복:
+
+| 방법 | 평균 | 최소 | 최대 | 중간값 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **71.21 ms** | **62.77 ms** | **81.30 ms** | **71.16 ms** |
+| PumpPortal API | 151.08 ms | 120.96 ms | 246.40 ms | 141.44 ms |
+| Jupiter Metis API | 179.83 ms | 153.17 ms | 370.01 ms | 168.11 ms |
+| PumpFun SDK | 790.94 ms | 278.57 ms | 4,570.26 ms | 364.92 ms |
+
+### 매도 트랜잭션 빌드
+
+1,000,000 토큰, 20% 슬리피지, 20회 반복:
+
+| 방법 | 평균 | 최소 | 최대 | 중간값 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **74.77 ms** | **65.13 ms** | **108.67 ms** | **71.72 ms** |
+| PumpPortal API | 152.08 ms | 111.91 ms | 554.96 ms | 120.59 ms |
+| Jupiter Metis API | 181.73 ms | 155.88 ms | 222.54 ms | 174.92 ms |
+| PumpFun SDK | 541.00 ms | 277.65 ms | 2,029.10 ms | 317.28 ms |
+
+공용 인터넷에서 LaserSell은 일관되게 가장 빠르며 변동 폭이 가장 좁습니다. PumpFun SDK는 가장 큰 변동성을 보이며, 매수 시 최악의 경우 4초 이상, 매도 시 2초 이상의 레이턴시를 보입니다. 이 수치는 자체 도구를 구축하는 SDK 및 API 통합 개발자에게 해당됩니다.
+
+## 비교 대상
+
+각 방법은 스왑 트랜잭션을 빌드하는 데 다른 접근 방식을 취합니다:
+
+| 방법 | 접근 방식 |
+| :--- | :--- |
+| **LaserSell API** | 단일 API 호출. 서버가 전체 트랜잭션을 빌드하여 서명 준비 상태로 반환합니다. |
+| **PumpFun SDK** | 로컬 빌드. 여러 RPC 호출로 온체인 상태를 가져온 다음 로컬에서 인스트럭션을 조립합니다. |
+| **PumpPortal API** | PumpPortal에 대한 단일 API 호출. |
+| **Jupiter Metis API** | 두 번의 API 호출. 먼저 견적 요청, 그 다음 스왑 빌드 요청. |
+
+LaserSell의 단일 호출 아키텍처는 라운드 트립을 제거하므로 다단계 접근 방식보다 일관되게 우수합니다.
+
+## 왜 중요한가
+
+자동 거래에서 트랜잭션 빌드 레이턴시는 실행 품질에 직접적으로 영향을 미칩니다. 밈코인이 급락하기 시작할 때, 5 ms 빌드와 170 ms 빌드의 차이는 청산이 트리거와 같은 블록에 랜딩하는지 아니면 가격이 이미 더 불리하게 움직인 후 여러 블록 뒤에 랜딩하는지를 결정할 수 있습니다.
+
+Exit Intelligence Stream의 경우, 이는 자동 청산이 감지와 전송 사이에 최소한의 오버헤드로 발동됨을 의미합니다. 자체 도구를 구축하는 SDK 및 API 사용자의 경우, 더 빠른 라운드 트립과 더 반응적인 애플리케이션을 의미합니다.
+
+## 직접 벤치마크 실행
+
+벤치마크는 오픈소스입니다. 저장소를 클론하여 자체 인프라에서 실행하세요:
+
+```bash
+git clone https://github.com/lasersell/benchmarks
+cd benchmarks
+
+# 매수 트랜잭션 빌드
+cd buy-tx-build
+npm install && npm run build
+npm run bench
+
+# 매도 트랜잭션 빌드
+cd ../sell-tx-build
+npm install && npm run build
+npm run bench
+```
+
+LaserSell API 키([app.lasersell.io](https://app.lasersell.io)에서 무료), Solana RPC URL, Pump.fun 토큰 민트 주소가 필요합니다. 전체 설정 옵션은 저장소 README를 참조하세요.

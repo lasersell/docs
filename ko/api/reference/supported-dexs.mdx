@@ -1,0 +1,60 @@
+---
+title: "지원 DEX"
+description: "LaserSell 스왑 라우팅을 위한 프로토콜, 마켓 타입, 졸업 지원, 런치패드 지원 범위."
+---
+
+## 지원 프로토콜
+
+LaserSell은 여러 Solana DEX 프로토콜을 통해 스왑을 라우팅합니다. `MarketContextMsg`의 `market_type` 필드가 주어진 토큰에 사용되는 프로토콜을 식별합니다.
+
+| `market_type`        | 프로토콜              | 유형            | 설명                                     |
+|----------------------|-----------------------|-----------------|-------------------------------------------------|
+| `pump_fun`           | Pump.fun              | 본딩 커브   | 원래 Pump.fun 본딩 커브.                |
+| `pump_swap`          | PumpSwap              | AMM             | PumpSwap AMM에서 졸업한 Pump.fun 토큰.  |
+| `meteora_dbc`        | Meteora DBC           | 다이나믹 본딩 | Meteora 다이나믹 본딩 커브 풀.            |
+| `meteora_damm_v2`    | Meteora DAMM V2       | AMM             | Meteora 다이나믹 AMM V2 풀.                   |
+| `raydium_launchpad`  | Raydium Launchpad     | 본딩 커브   | Raydium 런치패드 본딩 커브 토큰.         |
+| `raydium_cpmm`       | Raydium CPMM          | AMM             | Raydium 정곱 마켓 메이커 풀.    |
+
+## 본딩 커브 vs AMM 풀
+
+**본딩 커브** 프로토콜(`pump_fun`, `meteora_dbc`, `raydium_launchpad`)은 수학적 커브를 사용하여 가격을 결정합니다. 본딩 커브의 토큰은 나중에 전체 AMM 풀로 **졸업**할 수 있습니다.
+
+**AMM** 프로토콜(`pump_swap`, `meteora_damm_v2`, `raydium_cpmm`)은 정곱 또는 다이나믹 유동성 풀을 사용합니다. 더 깊은 유동성과 표준 스왑 메커니즘을 제공합니다.
+
+## 졸업
+
+일부 토큰은 본딩 커브에서 출시된 후 특정 조건(보통 시가총액 임계값)이 충족되면 AMM으로 "졸업"합니다. LaserSell은 졸업 이벤트를 감지하며, 전략에서 `sell_on_graduation: true`가 설정되어 있으면 졸업 시 자동으로 매도할 수 있습니다.
+
+| 소스 커브         | 졸업 대상            |
+|----------------------|-------------------------|
+| `pump_fun`           | `pump_swap`             |
+| `meteora_dbc`        | `meteora_damm_v2`       |
+| `raydium_launchpad`  | `raydium_cpmm`          |
+
+졸업이 발생하면 Exit Intelligence Stream이 `market_context`를 업데이트하고 원활하게 추적을 계속합니다.
+
+## 런치패드 지원 범위
+
+LaserSell은 모든 주요 Solana 토큰 런치패드를 모니터링합니다:
+
+- **Pump.fun**: 가장 인기 있는 밈코인 런치패드. 토큰이 본딩 커브에서 시작하여 PumpSwap으로 졸업합니다.
+- **Meteora**: DAMM V2 풀로 졸업하는 다이나믹 본딩 커브.
+- **Raydium Launchpad**: CPMM 풀로 졸업하는 Raydium의 네이티브 런치패드.
+
+Solana에서 채택이 증가하면 새 프로토콜이 추가됩니다. `market_type` 열거형이 이에 따라 확장됩니다.
+
+## 마켓 컨텍스트 사용
+
+`market_context`는 `position_opened` 및 `exit_signal_with_tx` 이벤트에 포함됩니다. `BuildSellTxRequest`에 전달하여 서버 측 해석을 건너뛸 수도 있습니다:
+
+```json
+{
+  "market_type": "pump_swap",
+  "pumpswap": {
+    "pool": "PoolAddress..."
+  }
+}
+```
+
+프로토콜별 전체 중첩 스키마는 [마켓 컨텍스트](/api/reference/market-context)를 참조하세요.

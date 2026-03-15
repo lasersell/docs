@@ -1,0 +1,157 @@
+---
+title: "POST /v1/buy"
+description: "通过 LaserSell API 构建未签名的买入交易，将 SOL 兑换为代币。"
+---
+
+<Warning>
+如果你计划使用退出智能流追踪此买入，你**必须**在提交买入交易**之前**连接流。流通过实时观察链上代币到达来检测新仓位。如果买入落地时流未连接，仓位将不会被追踪，也不会为其生成退出信号。
+</Warning>
+
+## 端点
+
+```
+POST https://api.lasersell.io/v1/buy
+```
+
+## 请求头
+
+| Header         | 必需 | 说明                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | 是      | 必须为 `application/json`      |
+| `x-api-key`    | 是      | 你的 LaserSell API 密钥          |
+
+## 请求体：`BuildBuyTxRequest`
+
+| 字段                   | 类型     | 必需 | 说明                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | 是      | 要买入的代币地址（base58）。                                         |
+| `user_pubkey`           | `string` | 是      | 你的钱包公钥（base58）。                                            |
+| `amount`                | `number` | 否*      | 人类可读的花费金额（例如 `0.1` 表示 0.1 SOL，`10.0` 表示 10 USD1）。与 `amount_in_total` 互斥。 |
+| `amount_in_total`       | `number` | 否*      | 以输入资产原子单位计的花费金额（例如 SOL 的 lamports）。与 `amount` 互斥。 |
+| `slippage_bps`          | `number` | 是      | 最大滑点容忍度（基点，例如 `2000` = 20%）。            |
+| `input`                 | `string` | 否       | 输入资产：`"SOL"`（默认）或 `"USD1"`。                                 |
+| `mode`                  | `string` | 否       | 路由模式提示。有效值：`"fast"`、`"secure"`。默认 `"fast"`。 |
+| `send_mode`             | `string` | 否       | 交易发送模式：`"helius_sender"`、`"astralane"` 或 `"rpc"`。        |
+| `tip_lamports`          | `number` | 否       | 可选的优先费小费（lamports）。                                      |
+| `partner_fee_recipient` | `string` | 否       | 合作伙伴费用接收钱包（base58 公钥）。                               |
+| `partner_fee_bps`       | `number` | 否       | 合作伙伴费用（基点，最大 50 = 0.5%）。与 `partner_fee_lamports` 互斥。 |
+| `partner_fee_lamports`  | `number` | 否       | 合作伙伴费用（固定 SOL lamports，最大 50,000,000）。与 `partner_fee_bps` 互斥。 |
+
+<Note>
+**\*** 必须提供 `amount` 或 `amount_in_total` 中的一个。`amount` 根据 `input` 资产自动转换为原子单位（SOL: 10^9, USD1: 10^6）。
+</Note>
+
+## 响应：`BuildTxResponse`
+
+| 字段   | 类型     | 说明                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | Base64 编码的未签名 Solana `VersionedTransaction`。 |
+| `route` | `object` | 可选的路由元数据。                      |
+| `debug` | `object` | 可选的调试信息。                     |
+
+## curl 示例
+
+使用人类可读的 `amount`：
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount": 0.1,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+使用原子单位 `amount_in_total`：
+
+```bash
+curl -X POST https://api.lasersell.io/v1/buy \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_in_total": 100000000,
+    "slippage_bps": 2000,
+    "input": "SOL"
+  }'
+```
+
+## SDK 示例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildBuyTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildBuyTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount: 0.1, // 0.1 SOL
+  slippage_bps: 2_000,
+};
+
+const response = await client.buildBuyTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildBuyTxRequest
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildBuyTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount=0.1,  # 0.1 SOL
+    slippage_bps=2_000,
+)
+
+response = await client.build_buy_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildBuyTxRequest};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildBuyTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount: Some(0.1), // 0.1 SOL
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_buy_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+amount := 0.1 // 0.1 SOL
+resp, err := client.BuildBuyTx(ctx, lasersell.BuildBuyTxRequest{
+    Mint:        "TOKEN_MINT_ADDRESS",
+    UserPubkey:  "YOUR_WALLET_PUBKEY",
+    Amount:      &amount,
+    SlippageBps: 2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## 错误响应
+
+参见[错误处理](/api/exit-api/error-handling)了解完整的错误信封规范和可重试错误逻辑。

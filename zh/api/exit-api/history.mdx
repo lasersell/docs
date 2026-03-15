@@ -1,0 +1,99 @@
+---
+title: "GET /v1/history"
+description: "从 LaserSell API 获取分页的交易历史。"
+---
+
+## 端点
+
+```
+GET https://api.lasersell.io/v1/history
+```
+
+## 请求头
+
+| Header      | 必需 | 说明            |
+|-------------|----------|------------------------|
+| `x-api-key` | 是      | 你的 LaserSell API 密钥 |
+
+## 查询参数
+
+| 参数 | 类型     | 默认值 | 说明                                                       |
+|-----------|----------|---------|-------------------------------------------------------------------|
+| `limit`   | `number` | `50`    | 返回的最大交易数量（上限 200）。               |
+| `offset`  | `number` | `0`     | 分页时跳过的交易数量。                          |
+| `mint`    | `string` | —       | 按特定代币地址筛选结果（base58）。         |
+| `wallet`  | `string` | —       | 按特定钱包公钥筛选结果（base58）。          |
+
+## 响应：`TradeHistoryResponse`
+
+| 字段    | 类型            | 说明                                          |
+|----------|-----------------|------------------------------------------------------|
+| `trades` | `TradeHistoryItem[]` | 交易记录数组，按最近时间排序。 |
+| `total`  | `number \| null` | 匹配交易的估计总数，用于分页。 |
+
+### `TradeHistoryItem` 对象
+
+| 字段                        | 类型             | 说明                                                        |
+|------------------------------|------------------|--------------------------------------------------------------------|
+| `id`                         | `number`         | 唯一交易记录标识符。                                    |
+| `session_id`                 | `number`         | 产生此交易的流会话。                           |
+| `position_id`                | `number`         | 会话内的仓位标识符。                            |
+| `wallet_pubkey`              | `string`         | 持有仓位的钱包公钥（base58）。                 |
+| `mint`                       | `string`         | 代币地址（base58）。                                       |
+| `entry_quote_units`          | `number`         | 开仓花费的报价资产原子单位。     |
+| `exit_quote_units`           | `number \| null` | 平仓收到的报价资产原子单位。            |
+| `profit_quote_units`         | `number \| null` | 报价资产原子单位的净利润或亏损。                    |
+| `tokens`                     | `number`         | 入场时获得的代币数量（原子单位）。                |
+| `exit_reason`                | `string \| null` | 平仓原因（如 `target_profit`、`stop_loss`、`trailing_stop`、`manual`）。 |
+| `market_kind`                | `string \| null` | 交易代币所在的 DEX 或发射台（如 `PumpFun`、`RaydiumCpmm`）。 |
+| `strategy_target_profit_pct` | `number \| null` | 开仓时配置的目标利润百分比。      |
+| `strategy_stop_loss_pct`     | `number \| null` | 开仓时配置的止损百分比。          |
+| `strategy_trailing_stop_pct` | `number \| null` | 开仓时配置的追踪止损百分比。      |
+| `opened_at`                  | `string`         | ISO 8601 格式的开仓时间戳。                   |
+| `closed_at`                  | `string \| null` | ISO 8601 格式的平仓时间戳。                   |
+
+## curl 示例
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=10" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+使用筛选：
+
+```bash
+curl "https://api.lasersell.io/v1/history?limit=20&wallet=YOUR_WALLET_PUBKEY&mint=TOKEN_MINT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+## 示例响应
+
+```json
+{
+  "trades": [
+    {
+      "id": 42,
+      "session_id": 1001,
+      "position_id": 3,
+      "wallet_pubkey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "entry_quote_units": 500000000,
+      "exit_quote_units": 650000000,
+      "profit_quote_units": 150000000,
+      "tokens": 1000000,
+      "exit_reason": "target_profit",
+      "market_kind": "PumpFun",
+      "strategy_target_profit_pct": 30.0,
+      "strategy_stop_loss_pct": 50.0,
+      "strategy_trailing_stop_pct": 20.0,
+      "opened_at": "2026-03-07T12:00:00Z",
+      "closed_at": "2026-03-07T12:30:00Z"
+    }
+  ],
+  "total": 1
+}
+```
+
+## 错误响应
+
+参见[错误处理](/api/exit-api/error-handling)了解完整的错误信封规范和可重试错误逻辑。

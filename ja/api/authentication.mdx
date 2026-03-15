@@ -1,0 +1,91 @@
+---
+title: "認証"
+description: "LaserSellダッシュボードからAPIキーを取得し、4つのSDKすべてでリクエストを認証します。"
+---
+
+## APIキーの取得
+
+1. [app.lasersell.io](https://app.lasersell.io)にサインイン。
+2. **Settings > API Keys**に移動。
+3. **Create API Key**をクリックし、名前を付けて値をコピー。
+
+キーを安全に保管してください。作成後は再表示できません。
+
+## リクエストの認証
+
+LaserSell APIへのすべてのリクエストとExit Intelligence StreamへのすべてのWebSocket接続には、`x-api-key` HTTPヘッダーを通じてAPIキーが必要です。
+
+### curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{"mint":"TOKEN_MINT","user_pubkey":"WALLET","amount_tokens":1000000}'
+```
+
+### SDK例
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiClient;
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+```
+</CodeGroup>
+
+### Exit Intelligence Stream認証
+
+Exit Intelligence Stream WebSocketも`x-api-key`を使用します。`StreamClient`を構築する際にSDKが自動的に処理します:
+
+<CodeGroup>
+```typescript TypeScript
+import { StreamClient } from "@lasersell/lasersell-sdk";
+
+const client = new StreamClient("YOUR_API_KEY");
+```
+
+```python Python
+from lasersell_sdk.stream.client import StreamClient
+
+client = StreamClient("YOUR_API_KEY")
+```
+
+```rust Rust
+use lasersell_sdk::stream::client::StreamClient;
+use secrecy::SecretString;
+
+let client = StreamClient::new(SecretString::new("YOUR_API_KEY".into()));
+```
+
+```go Go
+import "github.com/lasersell/lasersell-sdk/go/stream"
+
+client := stream.NewStreamClient("YOUR_API_KEY")
+```
+</CodeGroup>
+
+## セキュリティベストプラクティス
+
+- **APIキーをバージョン管理にコミットしない。** 環境変数またはシークレットマネージャーを使用してください。
+- **定期的にキーをローテーション** ダッシュボードを通じて。
+- **アクセスをスコープ** 異なるボットや環境に対して個別のキーを作成して。
+- キーが侵害された場合、ダッシュボードから直ちに取り消して代替キーを作成してください。

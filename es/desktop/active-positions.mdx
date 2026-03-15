@@ -1,0 +1,92 @@
+---
+title: "Posiciones activas"
+description: "Monitorea todas tus posiciones abiertas en tiempo real con PnL en vivo, datos de mercado y controles de salida manual."
+---
+
+La pestaña de Posiciones activas es la pantalla principal de la aplicación. Muestra cada posición de tokens en todas tus wallets activas, actualizada en tiempo real a medida que se producen nuevos bloques en Solana.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Active Positions.mp4"
+/>
+
+## Lista de posiciones
+
+El panel izquierdo lista todas las posiciones abiertas. Cada entrada muestra el símbolo del token, tu porcentaje de PnL actual y cuánto tiempo lleva abierta la posición.
+
+**Opciones de ordenación:**
+- **Tiempo** — Posiciones más recientes primero
+- **PnL** — Mejor rendimiento primero
+- **Tamaño** — Posiciones más grandes primero
+
+También puedes buscar posiciones por nombre o símbolo del token.
+
+Cuando estás conectado al stream sin posiciones abiertas, la lista muestra "Esperando posiciones..." hasta que se detecte tu próxima compra en cadena.
+
+## Detalle de posición
+
+Haz clic en cualquier posición de la lista para abrir la vista de detalle en el panel derecho.
+
+### Información de entrada y mercado
+
+- **Precio y monto de entrada** en SOL o USD1
+- **Precio actual** y **capitalización de mercado**
+- **Tiempo abierto** (transcurrido desde la entrada)
+- **Dirección mint del token** (clic para copiar)
+- **Tipo de mercado** con icono de DEX (Pump.fun, PumpSwap, Raydium, Meteora)
+- **Liquidez del pool** con bandas de slippage mostrando cuánto de tu posición puede salir en diferentes niveles de slippage
+- **Indicador de tendencia de liquidez** (estable, creciente o decreciente)
+
+### PnL en tiempo real
+
+- Ganancia o pérdida actual en SOL/USD1 y como porcentaje
+- Ingresos actuales si vendieras ahora
+- Gráfico de historial de PnL
+
+### Historial de operaciones
+
+La superposición de operaciones muestra cada transacción ejecutada en esta posición: hora, lado (compra/venta), cantidad de tokens, cantidad de SOL, wallet del maker y un enlace para ver la transacción en Solscan.
+
+## Acciones
+
+### Salir ahora
+
+Activa una salida manual inmediata a precio de mercado. LaserSell solicita una señal de salida del stream, construye la transacción, la firma localmente y la transmite. Útil cuando quieres anular tu estrategia y salir de inmediato.
+
+### Comprar más
+
+Aumenta el tamaño de tu posición con una compra adicional. Usa tus montos de compra rápida configurados.
+
+### Venta parcial
+
+Vende una porción de tu posición en lugar del monto total. Puedes especificar una cantidad de tokens o un porcentaje de tus holdings. Esto es útil para tomar ganancias mientras mantienes una posición en marcha.
+
+### Anulación de estrategia por posición
+
+Expande la sección de estrategia en cualquier posición para personalizar sus umbrales de salida independientemente de tu estrategia global. Puedes anular:
+
+- Target Profit %
+- Stop Loss %
+- Trailing Stop %
+- Niveles de take profit (% de activación, % de venta, % de ajuste de trailing)
+
+Cuando una posición tiene umbrales personalizados, muestra una insignia **Custom**. Haz clic en "Reset to Global" para volver a tu estrategia por defecto.
+
+Estas anulaciones tienen alcance de sesión. Se aplican inmediatamente y persisten hasta que cierres la aplicación, momento en el cual las posiciones vuelven a la estrategia global.
+
+## Barra lateral
+
+La barra lateral muestra tu portafolio agregado:
+
+- **Saldo del portafolio** — Valor combinado de SOL + USD1 convertido a tu moneda de visualización
+- **Saldo de SOL** — SOL nativo en todas las wallets activas
+- **Saldo de USD1** — Saldo de stablecoin USD1 (cuando está habilitado en la configuración)
+
+La barra lateral es redimensionable. Arrastra el borde para ajustar el ancho, o colápsala al modo de solo iconos para más espacio en pantalla.
+
+## Posiciones reflejadas
+
+Las posiciones abiertas a través de [Mirror Trading](/desktop/mirror-trading) aparecen en la misma lista, marcadas con la wallet de origen. Siguen las mismas reglas de estrategia de salida y pueden cerrarse manualmente de la misma manera.

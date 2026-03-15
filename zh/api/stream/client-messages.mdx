@@ -1,0 +1,35 @@
+---
+title: "客户端消息"
+description: "发送到退出智能流的所有 8 种客户端消息类型的完整模式和 JSON 示例。"
+---
+
+## 消息类型
+
+| 类型                   | 说明                                        |
+|------------------------|----------------------------------------------------|
+| `ping`                 | 延迟探测；服务器用 `pong` 响应。        |
+| `configure`            | 初始会话设置，包含钱包和策略。   |
+| `update_strategy`      | 会话中更改策略参数。            |
+| `close_position`       | 从追踪中移除仓位。                   |
+| `request_exit_signal`  | 手动请求退出交易。              |
+| `update_wallets`       | 会话中添加或移除钱包。                 |
+| `update_position_strategy` | 覆盖单个仓位的策略。    |
+| `update_watch_wallets`     | 添加或更新跟单交易的监控钱包。|
+
+关于每种消息类型的完整 JSON 模式、字段说明和 SDK 代码示例，请参阅[英文版](/api/stream/client-messages)。所有字段名、类型和 JSON 结构与英文版完全一致。
+
+## 关键消息说明
+
+**`configure`** — 收到 `hello_ok` 后发送一次。设置要监控的钱包和要评估的策略。SDK 在调用 `StreamClient.connect()` 或 `StreamSession.connect()` 时自动发送。所有 `wallet_pubkeys` 中的钱包必须先[注册](/api/exit-api/wallets)到你的账户。
+
+**`update_strategy`** — 无需重连即可更新策略。对所有被追踪的仓位立即生效。
+
+**`close_position`** — 从追踪中移除仓位。服务器将停止监控盈亏且不会为其生成退出信号。
+
+**`request_exit_signal`** — 手动请求服务器为某个仓位生成退出交易，无论策略阈值是否已满足。
+
+**`update_wallets`** — 无需重连即可添加或移除会话中的钱包。
+
+**`update_position_strategy`** — 为单个仓位覆盖策略而不影响其他被追踪的仓位。
+
+**`update_watch_wallets`** — 会话中添加或更新跟单交易的监控钱包。替换当前的监控钱包列表。

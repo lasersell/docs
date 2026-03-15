@@ -1,0 +1,101 @@
+---
+title: "Referencia del CLI"
+description: "Guía del CLI de LaserSell: comportamiento del daemon, salida de logs y configuración."
+---
+
+El CLI de LaserSell se ejecuta como un daemon que monitorea tu wallet y ejecuta automáticamente las salidas cuando se cumplen las condiciones de tu estrategia.
+
+## Cómo funciona
+
+Después de desbloquear tu wallet, el CLI se conecta al stream de LaserSell y comienza a monitorear. Toda la actividad se registra en la terminal a través de salida de log estructurada.
+
+```shellscript
+lasersell
+```
+
+El daemon se ejecuta hasta que presiones **Ctrl+C** para apagarlo de forma ordenada.
+
+## Salida de logs
+
+El CLI produce eventos estructurados a medida que ocurren:
+
+| Evento | Significado |
+|-------|---------|
+| `startup` | CLI iniciado, wallet desbloqueada |
+| `stream_connected` | Conectado al stream de LaserSell |
+| `wallet_registered` | Propiedad de wallet verificada con el servidor |
+| `balance_update` | Saldo de SOL consultado |
+| `session_started` | Nueva posición detectada y monitoreo iniciado |
+| `pnl_update` | Actualización de ganancia/pérdida para una posición activa |
+| `sell_scheduled` | Condición de salida activada, venta en cola |
+| `sell_attempt` | Transacción de venta enviada |
+| `sell_complete` | Venta confirmada en cadena |
+| `session_closed` | Posición completamente cerrada |
+| `liquidity_snapshot` | Actualización de liquidez del pool (tendencia + bandas de profundidad) |
+| `stream_disconnected` | Conexión del stream perdida |
+
+## Flags del CLI
+
+| Flag | Corto | Descripción |
+|------|-------|-------------|
+| `--setup` | | Forzar ejecución del asistente de incorporación |
+| `--config <path>` | `-f` | Ruta a un archivo de configuración personalizado |
+| `--debug` | | Escribir logs a nivel debug en `~/.lasersell/debug.log` |
+| `--smoke` | | Ejecutar verificación de salud de conectividad y salir |
+| `--export-private-key` | | Exportar la clave privada base58 de tu wallet a stdout |
+
+`--smoke`, `--setup` y `--export-private-key` son mutuamente excluyentes.
+
+## Operación sin interfaz
+
+El CLI está diseñado para despliegues en servidores sin interfaz. Para desbloqueo automatizado, establece la frase de contraseña a través de variable de entorno:
+
+```shellscript
+export LASERSELL_WALLET_PASSPHRASE="your-passphrase"
+lasersell
+```
+
+En un VPS, ejecútalo en una sesión `tmux` o `screen`, o usa `systemd` para gestionar el proceso.
+
+## Estrategias de salida
+
+El CLI soporta todas las estrategias de salida de LaserSell, configuradas en `~/.lasersell/config.yml`:
+
+| Estrategia | Campo de configuración | Descripción |
+|----------|-------------|-------------|
+| Take profit | `target_profit` | Salir cuando la ganancia alcance este % de la entrada |
+| Stop loss | `stop_loss` | Salir cuando la pérdida alcance este % de la entrada |
+| Trailing stop | `trailing_stop` | Salir cuando la ganancia caiga este % desde el pico |
+| Deadline timeout | `deadline_timeout` | Forzar salida después de N segundos |
+| Venta por graduación | `sell_on_graduation` | Salir cuando el token migre a un nuevo DEX |
+| Ladder de salida | `take_profit_levels` | Vender cantidades parciales en múltiples umbrales de ganancia |
+| Guarda de liquidez | `liquidity_guard` | Salir cuando la liquidez del pool caiga por debajo del umbral seguro |
+| Trail de breakeven | `breakeven_trail` | Trailing stop que se activa una vez que la posición alcanza breakeven |
+
+Al menos una condición de salida debe estar habilitada. Ver [Configuración de ejemplo](/onboarding/example-configuration) para la referencia completa de configuración.
+
+## Copy trading
+
+Monitorea otras wallets y opcionalmente compra automáticamente cuando ellas compran:
+
+```yaml
+watch_wallets:
+  - pubkey: "TraderWallet1..."
+    label: "whale"
+  - pubkey: "TraderWallet2..."
+    auto_buy:
+      amount: 0.1       # SOL
+      amount_usd1: 0.0   # USD1
+```
+
+Las posiciones de wallets observadas se gestionan con la misma estrategia de salida que tus propias posiciones.
+
+## Modificar tu estrategia
+
+Edita `~/.lasersell/config.yml` y reinicia el daemon. Los cambios surten efecto en el siguiente lanzamiento.
+
+Para volver a ejecutar el asistente de configuración:
+
+```shellscript
+lasersell --setup
+```

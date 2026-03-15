@@ -1,0 +1,138 @@
+---
+title: "POST /v1/sell"
+description: "Construye una transacción de venta sin firmar para intercambiar tokens por SOL o USD1 a través de LaserSell API."
+---
+
+## Endpoint
+
+```
+POST https://api.lasersell.io/v1/sell
+```
+
+## Encabezados
+
+| Encabezado     | Requerido | Descripción                     |
+|----------------|----------|---------------------------------|
+| `Content-Type` | Sí       | Debe ser `application/json`      |
+| `x-api-key`    | Sí       | Tu clave API de LaserSell        |
+
+## Cuerpo de solicitud: `BuildSellTxRequest`
+
+| Campo                   | Tipo     | Requerido | Descripción                                                                 |
+|-------------------------|----------|----------|-----------------------------------------------------------------------------|
+| `mint`                  | `string` | Sí       | Dirección mint del token (base58).                                          |
+| `user_pubkey`           | `string` | Sí       | Tu clave pública de wallet (base58).                                        |
+| `amount_tokens`         | `number` | Sí       | Cantidad a vender en unidades atómicas del token.                           |
+| `output`                | `string` | Sí       | Activo de salida deseado: `"SOL"` o `"USD1"`.                              |
+| `slippage_bps`          | `number` | Sí       | Tolerancia máxima de slippage en puntos base (por ejemplo, `2000` = 20%).   |
+| `mode`                  | `string` | No       | Sugerencia de modo de enrutamiento. Valores válidos: `"fast"`, `"secure"`. Por defecto `"fast"`. |
+| `market_context`        | `object` | No       | Contexto de mercado pre resuelto. Omitir para que el servidor resuelva automáticamente. |
+| `send_mode`             | `string` | No       | Modo de envío de transacción: `"helius_sender"`, `"astralane"` o `"rpc"`.   |
+| `tip_lamports`          | `number` | No       | Tip opcional de priority fee en lamports.                                    |
+| `partner_fee_recipient` | `string` | No       | Wallet receptora de comisión de partner (clave pública base58).              |
+| `partner_fee_bps`       | `number` | No       | Comisión de partner en puntos base (máximo 50 = 0.5%). Mutuamente excluyente con `partner_fee_lamports`. |
+| `partner_fee_lamports`  | `number` | No       | Comisión de partner en lamports fijos de SOL (máximo 50,000,000). Mutuamente excluyente con `partner_fee_bps`. |
+
+## Respuesta: `BuildTxResponse`
+
+| Campo   | Tipo     | Descripción                                     |
+|---------|----------|-------------------------------------------------|
+| `tx`    | `string` | `VersionedTransaction` de Solana sin firmar codificada en base64. |
+| `route` | `object` | Metadatos opcionales de enrutamiento.            |
+| `debug` | `object` | Información de depuración opcional.              |
+
+## Ejemplo con curl
+
+```bash
+curl -X POST https://api.lasersell.io/v1/sell \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "mint": "TOKEN_MINT_ADDRESS",
+    "user_pubkey": "YOUR_WALLET_PUBKEY",
+    "amount_tokens": 1000000,
+    "slippage_bps": 2000,
+    "output": "SOL"
+  }'
+```
+
+## Ejemplos de SDK
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiClient, type BuildSellTxRequest } from "@lasersell/lasersell-sdk";
+
+const client = ExitApiClient.withApiKey("YOUR_API_KEY");
+
+const request: BuildSellTxRequest = {
+  mint: "TOKEN_MINT_ADDRESS",
+  user_pubkey: "YOUR_WALLET_PUBKEY",
+  amount_tokens: 1_000_000,
+  slippage_bps: 2_000,
+  output: "SOL",
+};
+
+const response = await client.buildSellTx(request);
+console.log("Unsigned tx (base64):", response.tx);
+
+// Or get just the base64 string:
+const txB64 = await client.buildSellTxB64(request);
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, BuildSellTxRequest, SellOutput
+
+client = ExitApiClient.with_api_key("YOUR_API_KEY")
+
+request = BuildSellTxRequest(
+    mint="TOKEN_MINT_ADDRESS",
+    user_pubkey="YOUR_WALLET_PUBKEY",
+    amount_tokens=1_000_000,
+    slippage_bps=2_000,
+    output=SellOutput.SOL,
+)
+
+response = await client.build_sell_tx(request)
+print("Unsigned tx (base64):", response.tx)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::{ExitApiClient, BuildSellTxRequest, SellOutput};
+
+let client = ExitApiClient::with_api_key("YOUR_API_KEY");
+
+let request = BuildSellTxRequest {
+    mint: "TOKEN_MINT_ADDRESS".into(),
+    user_pubkey: "YOUR_WALLET_PUBKEY".into(),
+    amount_tokens: 1_000_000,
+    output: SellOutput::Sol,
+    slippage_bps: 2_000,
+    ..Default::default()
+};
+
+let response = client.build_sell_tx(&request).await?;
+println!("Unsigned tx (base64): {}", response.tx);
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+client := lasersell.NewExitAPIClientWithAPIKey("YOUR_API_KEY")
+
+resp, err := client.BuildSellTx(ctx, lasersell.BuildSellTxRequest{
+    Mint:         "TOKEN_MINT_ADDRESS",
+    UserPubkey:   "YOUR_WALLET_PUBKEY",
+    AmountTokens: 1_000_000,
+    Output:       lasersell.SellOutputSOL,
+    SlippageBps:  2_000,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("Unsigned tx (base64):", resp.Tx)
+```
+</CodeGroup>
+
+## Respuestas de error
+
+Ver [Manejo de errores](/api/exit-api/error-handling) para la especificación completa del formato de error y la lógica de errores reintentables.

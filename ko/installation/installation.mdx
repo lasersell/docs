@@ -1,0 +1,135 @@
+---
+title: "설치"
+description: "Linux, macOS, Windows (WSL) 또는 Docker에 LaserSell을 설치합니다."
+---
+
+## 빠른 설치
+
+모든 플랫폼에서 가장 빠른 설치 방법:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+```shellscript
+lasersell --version
+```
+
+이것이 작동하면 [빠른 시작](/start-here/quickstart)으로 건너뛰세요. 플랫폼별 옵션은 아래에 있습니다.
+
+## 플랫폼 가이드
+
+<Tabs>
+<Tab title="Linux">
+
+### install.sh (권장)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+### 수동 APT 설정
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/KEY.gpg | sudo gpg --dearmor -o /usr/share/keyrings/lasersell-archive-keyring.gpg
+ARCH="$(dpkg --print-architecture)"
+echo "deb [arch=${ARCH} signed-by=/usr/share/keyrings/lasersell-archive-keyring.gpg] https://dl.lasersell.io stable main" | sudo tee /etc/apt/sources.list.d/lasersell.list > /dev/null
+sudo apt update
+sudo apt install lasersell
+```
+
+</Tab>
+<Tab title="macOS">
+
+### install.sh (권장)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+Intel 및 Apple Silicon (M 시리즈) 모두 지원합니다.
+
+### Homebrew
+
+```shellscript
+brew tap lasersell/lasersell
+brew install lasersell
+```
+
+### Tarball (Homebrew 없이)
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash -s -- --method tar
+```
+
+</Tab>
+<Tab title="Windows (WSL)">
+
+LaserSell은 WSL (Windows Subsystem for Linux)을 통해 Windows에서 실행됩니다.
+
+### 1. WSL 설치
+
+관리자 권한으로 PowerShell을 엽니다:
+
+```shellscript
+wsl --install
+```
+
+컴퓨터를 재시작합니다.
+
+### 2. LaserSell 설치
+
+WSL 배포판(예: Ubuntu)을 열고 실행합니다:
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+</Tab>
+<Tab title="Docker">
+
+### 1. 준비
+
+[Docker Desktop](https://www.docker.com/products/docker-desktop/)을 설치하고 `lasersell`이라는 빈 폴더를 만듭니다.
+
+### 2. 실행
+
+터미널을 열고 폴더로 이동한 후 실행합니다:
+
+**macOS / Linux:**
+
+```shellscript
+docker run -it --rm -v "$(pwd):/app/.lasersell" lasersell/lasersell
+```
+
+**Windows (PowerShell):**
+
+```shellscript
+docker run -it --rm -v ${PWD}:/app/.lasersell lasersell/lasersell
+```
+
+첫 실행 시 컨테이너 내에서 설정 마법사가 시작됩니다. 구성 파일은 마운트된 폴더에 기록되며 실행 간에 유지됩니다.
+
+</Tab>
+</Tabs>
+
+## 업그레이드
+
+| 방법 | 명령 |
+|--------|---------|
+| APT | `sudo apt update && sudo apt install lasersell` |
+| Homebrew | `brew upgrade lasersell` |
+| install.sh / Tarball | `curl -fsSL https://dl.lasersell.io/install.sh \| bash` 재실행 |
+| Docker | `docker pull lasersell/lasersell` |
+
+## CLI 플래그
+
+| 플래그 | 단축 | 설명 |
+|------|-------|-------------|
+| `--setup` | | 온보딩 마법사 강제 실행 |
+| `--config <path>` | `-f` | 커스텀 구성 파일 경로 |
+| `--debug` | | `~/.lasersell/debug.log`에 디버그 수준 로그 작성 |
+| `--smoke` | | 연결 헬스 체크 실행 후 종료 |
+| `--export-private-key` | | 지갑의 base58 개인키를 stdout으로 내보내기 |
+
+`--smoke`, `--setup`, `--export-private-key`는 상호 배타적입니다.

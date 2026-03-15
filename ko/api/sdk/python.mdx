@@ -1,0 +1,41 @@
+---
+title: "Python SDK"
+description: "LaserSell Python SDK를 설치, 구성, 사용하여 비동기 패턴으로 트랜잭션을 빌드하고 포지션을 스트리밍하세요."
+---
+
+전체 Python SDK 참조는 영문 문서 [Python SDK](/api/sdk/python)를 참조하세요. 모든 코드 블록과 SDK 예제는 영문 원본과 동일합니다.
+
+## 설치
+
+```bash
+pip install lasersell-sdk
+```
+
+추가 기능을 위한 선택적 extras:
+
+```bash
+# 트랜잭션 서명 (solders 필요)
+pip install lasersell-sdk[tx]
+
+# WebSocket 스트림 (websockets 필요)
+pip install lasersell-sdk[stream]
+
+# 둘 다
+pip install lasersell-sdk[tx,stream]
+```
+
+## 모듈
+
+| Import 경로                               | 목적                                |
+|-------------------------------------------|----------------------------------------|
+| `lasersell_sdk.exit_api`                  | `ExitApiClient`, 요청/응답 타입, `ExitApiError` |
+| `lasersell_sdk.tx`                        | `sign_unsigned_tx`, `send_transaction`, `SendTarget*` 클래스 |
+| `lasersell_sdk.stream.client`             | `StreamClient`, `StreamConfigure`, `StreamSender` |
+| `lasersell_sdk.stream.session`            | `StreamSession`, `StreamEvent`, `PositionHandle` |
+| `lasersell_sdk.stream.proto`              | 메시지 타입 (`ServerMessage`, `ClientMessage`, `StrategyConfigMsg`) |
+
+전체 API 클라이언트 사용법, 스트림 세션 코드, 유동성 스냅샷, 트랜잭션 헬퍼, 오류 처리, 키페어 로딩에 대한 코드 예제는 영문 원본 문서를 참조하세요.
+
+## 전체 예제
+
+전체 빌드, 서명, 제출 워크플로우는 [빠른 시작](/api/quickstart)을 참조하세요.

@@ -1,0 +1,90 @@
+---
+title: "初始设置"
+description: "LaserSell 设置向导的操作说明，创建你的配置和加密钱包。"
+---
+
+设置向导在首次启动时自动运行。随时使用 `lasersell --setup` 重新运行。
+
+## 你需要准备的
+
+- 来自 [Helius](https://helius.dev)、[Chainstack](https://chainstack.com) 或任何 Solana RPC 提供商的 **RPC URL**
+- 来自 [app.lasersell.io](https://app.lasersell.io) 的 **LaserSell API 密钥**（免费）
+- 钱包计划：创建新钱包，或准备好你的**助记词**、**base58 私钥**或 **Solana 密钥对 JSON**
+
+## 向导创建的内容
+
+- `~/.lasersell/config.yml`（RPC、API 密钥、策略）
+- `~/.lasersell/wallet.keystore.json`（加密钱包）
+
+## 向导操作说明
+
+### 凭证
+
+```
+RPC URL (private recommended): https://your-private-rpc.example.com
+LaserSell API key: ********
+```
+
+API 密钥输入被遮蔽。生产环境强烈建议使用私有 RPC。
+
+### 策略
+
+向导提示你配置每个退出条件。根据你的交易风格和风险承受能力设置值。
+
+- **目标利润**：利润达到此 % 时卖出（例如 `6%`）
+- **止损**：亏损达到此 % 时卖出（例如 `10%`）
+- **追踪止损**：利润从峰值下降此 % 时卖出（例如 `5%`）
+- **截止时间**：N 秒后强制卖出（例如 `120`）
+- **滑点容忍度**：卖出的最大滑点（例如 `20%`）
+- **毕业即卖**：代币迁移到 AMM 时自动卖出（`y/N`）
+
+至少一个退出条件（目标利润、止损、追踪止损或截止时间）必须启用。你可以稍后通过编辑 `~/.lasersell/config.yml` 并重启守护进程来更改这些设置，或者重新运行 `lasersell --setup`。
+
+### 钱包
+
+**检测到现有密钥库？** 你可以复用它或创建/导入不同的钱包。
+
+**创建新钱包：** LaserSell 生成一个 12 个单词的助记词并显示一次。立即保存。
+
+<Warning>
+你不会再次看到助记词。如果你丢失了它，你就丢失了钱包。
+</Warning>
+
+**导入现有钱包：** 选择以下之一：
+
+1. **Base58 私钥**（输入被遮蔽）
+2. **助记词**（使用派生路径 `m/44'/501'/0'/0'`）
+3. **Solana 密钥对 JSON** 文件路径
+
+导入后，验证显示的公钥是否与你预期的钱包匹配。
+
+### 密码短语
+
+设置密码短语以加密你的密钥库：
+
+```
+Keystore passphrase: ********
+Confirm passphrase: ********
+```
+
+<Warning>
+没有"忘记密码"功能。如果你丢失了密码短语，密钥库将无法恢复。你的恢复方式是从助记词或私钥重新导入钱包。
+</Warning>
+
+### 审核并写入
+
+LaserSell 显示你的设置摘要并询问是否写入配置。确认以保存。
+
+## 设置后
+
+LaserSell 继续正常启动。未来启动时，它会要求你输入密钥库密码短语以解锁钱包。
+
+对于无头/自动化运行，设置 `LASERSELL_WALLET_PASSPHRASE` 环境变量。
+
+## 故障排除
+
+**"config file not found; run --setup in an interactive terminal"**
+向导需要真实的 TTY。通过 SSH 连接到机器或打开本地终端并运行 `lasersell --setup`。
+
+**导入的助记词给出了错误的地址**
+LaserSell 使用 Solana 的标准派生路径（`m/44'/501'/0'/0'`）。如果你的钱包使用不同的派生方式，请通过 base58 私钥或密钥对 JSON 导入。

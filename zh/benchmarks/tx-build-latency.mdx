@@ -1,0 +1,108 @@
+---
+title: "交易构建延迟"
+description: "开源基准测试，比较 LaserSell API、PumpFun SDK、PumpPortal API 和 Jupiter Metis API 的 Solana 交易构建延迟。"
+---
+
+当 LaserSell 检测到退出条件时，卖出交易需要尽快构建并返回。每一毫秒的构建延迟都意味着你的交易晚一毫秒到达网络。
+
+我们开源了交易构建基准测试，任何人都可以验证这些数据。基准测试比较了四种构建 Solana 兑换交易的方法：LaserSell API、PumpFun SDK、PumpPortal API 和 Jupiter Metis API。
+
+所有基准测试运行 20 次迭代并有一轮预热，测量从请求到接收未签名交易的时间。
+
+## 同机房服务器（退出智能流）
+
+这是自动退出中真正重要的延迟。当退出智能流检测到你的止盈、止损或追踪止损被触发时，它通过同机房网络调用 LaserSell API 构建卖出交易。然后将交易返回给你的客户端进行签名。
+
+### 买入交易构建
+
+0.01 SOL 买入，20% 滑点，20 次迭代：
+
+| 方法 | 平均值 | 最小值 | 最大值 | 中位数 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **4.53 ms** | **3.39 ms** | **6.84 ms** | **4.10 ms** |
+| PumpPortal API | 65.24 ms | 26.18 ms | 264.29 ms | 46.34 ms |
+| Jupiter Metis API | 95.03 ms | 79.30 ms | 115.76 ms | 93.73 ms |
+| PumpFun SDK | 123.34 ms | 103.46 ms | 208.71 ms | 118.24 ms |
+
+### 卖出交易构建
+
+1,000,000 代币，20% 滑点，20 次迭代：
+
+| 方法 | 平均值 | 最小值 | 最大值 | 中位数 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **5.32 ms** | **3.38 ms** | **15.03 ms** | **4.46 ms** |
+| PumpPortal API | 80.74 ms | 27.75 ms | 576.28 ms | 38.18 ms |
+| PumpFun SDK | 120.81 ms | 96.53 ms | 143.23 ms | 121.65 ms |
+| Jupiter Metis API | 168.84 ms | 159.10 ms | 177.35 ms | 169.11 ms |
+
+在同机房路径上，LaserSell 构建交易平均不到 5 毫秒。次快的方法慢了超过 12 倍。这是退出智能流用于自动退出的路径。
+
+## 公共互联网（SDK 和 API）
+
+通过公共互联网的标准 API 延迟，从 MacBook Pro 测量。这代表了开发者从自己的应用程序中直接调用 REST API 时所体验到的延迟。
+
+桌面应用用户不会受到这些数字的影响。桌面应用通过退出智能流接收预构建的退出交易，该流在同机房路径上构建交易（即上面那些低于 5 毫秒的数字），然后通过持久化的 WebSocket 连接推送给客户端。
+
+### 买入交易构建
+
+0.01 SOL 买入，20% 滑点，20 次迭代：
+
+| 方法 | 平均值 | 最小值 | 最大值 | 中位数 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **71.21 ms** | **62.77 ms** | **81.30 ms** | **71.16 ms** |
+| PumpPortal API | 151.08 ms | 120.96 ms | 246.40 ms | 141.44 ms |
+| Jupiter Metis API | 179.83 ms | 153.17 ms | 370.01 ms | 168.11 ms |
+| PumpFun SDK | 790.94 ms | 278.57 ms | 4,570.26 ms | 364.92 ms |
+
+### 卖出交易构建
+
+1,000,000 代币，20% 滑点，20 次迭代：
+
+| 方法 | 平均值 | 最小值 | 最大值 | 中位数 |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **74.77 ms** | **65.13 ms** | **108.67 ms** | **71.72 ms** |
+| PumpPortal API | 152.08 ms | 111.91 ms | 554.96 ms | 120.59 ms |
+| Jupiter Metis API | 181.73 ms | 155.88 ms | 222.54 ms | 174.92 ms |
+| PumpFun SDK | 541.00 ms | 277.65 ms | 2,029.10 ms | 317.28 ms |
+
+通过公共互联网，LaserSell 始终是最快的，且方差最小。PumpFun SDK 显示出最大的波动性，买入的最差延迟超过 4 秒，卖出超过 2 秒。这些数字与使用 SDK 和 API 构建自己工具的集成开发者相关。
+
+## 比较内容
+
+每种方法采用不同的方式构建兑换交易：
+
+| 方法 | 方式 |
+| :--- | :--- |
+| **LaserSell API** | 单次 API 调用。服务器构建完整交易并返回，随时可以签名。 |
+| **PumpFun SDK** | 本地构建。发起多次 RPC 调用以获取链上状态，然后在本地组装指令。 |
+| **PumpPortal API** | 向 PumpPortal 发起单次 API 调用。 |
+| **Jupiter Metis API** | 两次 API 调用。先是报价请求，然后是兑换构建请求。 |
+
+LaserSell 的单次调用架构消除了往返延迟，这就是它始终优于多步骤方法的原因。
+
+## 为什么这很重要
+
+在自动交易中，交易构建延迟直接影响执行质量。当一个 meme 币开始暴跌时，5 毫秒构建和 170 毫秒构建之间的差异可能决定你的退出是在触发信号的同一个区块落地，还是在几个区块之后落地，那时价格已经进一步向不利方向移动。
+
+对于退出智能流来说，这意味着你的自动退出在检测和广播之间具有最小的开销。对于使用 SDK 和 API 构建自己工具的用户来说，这意味着更快的往返和更响应的应用。
+
+## 自己运行基准测试
+
+基准测试是开源的。克隆仓库并在你自己的基础设施上运行：
+
+```bash
+git clone https://github.com/lasersell/benchmarks
+cd benchmarks
+
+# 买入交易构建
+cd buy-tx-build
+npm install && npm run build
+npm run bench
+
+# 卖出交易构建
+cd ../sell-tx-build
+npm install && npm run build
+npm run bench
+```
+
+你需要一个 LaserSell API 密钥（在 [app.lasersell.io](https://app.lasersell.io) 免费获取）、一个 Solana RPC URL 和一个 Pump.fun 代币地址。完整配置选项请参阅仓库 README。

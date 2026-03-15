@@ -1,0 +1,55 @@
+---
+title: "Aplicación de escritorio"
+description: "LaserSell Desktop es una aplicación de trading nativa para macOS que monitorea tus posiciones en Solana en tiempo real y ejecuta salidas automatizadas en el momento en que se cumplen tus condiciones."
+---
+
+LaserSell Desktop es la forma principal de usar LaserSell. Es una aplicación nativa para macOS que se conecta directamente al Exit Intelligence Stream de LaserSell, monitorea cada posición en todas tus wallets en tiempo real y ejecuta ventas automáticamente cuando se cumplen tus condiciones de take profit, stop loss, trailing stop, deadline o venta por graduación.
+
+Sin pestañas del navegador que gestionar. Sin ventanas emergentes de wallet que aprobar. Configuras tu estrategia, compras tokens donde normalmente los compras, y dejas que la aplicación se encargue del resto.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Active Positions.mp4"
+/>
+
+## Qué hace la aplicación de escritorio
+
+1. **Detecta tus compras automáticamente.** En el momento en que compras un token en cualquier plataforma (Axiom, Photon, BullX, Phantom o cualquier otra), la aplicación lo detecta y comienza a monitorear.
+2. **Evalúa tu estrategia de salida en cada actualización de precio.** Take profit, stop loss, trailing stop, deadline timeout y venta por graduación se ejecutan en paralelo. Lo que se active primero ejecuta la salida.
+3. **Vende automáticamente.** En el momento en que se activa tu condición de salida, LaserSell construye la transacción en menos de 5 ms, la firma localmente con tus claves cifradas y la transmite directamente a la red Solana. No se requiere intervención humana una vez que la estrategia está configurada. Eso es más de 12 veces más rápido que el siguiente método más cercano (ver [benchmarks](/benchmarks/tx-build-latency)).
+4. **Mantiene tus claves seguras.** Cada wallet está cifrada en tu máquina con una frase de contraseña que solo tú conoces. LaserSell nunca tiene acceso a tus claves privadas.
+
+## Características principales
+
+- **Panel de posiciones activas** con PnL en tiempo real, datos de mercado y salidas manuales con un clic
+- **Configuración de estrategia de salida** con ladders de take profit de un solo nivel o multinivel, trailing stops y guardas de liquidez
+- **Mirror Trading** para copiar operaciones de wallets externas con montos de compra por wallet y seguimiento de rendimiento
+- **Wallet integrada** con envío, recepción, swap y gestión de múltiples wallets
+- **Analíticas** con gráficos de PnL diario, tasa de victorias, desglose de razones de salida e insights de trading personalizados
+- **Logros** en 10 categorías con niveles de rareza
+- **Touch ID** para desbloqueo rápido de wallet en macOS
+- **7 idiomas** (inglés, chino, japonés, coreano, español, ruso, árabe)
+
+## Mercados soportados
+
+La aplicación monitorea y auto vende en todos los principales launchpads y DEXs de Solana:
+
+- Pump.fun y PumpSwap
+- Meteora DBC y DAMM V2
+- Raydium Launchpad y CPMM
+
+Los tokens en mercados no soportados aún pueden intercambiarse manualmente a través de la integración con Jupiter.
+
+## Primeros pasos
+
+1. [Descargar e instalar](/desktop/installation) la aplicación.
+2. [Iniciar sesión y configurar tu wallet](/desktop/onboarding).
+3. [Configurar tu estrategia de salida](/desktop/exit-strategy).
+4. Comprar un token en cualquier plataforma. LaserSell se encarga de la salida.
+
+## Para desarrolladores
+
+Si quieres construir tu propia aplicación sobre LaserSell en lugar de usar la aplicación de escritorio, el mismo motor de Exit Intelligence está disponible a través del [SDK y LaserSell API](/api/overview). La aplicación de escritorio está construida sobre él.

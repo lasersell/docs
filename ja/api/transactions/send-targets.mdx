@@ -1,0 +1,24 @@
+---
+title: "送信ターゲット"
+description: "署名済みトランザクションの送信方法を選択: Default RPC、カスタムRPC、Helius Sender、またはAstralane Iris。"
+---
+
+送信ターゲットの完全な説明、4つのターゲットのSDKコード例、Astralaneリージョン、推奨設定については、[英語版ドキュメント](/api/transactions/send-targets)を参照してください。
+
+## 利用可能なターゲット
+
+| ターゲット | 説明 |
+|---------------------------------|-----------------------|
+| Default RPC | テストと開発用のSolana公開メインネットベータエンドポイント |
+| Custom RPC | Helius、Chainstack等のプライベートRPCエンドポイント（本番推奨） |
+| Helius Sender | 最適化されたトランザクションランディングのためのHelius `/fast`エンドポイント（APIキー不要） |
+| Astralane Iris | リージョナルエンドポイントによるレイテンシ最適化（Astralane APIキーが必要） |
+
+## 推奨
+
+| ユースケース | 推奨ターゲット |
+|---------------------------------|-----------------------|
+| テストと開発 | Default RPC |
+| 本番（一般） | Helius Sender |
+| 本番（レイテンシ重視） | Astralane Iris |
+| 本番（既存RPCセットアップ） | Custom RPC |

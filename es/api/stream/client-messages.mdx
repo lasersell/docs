@@ -1,0 +1,36 @@
+---
+title: "Mensajes del cliente"
+description: "Esquema completo y ejemplos JSON para los 8 tipos de mensajes del cliente enviados al Exit Intelligence Stream."
+---
+
+## Tipos de mensajes
+
+| Tipo                   | Descripción                                        |
+|------------------------|----------------------------------------------------|
+| `ping`                 | Sonda de latencia; el servidor responde con `pong`. |
+| `configure`            | Configuración inicial de sesión con wallets y estrategia. |
+| `update_strategy`      | Cambiar parámetros de estrategia durante la sesión. |
+| `close_position`       | Eliminar una posición del seguimiento.              |
+| `request_exit_signal`  | Solicitar manualmente una transacción de salida.    |
+| `update_wallets`       | Añadir o eliminar wallets durante la sesión.        |
+| `update_position_strategy` | Anular estrategia para una sola posición.      |
+| `update_watch_wallets`     | Añadir o actualizar wallets de observación para copy trading. |
+
+## `configure`
+
+Enviado una vez después de recibir `hello_ok`. Establece las wallets a observar y la estrategia a evaluar.
+
+| Campo                  | Tipo       | Requerido | Descripción                                     |
+|------------------------|------------|----------|-------------------------------------------------|
+| `wallet_pubkeys`       | `string[]` | Sí       | Una o más claves públicas de wallets a monitorear. |
+| `strategy`             | `object`   | Sí       | Configuración de estrategia. Ver [Configuración de estrategia](/api/stream/strategy-configuration). |
+| `deadline_timeout_sec` | `number`   | No       | Segundos de inactividad antes de que el servidor auto genere una señal de salida. Omitir o establecer en `0` para deshabilitar. |
+| `send_mode`            | `string`   | No       | Modo de envío de transacción: `"rpc"`, `"helius_sender"` o `"astralane"`. Por defecto: `"rpc"`. |
+| `tip_lamports`         | `number`   | No       | Tip de priority fee en lamports. Por defecto: `1000` (0.001 SOL). |
+| `watch_wallets`        | `WatchWalletEntryMsg[]` | No | Lista opcional de wallets externas para reflejar en copy trading. |
+
+<Note>
+Todas las wallets en `wallet_pubkeys` deben estar [registradas](/api/exit-api/wallets) en tu cuenta antes de conectar. El stream rechazará wallets no registradas con el código de error `wallet_not_registered`.
+</Note>
+
+Para esquemas JSON completos y ejemplos de código de los 8 tipos de mensajes del cliente en los 4 SDKs, consulta la [documentación en inglés](/api/stream/client-messages).

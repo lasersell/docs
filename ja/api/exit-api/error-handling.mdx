@@ -1,0 +1,238 @@
+---
+title: "エラー処理"
+description: "HTTPステータスコード、エラーエンベロープ形式、ExitApiErrorの種類、LaserSell APIのリトライ動作。"
+---
+
+## HTTPステータスコード
+
+| ステータス | 意味 | リトライ可能 |
+|--------|------------------------------------|-----------|
+| 200    | 成功 | N/A |
+| 400    | 不正リクエスト（無効なパラメータ、無効なミント、非対応トークンプログラム） | いいえ |
+| 401    | 未認証（APIキーの欠落または無効） | いいえ |
+| 404    | 非対応マーケットまたはミント未インデックス | いいえ（下記参照） |
+| 422    | 処理不能（有効なリクエストだが実行可能なルートなし） | いいえ |
+| 429    | レート制限 | はい |
+| 502    | Bad Gateway（上流RPCまたはDEX障害） | はい |
+| 503    | サービス利用不可（ルーター未準備またはポーズ中） | はい |
+| 500    | 内部サーバーエラー | はい |
+
+## レスポンスエンベロープ
+
+### 成功
+
+```json
+{
+  "status": "ok",
+  "tx": "base64-encoded unsigned transaction",
+  "route": { "market_type": "pumpswap", "pool_id": "..." }
+}
+```
+
+### 非対応マーケット
+
+サポートされているDEXでミントに実行可能なルートがない場合に返されます。`message`フィールドは人間とAIが読める説明を提供します。
+
+```json
+{
+  "status": "unsupported",
+  "reason": "no_route",
+  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+}
+```
+
+| 理由 | ステータス | 説明 |
+|--------|--------|-------------|
+| `no_route` | 404 | サポートされているDEXにこのミントのプールがない |
+| `invalid_mint` | 400 | ミントアドレスがオンチェーンに存在しない |
+| `unsupported_token_program` | 400 | トークンがSPL TokenまたはToken-2022以外のプログラムを使用 |
+
+### 未インデックス
+
+ミントは存在するがまだ解決されていない場合に返されます。短い遅延後にリトライしてください。
+
+```json
+{
+  "status": "not_indexed",
+  "mint": "So11111111111111111111111111111111111111112",
+  "reason": "mint not indexed yet; try again shortly"
+}
+```
+
+### エラー
+
+バリデーション失敗、レート制限、サーバーエラーの一般的なエラーレスポンスです。
+
+```json
+{
+  "error": "descriptive error message"
+}
+```
+
+SDKはすべてのレスポンスバリアントを解析し、`ExitApiError`型を通じて提供します。
+
+## `ExitApiError`の種類
+
+すべてのSDKは`kind`識別子を持つ`ExitApiError`（または同等のもの）を公開します:
+
+| 種類 | トリガー | リトライ可能 |
+|-------------------|--------------------------------------------|-----------|
+| `transport`       | ネットワーク障害、DNSエラー、タイムアウト | はい |
+| `http_status`     | 非2xx HTTPレスポンス | ステータスが500以上または429の場合はい |
+| `envelope_status` | サーバーが`{ "status": "error" }`を返した | いいえ |
+| `parse`           | レスポンスボディをJSONとして解析できなかった | いいえ |
+
+### リトライ可能性の確認
+
+<CodeGroup>
+```typescript TypeScript
+import { ExitApiError } from "@lasersell/lasersell-sdk";
+
+try {
+  const response = await client.buildSellTx(request);
+} catch (error) {
+  if (error instanceof ExitApiError) {
+    console.log("Kind:", error.kind);
+    console.log("Retryable:", error.isRetryable());
+    console.log("HTTP status:", error.status);
+    console.log("Body:", error.body);
+  }
+}
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiError
+
+try:
+    response = await client.build_sell_tx(request)
+except ExitApiError as error:
+    print("Kind:", error.kind)
+    print("Retryable:", error.is_retryable())
+    print("HTTP status:", error.status)
+    print("Body:", error.body)
+```
+
+```rust Rust
+use lasersell_sdk::exit_api::ExitApiError;
+
+match client.build_sell_tx(&request).await {
+    Ok(response) => { /* use response */ }
+    Err(error) => {
+        eprintln!("Kind: {:?}", error.kind());
+        eprintln!("Retryable: {}", error.is_retryable());
+    }
+}
+```
+
+```go Go
+import lasersell "github.com/lasersell/lasersell-sdk/go"
+
+resp, err := client.BuildSellTx(ctx, request)
+if err != nil {
+    var apiErr *lasersell.ExitAPIError
+    if errors.As(err, &apiErr) {
+        fmt.Println("Kind:", apiErr.Kind)
+        fmt.Println("Retryable:", apiErr.IsRetryable())
+        fmt.Println("HTTP status:", apiErr.Status)
+    }
+}
+```
+</CodeGroup>
+
+## 組み込みリトライ動作
+
+すべてのSDKには以下のデフォルトで自動リトライが含まれています:
+
+| 設定 | デフォルト値 |
+|---------------------|---------------|
+| 最大試行回数 | 2 |
+| 初期バックオフ | 25 ms |
+| 最大バックオフ | 25 ms |
+| ジッター | 25 ms |
+| 接続タイムアウト | 200 ms |
+| 試行タイムアウト | 900 ms |
+
+リトライは`isRetryable()`が`true`を返すエラー（トランスポート障害、5xxレスポンス、429レート制限）に対してのみ発動します。
+
+### リトライポリシーのカスタマイズ
+
+<CodeGroup>
+```typescript TypeScript
+const client = ExitApiClient.withOptions("YOUR_API_KEY", {
+  attempt_timeout_ms: 2000,
+  retry_policy: {
+    max_attempts: 3,
+    initial_backoff_ms: 50,
+    max_backoff_ms: 200,
+    jitter_ms: 50,
+  },
+});
+```
+
+```python Python
+from lasersell_sdk.exit_api import ExitApiClient, ExitApiClientOptions
+from lasersell_sdk.retry import RetryPolicy
+
+client = ExitApiClient.with_options(
+    "YOUR_API_KEY",
+    ExitApiClientOptions(
+        attempt_timeout_s=2.0,
+        retry_policy=RetryPolicy(
+            max_attempts=3,
+            initial_backoff_ms=50,
+            max_backoff_ms=200,
+            jitter_ms=50,
+        ),
+    ),
+)
+```
+
+```rust Rust
+use std::time::Duration;
+use lasersell_sdk::exit_api::{ExitApiClient, ExitApiClientOptions};
+use lasersell_sdk::retry::RetryPolicy;
+use secrecy::SecretString;
+
+let client = ExitApiClient::with_options(
+    Some(SecretString::new("YOUR_API_KEY".into())),
+    ExitApiClientOptions {
+        connect_timeout: Duration::from_millis(200),
+        attempt_timeout: Duration::from_millis(2000),
+        retry_policy: RetryPolicy {
+            max_attempts: 3,
+            initial_backoff: Duration::from_millis(50),
+            max_backoff: Duration::from_millis(200),
+            jitter: Duration::from_millis(50),
+        },
+    },
+)?;
+```
+
+```go Go
+import (
+    "time"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+)
+
+client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAPIClientOptions{
+    ConnectTimeout: 200 * time.Millisecond,
+    AttemptTimeout: 2000 * time.Millisecond,
+    RetryPolicy: lasersell.RetryPolicy{
+        MaxAttempts:    3,
+        InitialBackoff: 50 * time.Millisecond,
+        MaxBackoff:     200 * time.Millisecond,
+        Jitter:         50 * time.Millisecond,
+    },
+})
+```
+</CodeGroup>
+
+## ベストプラクティス
+
+- `400`、`401`、`422`エラーは**リトライしないでください**。コードで修正すべきリクエストまたは認証の問題を示しています。
+- `"status": "unsupported"`の`404`は**リトライしないでください**。ミントにサポートされているマーケットがありません。
+- `"status": "not_indexed"`の`404`は**1回リトライしてください**。ミントの解決に少し時間が必要な場合があります。
+- `429`レスポンスには**指数バックオフで待機してください**。組み込みリトライがこれを自動処理します。
+- `502`および`503`エラーには**バックオフ付きでリトライしてください**。一時的なインフラ問題です。
+- デバッグ用に`kind`、`status`、`body`を含む**エラー詳細をログに記録してください**。
+- 一貫して`envelope_status`エラーが発生する場合は、`mint`アドレスと`user_pubkey`が正しいことを確認してください。

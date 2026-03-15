@@ -1,0 +1,14 @@
+---
+title: "Cifrado de wallet"
+description: "Descubre cómo LaserSell reemplaza los archivos de wallet en texto plano inseguros con un sistema de almacén de claves cifrado y local que asegura que tus claves nunca salgan de tu máquina."
+---
+
+La seguridad es el núcleo de la arquitectura de LaserSell. Entendemos que tus claves privadas controlan tus activos, por eso LaserSell utiliza un **sistema de almacén de claves cifrado, local y de confianza cero**. No almacenamos tus claves en nuestros servidores, y nunca se guardan en texto plano en tu disco duro.
+
+## Arquitectura de seguridad
+
+LaserSell reemplaza los archivos de wallet en "texto plano" inseguros (como los archivos `id.json` estándar) con un **almacén de claves** cifrado.
+
+- **Cifrado:** Tu clave privada se cifra usando **XChaCha20-Poly1305**, un algoritmo de cifrado autenticado de alto rendimiento.
+- **Protección con frase de contraseña:** Debes establecer una **frase de contraseña** para bloquear tu wallet. Usamos **Argon2id** (un algoritmo de hash de contraseñas con uso intensivo de memoria) para derivar tu clave de cifrado, haciendo tu wallet altamente resistente a ataques de fuerza bruta.
+- **Bloqueo de sesión:** Tu wallet solo se descifra en memoria mientras LaserSell está ejecutándose. Si cierras la aplicación, la wallet se bloquea automáticamente.

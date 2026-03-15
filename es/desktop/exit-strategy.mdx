@@ -1,0 +1,84 @@
+---
+title: "Estrategia de salida"
+description: "Configura reglas de salida automatizadas incluyendo take profit, stop loss, trailing stop, ladders de salida, guarda de liquidez y más."
+---
+
+La página de Estrategia de salida es donde defines las reglas que determinan cuándo LaserSell vende tus posiciones. Todas las condiciones se ejecutan en paralelo en cada actualización de precio. La que se active primero ejecuta la salida.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Exit Strategy.mp4"
+/>
+
+## Condiciones básicas de salida
+
+Estas están disponibles en todos los niveles. Cada condición tiene un interruptor para habilitarla o deshabilitarla y un valor para configurar.
+
+### Target Profit
+
+Cuando la ganancia de tu posición alcanza este porcentaje, LaserSell vende. Por ejemplo, un target profit del 25% significa que la aplicación sale cuando tu posición vale el 125% de tu entrada.
+
+### Stop Loss
+
+Cuando la pérdida de tu posición alcanza este porcentaje, LaserSell sale para proteger tu capital restante. Un stop loss del 15% significa que la aplicación vende si el valor cae al 85% de tu entrada.
+
+Una pérdida del 10% es recuperable. Una pérdida del 99% es una cuenta destruida. Los stop losses son tu primera línea de defensa.
+
+### Trailing Stop
+
+En lugar de salir en un objetivo de ganancia fijo, el trailing stop rastrea la ganancia pico de tu posición. Si el precio se revierte y cae el porcentaje configurado desde ese pico, LaserSell activa la salida.
+
+Por ejemplo, si un token sube 50% y tu trailing stop está establecido en 5%:
+
+- LaserSell mantiene durante la subida.
+- Si el precio cae de +50% a +45% (una caída del 5% desde el pico), se activa la salida.
+- Capturas 45% de ganancia en lugar de salir en un fijo del 25%.
+
+Esto permite que las operaciones ganadoras corran mientras proporciona protección automática a la baja en reversiones.
+
+### Venta por graduación
+
+Sale automáticamente cuando un token migra de una curva de vinculación a un DEX (por ejemplo, de Pump.fun a PumpSwap). Muchos tokens experimentan una liquidación brusca inmediatamente después de la graduación, por lo que esto actúa como una salida anticipada antes del dump post migración.
+
+### Deadline Timeout
+
+Fuerza una salida después de un número determinado de segundos independientemente del PnL. Esta es una red de seguridad para posiciones que se mueven lateralmente y atan capital que podría desplegarse en otro lugar.
+
+## Ladder de salida (Tier 1+)
+
+El ladder de salida reemplaza el objetivo único de take profit con una venta escalonada multinivel. En lugar de salir del 100% de tu posición a un precio, aseguras ganancias progresivamente a medida que el precio sube.
+
+Puedes configurar hasta **10 niveles**. Cada nivel define:
+
+- **Profit Trigger %** — El umbral de ganancia que activa este nivel.
+- **Sell %** — El porcentaje de tu posición restante para vender en este nivel.
+- **Trailing Adj %** — Un ajuste opcional del trailing stop aplicado al resto después de que se active este nivel.
+
+**Ejemplo (ladder de 3 niveles):**
+
+| Nivel | Activación | Venta | Efecto |
+| :--- | :--- | :--- | :--- |
+| 1 | +25% | 30% | Vender 30% de la posición, asegurar ganancias tempranas |
+| 2 | +50% | 40% | Vender 40% del resto, capturar la mitad del recorrido |
+| 3 | +100% | 100% | Vender todo lo que queda |
+
+Los triggers de ganancia deben estar en orden ascendente, y el porcentaje total de venta en todos los niveles no puede exceder el 100%.
+
+### Guarda de liquidez
+
+Cuando está habilitada, la guarda de liquidez escala automáticamente las ventas hacia abajo si la liquidez del pool se ha reducido. Si un nivel intenta vender más de lo que el pool puede absorber con un slippage razonable, la guarda reduce la cantidad de venta y redistribuye la porción no vendida al siguiente nivel. Esto evita que salidas grandes destruyan el precio de tu propia posición.
+
+### Trail de breakeven (Tier 2)
+
+Una vez que tu ganancia alcanza un umbral configurable, el trail de breakeven mueve tu stop loss a tu precio de entrada. A partir de ese momento, la posición no puede perder dinero. Sale con ganancia o en breakeven.
+
+## Cambios de estrategia
+
+Los cambios en tu estrategia se guardan automáticamente y se envían al stream de LaserSell inmediatamente. No hay un paso de "desplegar". Cualquier posición abierta comienza a usar la estrategia actualizada en la siguiente actualización de precio.
+
+## Anulaciones por posición
+
+Puedes anular la estrategia global para posiciones individuales desde la vista de detalle de [Posiciones activas](/desktop/active-positions). Ver [Anulación de estrategia por posición](/desktop/active-positions#per-position-strategy-override) para detalles.

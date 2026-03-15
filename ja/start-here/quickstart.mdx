@@ -1,0 +1,93 @@
+---
+title: "クイックスタート"
+description: "LaserSellをインストールして5分以内に自動売却を開始します。"
+---
+
+## 前提条件
+
+- **プライベートRPCエンドポイント。** [Helius](https://helius.dev)、[Shyft](https://shyft.to)、[Chainstack](https://chainstack.com)の無料ティアRPCにサインアップすることを推奨します。プライベートRPCはパブリックSolana RPCよりも高速な残高更新と信頼性の高いトランザクション確認を提供します。
+- **LaserSell APIキー。** [app.lasersell.io](https://app.lasersell.io)でサインアップして無料のAPIキーを作成してください。ほとんどのユーザーにはFreeティアで十分です。
+
+## インストール
+
+```shellscript
+curl -fsSL https://dl.lasersell.io/install.sh | bash
+```
+
+動作確認:
+
+```shellscript
+lasersell --version
+```
+
+プラットフォーム固有の手順が必要ですか？ [インストール概要](/installation/overview)を参照してください。
+
+## セットアップ
+
+LaserSellを実行します。初回起動時にセットアップウィザードが自動的に開始されます:
+
+```shellscript
+lasersell
+```
+
+ウィザードでは、RPC URL、APIキー、戦略設定、ウォレット（新規作成または既存のインポート）、キーストアを暗号化するパスフレーズが求められます。
+
+<Warning>
+「パスワードを忘れた」機能はありません。パスフレーズを紛失するとキーストアは回復できません。
+</Warning>
+
+各プロンプトの詳細なウォークスルーは、[初期設定](/onboarding/initial-setup)を参照してください。
+
+## 確認
+
+ヘルスチェックを実行してすべてが接続されていることを確認します:
+
+```shellscript
+lasersell --smoke
+```
+
+`SMOKE OK`が表示されるはずです。その後LaserSellを起動します:
+
+```shellscript
+lasersell
+```
+
+LaserSellがウォレットの監視を開始しました。
+
+## これからの動作
+
+LaserSellは**パッシブモニター**です。あなたの代わりに取引を行いません。代わりに、ウォレットの新しいトークン購入を監視し、売却側を自動的に処理します。
+
+1. 通常使用しているプラットフォーム（Photon、BullX、Phantom、Jupiterなど）でトークンを購入
+2. LaserSellが数秒以内に購入を自動検出
+3. CLIがライブPnL更新付きでポジションをアクティブとしてログ
+4. エグジット条件（テイクプロフィット、ストップロス、トレーリングストップ、デッドライン、または卒業）が発動すると、LaserSellが自動的に売却トランザクションを構築・署名
+5. あなたは取引を続けます。LaserSellは売却を続けます。
+
+## 最初の自動エグジット
+
+完全なループを体験してLaserSellの動作を確認しましょう:
+
+1. **LaserSellが実行中。** ストリームが接続され、ウォレットが登録されたことを確認するログ出力が表示されます。
+2. **小さなポジションを購入** サポートされているプラットフォームで。実際の資本をリスクにさらさずにメカニクスを観察できるよう、少額から始めてください。
+3. **ログを観察。** 数秒以内に新しいポジションの`session_started`と`pnl_update`イベントが表示されます。
+4. **エグジットが発火。** テイクプロフィット、ストップロス、トレーリングストップ、またはデッドライン条件がトリガーされると、`sell_scheduled`に続いてオンチェーン署名付きの`sell_complete`が表示されます。
+
+これが全ループです。通常通り取引し、LaserSellがすべてのエグジットを処理します。
+
+## 戦略の調整
+
+`~/.lasersell/config.yml`を編集して戦略を調整し、デーモンを再起動します。またはセットアップウィザードを再実行:
+
+```shellscript
+lasersell --setup
+```
+
+完全な設定リファレンスは[設定例](/onboarding/example-configuration)を参照してください。
+
+## 次のステップ
+
+- [CLIリファレンス](/onboarding/lasersell-ui): ログイベント、CLIフラグ、ヘッドレス運用、コピートレーディング
+- [設定例](/onboarding/example-configuration): すべての利用可能なフィールドを含む完全な設定リファレンス
+- [初期設定](/onboarding/initial-setup): `lasersell --setup`でセットアップウィザードを再実行
+- [鍵の安全性](/security/key-safety): 鍵を保護する

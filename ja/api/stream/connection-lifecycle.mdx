@@ -1,0 +1,16 @@
+---
+title: "接続ライフサイクル"
+description: "WebSocketハンドシェイク、hello_ok、制限、再接続動作、ping/pong、Exit Intelligence StreamのStreamClient対StreamSession抽象化。"
+---
+
+接続手順、`limits`オブジェクト、再接続、ping/pong、StreamClient対StreamSession、レーンスプリッティングの詳細については、[英語版ドキュメント](/api/stream/connection-lifecycle)の完全なスキーマとコード例を参照してください。このページの内容は英語版と同一の技術仕様です。
+
+主要な概念:
+
+- **接続**: `wss://stream.lasersell.io/v1/ws`に`x-api-key`ヘッダーで接続
+- **`hello_ok`受信**: セッションID、サーバー時刻、ティア制限を含む
+- **`configure`送信**: ウォレットと戦略を設定
+- **再接続**: SDKが指数バックオフ（100ms開始、最大2000ms）で自動処理
+- **レーンスプリッティング**: 高優先度（エグジットシグナル）と低優先度（`pnl_update`）に分離（TypeScript SDKのみ）
+- **StreamSession**: ポジション追跡、デッドラインタイマー、型付きイベントを含む高レベルラッパー（推奨）
+- **StreamClient**: 生のWebSocket管理を行う低レベルクライアント
