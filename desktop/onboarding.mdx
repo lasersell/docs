@@ -1,0 +1,67 @@
+---
+title: "Onboarding"
+description: "Sign in, set up your wallet, configure your initial exit strategy, and connect to the LaserSell stream."
+---
+
+When you open LaserSell Desktop for the first time, the onboarding wizard walks you through five steps. The whole process takes about two minutes.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Onboarding.mp4"
+/>
+
+## Step 1: Sign In
+
+Sign in with your LaserSell account to get an API key. You have two options:
+
+- **Browser sign-in:** Click "Sign In" and authenticate in your browser. The app receives your API key automatically via a deep link.
+- **Manual paste:** If you already have an API key, paste it directly.
+
+If you do not have an account yet, click "Sign Up" to create one. Accounts are free and instant.
+
+## Step 2: Wallet Setup
+
+You need at least one Solana wallet for LaserSell to monitor. Choose one:
+
+- **Import an existing wallet.** Paste your Base58 private key. This is useful if you already have a funded wallet you trade with.
+- **Generate a new wallet.** LaserSell creates a fresh keypair locally. You will need to fund it with SOL before trading.
+
+Either way, you will set an encryption passphrase (8+ characters). This passphrase encrypts your private key on disk using XChaCha20Poly1305. LaserSell never stores or transmits your keys in plaintext.
+
+<Tip>
+You can add more wallets later from the [Wallet > Manage](/desktop/wallet) tab. Your account tier determines how many wallets you can use simultaneously.
+</Tip>
+
+## Step 3: Initial Strategy
+
+Set your starting exit strategy:
+
+- **Target Profit %** — The profit threshold where LaserSell auto-sells (default: 25%).
+- **Stop Loss %** — The loss threshold where LaserSell cuts the position (default: 15%).
+
+These are starting values. You can configure trailing stops, deadlines, sell-on-graduation, exit ladders, and more from the [Exit Strategy](/desktop/exit-strategy) page after onboarding.
+
+## Step 4: RPC URL
+
+Optionally set a custom Solana RPC endpoint. If you have a dedicated RPC from Helius, QuickNode, Triton, or another provider, paste the URL here for faster and more reliable transaction delivery.
+
+If you skip this step, the app uses a default public endpoint. You can change it later in [Settings > Connection](/desktop/settings).
+
+## Step 5: Crash Reporting
+
+Choose whether to send anonymous crash reports. This helps us find and fix bugs. No wallet data, keys, or trade information is ever included. You can change this at any time in Settings.
+
+## Unlocking
+
+After onboarding, you will see the unlock screen on subsequent launches. Enter your wallet passphrase to decrypt your keys and start monitoring.
+
+If you have multiple wallets with different passphrases, you can unlock them individually or skip wallets you do not need for this session.
+
+On macOS, you can enable **Touch ID** in [Settings > Security](/desktop/security) for faster unlocking.
+
+## What Happens Next
+
+Once unlocked, the app connects to the LaserSell Exit Intelligence stream and begins monitoring your wallets. Any tokens you hold (or buy from this point forward) will appear in the [Active Positions](/desktop/active-positions) dashboard with real-time PnL tracking.

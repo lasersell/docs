@@ -1,0 +1,40 @@
+---
+title: "Insights"
+description: "Personalized trade analysis that detects behavioral patterns, strategy misconfigurations, and missed opportunities across your trading history."
+---
+
+Every trader has blind spots. Insights find yours.
+
+LaserSell analyzes your trading history and generates insights that are personally tailored to you. These are not generic tips or one-size-fits-all advice. They are specific observations drawn from your actual trades, your patterns, and your strategy configuration.
+
+Insights are available to Professional tier and above.
+
+## How Insights Work
+
+LaserSell studies your closed trades over a configurable period (24 hours, 7 days, 30 days, 90 days, or all time) and looks for patterns that may be helping or hurting your performance. When something worth surfacing is found, you receive an insight with a severity level and a suggestion for what to change.
+
+Insights update as new trades close. They are not static. They evolve with your trading.
+
+## Severity Levels
+
+Each insight is tagged with a severity that indicates how much it may be affecting your performance:
+
+- **High** — Significant impact on your P&L. Address these first.
+- **Medium** — Noticeable pattern that could be improved.
+- **Low** — Minor observation or positive trend.
+
+## What to Expect
+
+Insights cover a wide range of your trading behavior. They might tell you that a habit you did not notice is costing you money, that a setting in your strategy is not calibrated for how you actually trade, that you perform better at certain times or on certain markets, or that your overall trajectory is heading in the wrong direction.
+
+Some insights are encouraging. Most are constructive. All of them are based on what your data actually shows, not assumptions about how you should be trading.
+
+## API Access
+
+Insights are available programmatically:
+
+```
+GET /v1/insights?period=7d
+```
+
+Supported periods: `24h`, `7d`, `30d`, `90d`, `all`. Requires Professional tier or above. Free tier returns an empty response with `capped: true`.

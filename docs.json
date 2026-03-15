@@ -18,12 +18,24 @@
             ]
           },
           {
-            "group": "AI Agents",
+            "group": "Analytics & Achievements",
             "pages": [
-              "ai-agents/overview",
-              "ai-agents/build-a-trading-agent",
-              "ai-agents/mcp-server",
-              "ai-agents/coding-skills"
+              "features/analytics",
+              "features/insights",
+              "features/achievements"
+            ]
+          },
+          {
+            "group": "Benchmarks",
+            "pages": [
+              "benchmarks/tx-build-latency"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "security/key-safety",
+              "getting-support/report-a-bug"
             ]
           },
           {
@@ -35,10 +47,12 @@
             ]
           },
           {
-            "group": "Security",
+            "group": "AI Agents",
             "pages": [
-              "security/key-safety",
-              "getting-support/report-a-bug"
+              "ai-agents/overview",
+              "ai-agents/build-a-trading-agent",
+              "ai-agents/mcp-server",
+              "ai-agents/coding-skills"
             ]
           },
           {
@@ -48,6 +62,42 @@
               "glossary",
               "community",
               "getting-support/changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Desktop",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "desktop/overview",
+              "desktop/installation",
+              "desktop/onboarding"
+            ]
+          },
+          {
+            "group": "Trading",
+            "pages": [
+              "desktop/active-positions",
+              "desktop/exit-strategy",
+              "desktop/mirror-trading"
+            ]
+          },
+          {
+            "group": "Wallet",
+            "pages": [
+              "desktop/wallet"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "desktop/activity-log",
+              "desktop/analytics",
+              "desktop/settings",
+              "desktop/security"
             ]
           }
         ]

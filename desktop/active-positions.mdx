@@ -1,0 +1,92 @@
+---
+title: "Active Positions"
+description: "Monitor all your open positions in real time with live PnL, market data, and manual exit controls."
+---
+
+The Active Positions tab is the main screen of the app. It shows every token position across your active wallets, updated in real time as new blocks are produced on Solana.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Active Positions.mp4"
+/>
+
+## Position List
+
+The left panel lists all open positions. Each entry shows the token symbol, your current PnL percentage, and how long the position has been open.
+
+**Sort options:**
+- **Time** — Newest positions first
+- **P&L** — Best performing first
+- **Size** — Largest positions first
+
+You can also search positions by token name or symbol.
+
+When connected to the stream with no open positions, the list shows "Waiting for positions..." until your next buy is detected on-chain.
+
+## Position Detail
+
+Click any position in the list to open the detail view in the right panel.
+
+### Entry and Market Info
+
+- **Entry price and amount** in SOL or USD1
+- **Current price** and **market cap**
+- **Time open** (elapsed since entry)
+- **Token mint address** (click to copy)
+- **Market type** with DEX icon (Pump.fun, PumpSwap, Raydium, Meteora)
+- **Pool liquidity** with slippage bands showing how much of your position can be exited at different slippage levels
+- **Liquidity trend** indicator (stable, increasing, or decreasing)
+
+### Real-Time PnL
+
+- Current profit or loss in SOL/USD1 and as a percentage
+- Current proceeds if you sold now
+- PnL history chart
+
+### Trade History
+
+The trade overlay shows every transaction executed on this position: time, side (buy/sell), token amount, SOL amount, maker wallet, and a link to view the transaction on Solscan.
+
+## Actions
+
+### Exit Now
+
+Triggers an immediate manual exit at market price. LaserSell requests an exit signal from the stream, constructs the transaction, signs it locally, and broadcasts it. Useful when you want to override your strategy and get out right now.
+
+### Buy More
+
+Increase your position size with an additional buy. Uses your configured quick buy amounts.
+
+### Partial Sell
+
+Sell a portion of your position instead of the full amount. You can specify either a token amount or a percentage of your holdings. This is useful for taking profits while keeping a runner.
+
+### Per-Position Strategy Override
+
+Expand the strategy section on any position to customize its exit thresholds independently from your global strategy. You can override:
+
+- Target Profit %
+- Stop Loss %
+- Trailing Stop %
+- Take-profit levels (trigger %, sell %, trailing adjustment %)
+
+When a position has custom thresholds, it shows a **Custom** badge. Click "Reset to Global" to revert to your default strategy.
+
+These overrides are session-scoped. They apply immediately and persist until you close the app, at which point positions revert to the global strategy.
+
+## Sidebar
+
+The sidebar shows your aggregate portfolio:
+
+- **Portfolio Balance** — Combined SOL + USD1 value converted to your display currency
+- **SOL Balance** — Native SOL across all active wallets
+- **USD1 Balance** — USD1 stablecoin balance (when enabled in settings)
+
+The sidebar is resizable. Drag the edge to adjust width, or collapse it to icon-only mode for more screen space.
+
+## Mirrored Positions
+
+Positions opened through [Mirror Trading](/desktop/mirror-trading) appear in the same list, marked with the source wallet. They follow the same exit strategy rules and can be manually exited the same way.

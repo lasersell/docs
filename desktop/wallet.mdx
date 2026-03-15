@@ -1,0 +1,107 @@
+---
+title: "Wallet"
+description: "Manage multiple wallets, view token holdings, send and receive SOL and SPL tokens, and swap through Jupiter."
+---
+
+The Wallet page is your hub for managing wallets, viewing holdings, and executing manual transactions. It has five tabs: Overview, Send, Receive, Swap, and Manage.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Wallet.mp4"
+/>
+
+## Overview
+
+The Overview tab shows all tokens held across your active wallets.
+
+**Each token displays:**
+- Symbol and logo
+- Current price
+- 24-hour price change
+- Your balance and its value in your display currency
+
+**Filters:**
+- **All** — Every token in your wallets
+- **Armed** — Tokens actively monitored by the LaserSell stream
+- **Wallet** — Filter by specific wallet
+
+Tokens on supported markets show an **Armed** badge when LaserSell is monitoring them. Tokens on unsupported markets display a note that auto-sell is not available, with the option to swap manually.
+
+### Token Search
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Search.mp4"
+/>
+
+Search for any Solana token by name, symbol, or mint address. Results show price, market info, and whether the token is on a market LaserSell supports. You can jump directly to the Swap tab with a token pre-selected.
+
+## Send
+
+Transfer SOL or any SPL token to another wallet.
+
+1. Select the wallet to send from.
+2. Enter the recipient address (Solana public key or `.sol` domain).
+3. Choose the asset (SOL or any SPL token in your wallet).
+4. Enter the amount (or click Max).
+5. Review the transaction details.
+6. Confirm to sign and broadcast.
+
+After a successful send, you will see a confirmation with a link to view the transaction on Solscan.
+
+## Receive
+
+Displays your wallet address as both text (with a copy button) and a QR code. Use this to receive SOL or SPL tokens from another wallet on Solana mainnet.
+
+If you have multiple wallets, select which one to display using the wallet selector at the top.
+
+## Swap
+
+Swap between any Solana tokens using Jupiter routing.
+
+1. Select the wallet to swap from.
+2. Choose the input token and enter the amount.
+3. Choose the output token (search by name, symbol, or mint).
+4. Review the quote: output amount, price impact, route, and slippage.
+5. Confirm to sign and execute.
+
+The swap interface fetches live quotes from Jupiter and auto-updates as you type (debounced for performance).
+
+**Unsupported market disclaimer:** If you swap into a token on a market LaserSell does not monitor yet, you will see a note: auto-sell will not be available for that token. You can still hold and sell it manually.
+
+## Manage
+
+Add, back up, and remove wallets.
+
+### Adding a Wallet
+
+- **Import Existing** — Paste a Base58 private key. The key is encrypted immediately with your chosen passphrase.
+- **Generate New** — Creates a fresh keypair locally. Fund it with SOL to start trading.
+
+Each wallet is encrypted independently. You can use different passphrases per wallet.
+
+### Backing Up
+
+Click the backup button on any wallet, enter your passphrase, and your private key is revealed. Copy it and store it securely offline. This is the only way to recover your wallet if you lose access to your machine.
+
+<Warning>
+Never share your private key. LaserSell will never ask for it outside of the import flow.
+</Warning>
+
+### Removing a Wallet
+
+Removal is a two-step process. The app prompts you to back up your key first, then confirms permanent deletion. Once deleted, the encrypted keystore file is removed from disk and cannot be recovered.
+
+### Wallet Limits
+
+| Tier | Active Wallets |
+| :--- | :--- |
+| Personal (Free) | 1 |
+| Professional | 5 |
+| Advanced | 200 |

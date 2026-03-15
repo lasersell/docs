@@ -1,0 +1,90 @@
+---
+title: "Achievements"
+description: "Track your trading milestones across 10 categories with rarity tiers from Common to Legendary."
+---
+
+LaserSell tracks your trading milestones and awards achievements as you hit them. There are over 60 achievements across 10 categories, ranging from Common milestones anyone can hit to Legendary achievements that require exceptional performance.
+
+<Note>
+Unlocked achievements will be redeemable for rewards unlike anything offered to traders before. There is no LaserSell token and there will not be an airdrop.
+</Note>
+
+## How Achievements Work
+
+Achievements are checked automatically on an hourly cycle. Only trades routed through the LaserSell protocol count toward achievement progress. When you unlock a new achievement, the app sends a notification.
+
+Hidden achievements do not reveal their conditions until you unlock them.
+
+## Rarity Tiers
+
+| Rarity | Description |
+| :--- | :--- |
+| **Common** | Entry-level milestones. You will unlock these naturally as you start trading. |
+| **Uncommon** | Moderate accomplishments that require sustained trading activity. |
+| **Rare** | Significant achievements that take real commitment or skill. |
+| **Epic** | Exceptional milestones reached by a small percentage of traders. |
+| **Legendary** | The rarest achievements in the system. These require extraordinary volume, consistency, or a single moment of exceptional performance. |
+
+## Categories
+
+### Volume
+
+Cumulative trading volume milestones. The more you trade through LaserSell, the higher you climb.
+
+### Trades
+
+Total completed trade milestones, from your first trade all the way up to the thousands.
+
+### Streak
+
+Consecutive trading day milestones. A streak day is counted when you complete at least one trade routed through LaserSell. Missing a day resets your current streak.
+
+Your current streak and longest streak are displayed at the top of the Achievements tab in the app.
+
+### Profit
+
+Cumulative realized profit milestones in SOL.
+
+### Speed
+
+Achievements for profitable trades completed in short timeframes. These reward fast execution and quick exits.
+
+### Single Trade
+
+Achievements based on the performance of a single position, from solid returns to extraordinary multipliers.
+
+### Win Rate
+
+Win rate milestones with minimum trade requirements to prevent gaming. Sustaining a high win rate over hundreds of trades is one of the hardest things to do.
+
+### Mirror
+
+Achievements for [Mirror Trading](/desktop/mirror-trading). Tracks your copy trading activity and performance across watched wallets.
+
+### Secret
+
+Hidden achievements with conditions that are not revealed until you unlock them. You will discover these naturally as you trade.
+
+### Mastery
+
+Meta-achievements awarded for completing every achievement in a category. There is one Mastery achievement for each of the other categories. Completing every Secret achievement earns the only Legendary-tier Mastery.
+
+## Streaks
+
+Your trading streak tracks consecutive days with at least one completed trade routed through LaserSell.
+
+- **Current Streak** — How many consecutive days you have traded, counting today.
+- **Longest Streak** — Your all-time record.
+- **Last Trade Date** — When your most recent trade was recorded.
+
+Missing a single day resets your current streak to zero. Your longest streak is preserved permanently.
+
+## API Access
+
+Achievements are available programmatically:
+
+```
+GET /v1/achievements
+```
+
+Returns all achievements with their unlock status and timestamps. Locked achievements in the Secret category return masked descriptions.

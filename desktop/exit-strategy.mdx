@@ -1,0 +1,84 @@
+---
+title: "Exit Strategy"
+description: "Configure automated exit rules including take profit, stop loss, trailing stop, exit ladders, liquidity guard, and more."
+---
+
+The Exit Strategy page is where you define the rules that determine when LaserSell sells your positions. All conditions run in parallel on every price update. Whichever triggers first executes the exit.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Exit Strategy.mp4"
+/>
+
+## Basic Exit Conditions
+
+These are available on all tiers. Each condition has a toggle to enable or disable it and a value to configure.
+
+### Target Profit
+
+When your position's profit reaches this percentage, LaserSell sells. For example, a 25% target profit means the app exits when your position is worth 125% of your entry.
+
+### Stop Loss
+
+When your position's loss reaches this percentage, LaserSell exits to protect your remaining capital. A 15% stop loss means the app sells if the value drops to 85% of your entry.
+
+A 10% loss is recoverable. A 99% loss is a blown account. Stop losses are your first line of defense.
+
+### Trailing Stop
+
+Instead of exiting at a fixed profit target, the trailing stop tracks the peak profit of your position. If the price reverses and drops by the configured percentage from that peak, LaserSell triggers the exit.
+
+For example, if a token pumps 50% and your trailing stop is set to 5%:
+
+- LaserSell holds through the pump.
+- If the price drops from +50% to +45% (a 5% drawdown from peak), the exit fires.
+- You capture 45% profit instead of exiting at a fixed 25%.
+
+This lets winning trades run while still providing automatic downside protection on reversals.
+
+### Sell on Graduation
+
+Automatically exit when a token migrates from a bonding curve to a DEX (for example, from Pump.fun to PumpSwap). Many tokens experience a sharp sell-off immediately after graduation, so this acts as an early exit before the post-migration dump.
+
+### Deadline Timeout
+
+Force an exit after a set number of seconds regardless of PnL. This is a safety net for positions that go sideways and tie up capital that could be deployed elsewhere.
+
+## Exit Ladder (Tier 1+)
+
+The exit ladder replaces the single take-profit target with a multi-level staged sell. Instead of exiting 100% of your position at one price, you lock in profits progressively as the price rises.
+
+You can configure up to **10 levels**. Each level defines:
+
+- **Profit Trigger %** — The profit threshold that activates this level.
+- **Sell %** — The percentage of your remaining position to sell at this level.
+- **Trailing Adj %** — An optional trailing stop adjustment applied to the remainder after this level fires.
+
+**Example (3-level ladder):**
+
+| Level | Trigger | Sell | Effect |
+| :--- | :--- | :--- | :--- |
+| 1 | +25% | 30% | Sell 30% of position, lock in early gains |
+| 2 | +50% | 40% | Sell 40% of remainder, capture mid-run |
+| 3 | +100% | 100% | Sell everything that is left |
+
+Profit triggers must be in ascending order, and the total sell percentage across all levels cannot exceed 100%.
+
+### Liquidity Guard
+
+When enabled, the liquidity guard automatically scales down sells if pool liquidity has thinned. If a level tries to sell more than the pool can absorb at reasonable slippage, the guard reduces the sell amount and redistributes the unsold portion to the next level. This prevents large exits from crashing the price of your own position.
+
+### Breakeven Trail (Tier 2)
+
+Once your profit hits a configurable threshold, the breakeven trail moves your stop loss to your entry price. From that point forward, the position cannot lose money. It either exits at profit or at breakeven.
+
+## Strategy Changes
+
+Changes to your strategy are auto-saved and pushed to the LaserSell stream immediately. There is no "deploy" step. Any open positions begin using the updated strategy on the next price update.
+
+## Per-Position Overrides
+
+You can override the global strategy for individual positions from the [Active Positions](/desktop/active-positions) detail view. See [Per-Position Strategy Override](/desktop/active-positions#per-position-strategy-override) for details.

@@ -1,0 +1,84 @@
+---
+title: "Settings"
+description: "Configure your connection, display preferences, trading parameters, security, language, and more."
+---
+
+The Settings page lets you customize every aspect of the app. Changes are saved automatically.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Settings.mp4"
+/>
+
+## Connection & Account
+
+- **Connection Status** — Shows whether the app is connected to the LaserSell stream (green = connected, red = disconnected).
+- **Account Tier** — Your current subscription: Personal (Free), Professional, or Advanced.
+- **Pause Monitoring** — Temporarily stop all stream monitoring and auto-sells without disconnecting. Useful when you want to hold positions manually.
+
+## Network
+
+### API Key
+
+Your LaserSell API key. Masked by default with a toggle to reveal, and a copy button. If you need a new key, use the sign-in flow to generate one.
+
+### RPC URL
+
+Your Solana RPC endpoint. If you have a dedicated RPC from a provider like Helius, QuickNode, or Triton, set it here for faster and more reliable transactions. The default is a public endpoint.
+
+### Send Mode
+
+How LaserSell submits transactions to the network:
+
+- **RPC** (default) — Direct submission through your RPC endpoint. No additional fees.
+- **Helius Sender** — Optimized transaction delivery through Helius for better landing rates. Requires a Helius API key and a builder tip (recommended: 0.001 SOL).
+- **Astralane Iris** — MEV-protected transaction routing. Requires an Astralane API key and region selection (Frankfurt, Amsterdam, New York, San Francisco, Tokyo, Singapore, and more).
+
+## Display
+
+- **Currency** — Choose your display currency for portfolio values and PnL. Supports 20 currencies across Americas, Europe, Asia Pacific, and Middle East.
+- **Show USD1** — Display your USD1 stablecoin balance in the sidebar.
+- **Mirror USD1 Trading** — Enable USD1 denominated copy trading.
+- **Menu Bar Icon** — Show LaserSell in the macOS menu bar for quick access.
+- **Notification Sound** — Play a coin sound when trades execute.
+- **Connect on Startup** — Automatically connect to the stream when the app launches. Disable this if you want to use the app as a standalone wallet without stream monitoring.
+
+## Trading
+
+- **Quick Buy Amounts (SOL)** — Preset SOL amounts for the quick buy buttons (e.g., 0.1, 0.5, 1.0 SOL).
+- **Quick Buy Amounts (USD1)** — Preset USD1 amounts (shown when USD1 buying is enabled).
+- **Quick Sell Percentages** — Preset sell percentages for partial sells (e.g., 10%, 25%, 50%, 100%).
+- **Slippage Tolerance** — Maximum allowed price slippage on trades, in basis points.
+
+## Security
+
+See [Security](/desktop/security) for details on Touch ID, auto-lock, and encryption.
+
+## Language
+
+Switch the app interface between 7 supported languages:
+
+- English
+- Chinese (中文)
+- Japanese (日本語)
+- Korean (한국어)
+- Spanish (Español)
+- Russian (Русский)
+- Arabic (العربية)
+
+All UI text updates immediately when you change the language.
+
+## Privacy
+
+- **Crash Reports** — Toggle anonymous error reporting via Sentry. No wallet data or trade information is included.
+
+## About
+
+- **Version** — The current app version.
+- **Platform** — Your operating system.
+- **Get Help** — Link to support resources.
+- **Copy Error Report** — Formats recent errors for sharing with support.
+- **Logout** — Clears your API key and returns to the sign-in screen.

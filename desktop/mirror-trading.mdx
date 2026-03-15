@@ -1,0 +1,61 @@
+---
+title: "Mirror Trading"
+description: "Copy-trade from external wallets by watching their on-chain activity and automatically mirroring their buys."
+---
+
+Mirror Trading lets you watch external Solana wallets and automatically copy their trades. When a watched wallet buys a token on a supported market, LaserSell buys the same token from your wallet using your configured buy amount. Your exit strategy then manages the position automatically, just like any other trade.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Mirror Trading.mp4"
+/>
+
+## Adding a Watch Wallet
+
+Enter a Solana wallet address or a `.sol` domain (SNS) to start watching. The app resolves SNS domains automatically, so you can type `alice.sol` instead of a full public key.
+
+Each watch wallet has its own configuration:
+
+- **Buy Amount (SOL)** — How much SOL to spend when mirroring a buy.
+- **Buy Amount (USD1)** — How much USD1 to spend (when USD1 mirroring is enabled in settings).
+- **Nickname** — An optional label for easy identification. Click the pencil icon to edit inline.
+- **Enabled/Disabled** — Toggle to pause or resume mirroring without removing the wallet.
+
+## Watch Wallet Limits
+
+Your account tier determines how many wallets you can watch:
+
+| Tier | Watch Wallet Slots |
+| :--- | :--- |
+| Personal (Free) | 2 |
+| Professional | 10 |
+| Advanced | 25 |
+
+## How Mirroring Works
+
+1. A watched wallet buys a token on a supported market.
+2. LaserSell detects the buy on-chain.
+3. The app automatically buys the same token from your wallet using the configured buy amount for that watch wallet.
+4. Your exit strategy (take profit, stop loss, trailing stop, etc.) applies to the mirrored position.
+5. LaserSell exits the position automatically when conditions are met.
+
+Mirrored positions appear in the [Active Positions](/desktop/active-positions) dashboard alongside your own trades. They are marked with the source wallet so you can tell which positions came from mirroring.
+
+## Mirror Stats
+
+Each watch wallet shows performance statistics:
+
+- Total mirrored trades
+- Win rate
+- Best and worst trade
+- Average hold time
+- Total profit
+
+There is also a global summary across all watched wallets.
+
+## Watched Position Behavior
+
+Positions opened through mirroring follow the same exit rules as your own positions. You can manually exit them, apply per-position strategy overrides, or use partial sells. The only difference is that watched positions do not count toward trade streak achievements.

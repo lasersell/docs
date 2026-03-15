@@ -1,0 +1,38 @@
+---
+title: "Installation"
+description: "Download and install the LaserSell Desktop app on macOS."
+---
+
+## System Requirements
+
+- **macOS 10.15** (Catalina) or later
+- Both Apple Silicon (M1/M2/M3/M4) and Intel Macs are supported
+- An internet connection for real-time position monitoring
+
+## Download
+
+Download the latest version from [lasersell.io](https://www.lasersell.io).
+
+The app is code-signed and notarized by Apple.
+
+## Auto-Updates
+
+LaserSell Desktop checks for updates automatically. When a new version is available, you will see a prompt in the app. Updates are signed and verified before installation.
+
+You can also check manually from the app menu: **LaserSell > Check for Updates**.
+
+## Uninstalling
+
+To uninstall, drag the app to Trash. If you also want to remove your local data (wallets, config, activity log), delete the `~/.lasersell-app/` directory:
+
+```bash
+rm -rf ~/.lasersell-app
+```
+
+<Warning>
+This permanently deletes your encrypted wallet keystores. Make sure you have backed up your private keys before removing this directory.
+</Warning>
+
+## Next Step
+
+Once installed, open the app and follow the [onboarding guide](/desktop/onboarding) to sign in and set up your first wallet.

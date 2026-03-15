@@ -1,0 +1,39 @@
+---
+title: "Activity Log"
+description: "View a real-time log of every trade, send, and receive event across your wallets."
+---
+
+The Activity Log records every trade and transfer that happens across your active wallets during your session.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  src="/videos/LaserSell Activity.mp4"
+/>
+
+## What Gets Logged
+
+Every position open, close, send, and receive event appears as a row in the log. Each entry shows:
+
+- **Time** — When the event occurred (HH:MM:SS)
+- **Side** — Buy, Sell, Send, or Receive
+- **Token** — Symbol and coin image
+- **Wallet** — Which wallet was involved (truncated public key)
+- **Reason** — For auto-exits: what triggered the sell (Target Profit, Stop Loss, Trailing Stop, Graduation, Deadline)
+- **P&L** — Profit or loss in SOL or USD1 for closed positions
+
+The market type is shown as a small colored badge (Pump.fun, PumpSwap, Raydium, Meteora) next to each entry.
+
+## Session Summary
+
+At the top of the log, a summary line shows your session totals: how many buys, sells, and sends have occurred since you opened the app.
+
+## Export
+
+Click the export button to download your activity history as a CSV file. This is useful for record keeping, tax reporting, or analyzing your trades in a spreadsheet.
+
+## Persistence
+
+The activity log stores up to 500 entries locally at `~/.lasersell-app/activity.json`. Older entries are trimmed automatically when the limit is reached. The log persists across app restarts.

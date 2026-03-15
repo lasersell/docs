@@ -1,0 +1,94 @@
+---
+title: "Analytics"
+description: "Track your trading performance across every time period with PnL charts, win rate, volume, hold times, and exit reason breakdowns."
+---
+
+LaserSell tracks every trade you make through the protocol and turns it into actionable performance data. The Analytics dashboard is available in the [Desktop App](/desktop/analytics) and through the API.
+
+## Time Periods
+
+All metrics can be viewed across four time periods:
+
+- **24 Hours** — Today's performance
+- **7 Days** — Weekly snapshot
+- **30 Days** — Monthly overview
+- **All Time** — Your complete trading history
+
+Each period computes its own independent set of metrics, so you can compare how your trading has evolved over time.
+
+## Key Metrics
+
+### Total P&L
+
+Your net realized profit or loss across all closed positions in the selected period. This is the sum of every trade's final profit, displayed in your chosen display currency.
+
+### Total Volume
+
+The sum of all entry amounts (the SOL or USD1 you spent buying tokens) across the period. This measures how much capital you have deployed, regardless of outcome.
+
+### Win Rate
+
+The percentage of your closed trades that ended in profit.
+
+```
+Win Rate = Winning Trades / (Winning Trades + Losing Trades) × 100
+```
+
+Only closed positions count. Open positions are excluded from the win rate calculation.
+
+### Total Trades
+
+The number of positions that closed during the selected period.
+
+### Average P&L
+
+Your average profit or loss per closed trade. This tells you whether your typical trade is profitable and by how much.
+
+### Average Hold Time
+
+How long you hold positions on average before they are closed, whether by your exit strategy or manually. Displayed in hours and minutes.
+
+Short average hold times usually indicate fast-moving memecoin trading. Longer hold times may indicate you are trading larger-cap tokens or using wider trailing stops.
+
+### Best Trade
+
+The single trade with the highest realized profit in the period. Useful for understanding your upside potential and whether your strategy lets winners run far enough.
+
+### Worst Trade
+
+The single trade with the deepest realized loss in the period. If this number is disproportionately large compared to your average P&L, your stop loss may need tightening.
+
+## Daily PnL Chart
+
+A 90-day bar chart showing your daily net profit or loss. Green bars are profitable days, red bars are losing days. Hover over any bar to see the exact figure and trade count for that day.
+
+This chart helps you spot patterns: are you consistently profitable, or do a few big days carry the average? Are your losing days getting smaller over time?
+
+## Exit Reason Breakdown
+
+A visual breakdown of what triggered your exits during the selected period:
+
+| Reason | What It Means |
+| :--- | :--- |
+| **Target Profit** | Your take-profit threshold was reached |
+| **Trailing Stop** | Price pulled back from its peak by your trailing percentage |
+| **Stop Loss** | Price hit your stop-loss threshold |
+| **Graduation** | Token migrated from a bonding curve to a DEX |
+| **Deadline** | Position timed out after your configured deadline |
+
+This breakdown is one of the most useful tools for tuning your strategy. For example:
+
+- If most exits are **Stop Loss**, your stop may be too tight, or you may be entering at bad times.
+- If most exits are **Deadline**, your positions may be going sideways. Consider whether the tokens you are trading have enough volatility for your strategy.
+- If **Trailing Stop** dominates and your P&L is healthy, your strategy is likely working well, capturing runs and exiting on pullbacks.
+- If **Target Profit** fires frequently but your best trades are much higher than your target, you may be leaving money on the table. Consider widening your target or switching to a trailing stop.
+
+## API Access
+
+Analytics are available programmatically through the LaserSell API:
+
+```
+GET /v1/stats
+```
+
+Returns all four time periods with every metric listed above. See the [API documentation](/api/exit-api/history) for response format details.

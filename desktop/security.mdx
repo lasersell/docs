@@ -1,0 +1,45 @@
+---
+title: "Security"
+description: "How LaserSell Desktop protects your wallets with local encryption, Touch ID, and auto-lock."
+---
+
+LaserSell Desktop is non-custodial. Your private keys are encrypted on your machine and never leave your device. Here is how the security model works.
+
+## Wallet Encryption
+
+Every wallet is encrypted at rest using **XChaCha20-Poly1305** with a key derived from your passphrase via **Argon2id** (memory-hard KDF). Each wallet has its own random salt.
+
+The encrypted keystore files are stored at `~/.lasersell-app/wallets/`. Even if someone gains access to your file system, they cannot read your keys without your passphrase.
+
+You can use different passphrases for different wallets. The app prompts for each wallet's passphrase on unlock.
+
+## Touch ID
+
+On macOS, you can enable Touch ID for faster wallet unlocking. When enabled, your passphrase is stored securely in the macOS Keychain and retrieved via biometric authentication on each unlock.
+
+To enable: **Settings > Security > Touch ID Unlock**. You will be asked to enter your passphrase once to store it in the Keychain.
+
+To disable: Toggle the setting off. Your passphrase is removed from the Keychain and you will return to manual passphrase entry.
+
+## Auto-Lock
+
+The app automatically locks your wallets after a period of inactivity. This clears all decrypted keys from memory and pauses monitoring until you unlock again.
+
+**Options:** 15 minutes, 30 minutes, 45 minutes, 1 hour, 2 hours, 6 hours, or Disabled.
+
+The inactivity timer resets on any mouse movement, keyboard input, or click. You can also lock manually at any time from **Settings > Security > Lock LaserSell**.
+
+## Transaction Signing
+
+All transactions are signed locally on your device. LaserSell constructs the transaction, your local keypair signs it, and the signed transaction is broadcast directly to the Solana network via your RPC endpoint. No intermediary ever touches your private key.
+
+## What We Never Do
+
+- **Never transmit your keys.** Private keys and seed phrases are never sent over the network.
+- **Never store keys in plaintext.** The keystore is always encrypted on disk.
+- **Never back up to the cloud.** There is no cloud sync, no remote backup, and no "forgot passphrase" recovery. If you lose your passphrase and have not backed up your key, the wallet is unrecoverable.
+- **Never retain custody.** The LaserSell router program is a pass-through. Your funds move directly from your wallet to the DEX and back.
+
+<Warning>
+Back up your private keys. You can do this from [Wallet > Manage](/desktop/wallet). If you lose access to your machine and your passphrase, there is no recovery path. LaserSell cannot help you recover lost keys.
+</Warning>

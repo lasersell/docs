@@ -1,0 +1,106 @@
+---
+title: "Transaction Build Latency"
+description: "Open-source benchmarks comparing Solana transaction build latency across LaserSell API, PumpFun SDK, PumpPortal API, and Jupiter's Metis API."
+---
+
+When LaserSell detects an exit condition, the sell transaction needs to be built and returned as fast as possible. Every millisecond of build latency is a millisecond your transaction is not on its way to the network.
+
+We open-sourced our transaction build benchmarks so anyone can verify these numbers. The benchmarks compare four methods of building Solana swap transactions: LaserSell API, PumpFun SDK, PumpPortal API, and Jupiter's Metis API.
+
+All benchmarks run 20 iterations with a warmup round, measuring the time from request to receiving an unsigned transaction.
+
+## Co-Located Server (Exit Intelligence Stream)
+
+This is the latency that matters for automated exits. When the Exit Intelligence Stream detects that your take profit, stop loss, or trailing stop has been triggered, it calls the LaserSell API over the co-located network to build the sell transaction. The transaction is then returned to your client for signing.
+
+### Buy Transaction Build
+
+0.01 SOL buy, 20% slippage, 20 iterations:
+
+| Method | Avg | Min | Max | Median |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **4.53 ms** | **3.39 ms** | **6.84 ms** | **4.10 ms** |
+| PumpPortal API | 65.24 ms | 26.18 ms | 264.29 ms | 46.34 ms |
+| Jupiter Metis API | 95.03 ms | 79.30 ms | 115.76 ms | 93.73 ms |
+| PumpFun SDK | 123.34 ms | 103.46 ms | 208.71 ms | 118.24 ms |
+
+### Sell Transaction Build
+
+1,000,000 tokens, 20% slippage, 20 iterations:
+
+| Method | Avg | Min | Max | Median |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **5.32 ms** | **3.38 ms** | **15.03 ms** | **4.46 ms** |
+| PumpPortal API | 80.74 ms | 27.75 ms | 576.28 ms | 38.18 ms |
+| PumpFun SDK | 120.81 ms | 96.53 ms | 143.23 ms | 121.65 ms |
+| Jupiter Metis API | 168.84 ms | 159.10 ms | 177.35 ms | 169.11 ms |
+
+On the co-located path, LaserSell builds transactions in under 5 ms on average. The next fastest method is over 12x slower. This is the path used by the Exit Intelligence Stream for automated exits.
+
+## Public Internet (Desktop App and SDK)
+
+Standard API latency over the public internet, measured from a MacBook Pro. This represents the latency experienced by Desktop App users and developers calling the LaserSell API directly.
+
+### Buy Transaction Build
+
+0.01 SOL buy, 20% slippage, 20 iterations:
+
+| Method | Avg | Min | Max | Median |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **71.21 ms** | **62.77 ms** | **81.30 ms** | **71.16 ms** |
+| PumpPortal API | 151.08 ms | 120.96 ms | 246.40 ms | 141.44 ms |
+| Jupiter Metis API | 179.83 ms | 153.17 ms | 370.01 ms | 168.11 ms |
+| PumpFun SDK | 790.94 ms | 278.57 ms | 4,570.26 ms | 364.92 ms |
+
+### Sell Transaction Build
+
+1,000,000 tokens, 20% slippage, 20 iterations:
+
+| Method | Avg | Min | Max | Median |
+| :--- | :--- | :--- | :--- | :--- |
+| **LaserSell API** | **74.77 ms** | **65.13 ms** | **108.67 ms** | **71.72 ms** |
+| PumpPortal API | 152.08 ms | 111.91 ms | 554.96 ms | 120.59 ms |
+| Jupiter Metis API | 181.73 ms | 155.88 ms | 222.54 ms | 174.92 ms |
+| PumpFun SDK | 541.00 ms | 277.65 ms | 2,029.10 ms | 317.28 ms |
+
+Over the public internet, LaserSell is consistently the fastest with the tightest variance. The PumpFun SDK shows the most volatility, with worst-case latencies exceeding 4 seconds on buys and 2 seconds on sells.
+
+## What is Being Compared
+
+Each method takes a different approach to building a swap transaction:
+
+| Method | Approach |
+| :--- | :--- |
+| **LaserSell API** | Single API call. The server builds the full transaction and returns it ready to sign. |
+| **PumpFun SDK** | Local build. Makes multiple RPC calls to fetch on-chain state, then assembles instructions locally. |
+| **PumpPortal API** | Single API call to PumpPortal. |
+| **Jupiter Metis API** | Two API calls. First a quote request, then a swap build request. |
+
+LaserSell's single-call architecture eliminates round trips, which is why it consistently outperforms multi-step approaches.
+
+## Why This Matters
+
+In automated trading, transaction build latency directly affects execution quality. When a memecoin starts dumping, the difference between a 5 ms build and a 170 ms build can determine whether your exit lands in the same block as the trigger or several blocks later, after the price has already moved further against you.
+
+For the Exit Intelligence Stream, this means your automated exits fire with minimal overhead between detection and broadcast. For SDK and API users building their own tools, it means faster round trips and more responsive applications.
+
+## Run the Benchmarks Yourself
+
+The benchmarks are open source. Clone the repository and run them against your own infrastructure:
+
+```bash
+git clone https://github.com/lasersell/benchmarks
+cd benchmarks
+
+# Buy transaction build
+cd buy-tx-build
+npm install && npm run build
+npm run bench
+
+# Sell transaction build
+cd ../sell-tx-build
+npm install && npm run build
+npm run bench
+```
+
+You will need a LaserSell API key (free at [app.lasersell.io](https://app.lasersell.io)), a Solana RPC URL, and a Pump.fun token mint address. See the repository README for full configuration options.
