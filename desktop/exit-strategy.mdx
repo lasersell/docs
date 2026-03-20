@@ -71,7 +71,7 @@ Profit triggers must be in ascending order, and the total sell percentage across
 
 When enabled, the liquidity guard automatically scales down sells if pool liquidity has thinned. If a level tries to sell more than the pool can absorb at reasonable slippage, the guard reduces the sell amount and redistributes the unsold portion to the next level. This prevents large exits from crashing the price of your own position.
 
-### Breakeven Trail (Tier 2)
+### Breakeven Trail (Tier 1)
 
 Once your profit hits a configurable threshold, the breakeven trail moves your stop loss to your entry price. From that point forward, the position cannot lose money. It either exits at profit or at breakeven.
 
