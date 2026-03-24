@@ -56,6 +56,42 @@ Each watch wallet shows performance statistics:
 
 There is also a global summary across all watched wallets.
 
+## Safety Settings
+
+Mirror trading includes a set of hardening controls that let you limit risk exposure. Open them from the gear icon in the Mirror tab. All settings apply globally across every watched wallet in the session.
+
+### Max Positions Per Wallet
+
+The maximum number of concurrent mirrored positions allowed per watched wallet. When a watched wallet triggers a new buy signal but already has this many open positions, the signal is skipped. Default: **1**.
+
+### Cooldown Between Buys
+
+A minimum waiting period (in seconds) after each mirror buy before the next buy from the same watched wallet can execute. This prevents rapid fire entries when a wallet makes multiple trades in quick succession. Default: **30 seconds**.
+
+### Max Active SOL Exposure
+
+The total SOL value that can be allocated across all active mirrored positions at any given time. If a new mirror buy would push total exposure above this cap, the signal is skipped. Default: **5.0 SOL**.
+
+### Buy Slippage
+
+The maximum slippage tolerance for mirror buy transactions, expressed in basis points. A value of 2500 means up to 25% slippage is allowed. You may want to lower this for high liquidity tokens or raise it for newly launched tokens where price moves quickly. Default: **2500 bps (25%)**.
+
+### Skip Creator Tokens
+
+When enabled, the stream ignores buy signals where the watched wallet is the token creator. This helps avoid situations where a watched trader launches a token and buys their own supply. Default: **off**.
+
+### Minimum Pool Liquidity
+
+Sets a floor on pool liquidity (in SOL) required before a mirror buy will execute. If the token's pool has less than this amount of liquidity, the signal is skipped and you receive a `mirror_buy_failed` event. Useful for filtering out extremely thin markets. Default: **disabled**.
+
+### Max Entry Drift
+
+The maximum percentage that the current token price can differ from the watched wallet's entry price before the mirror buy is skipped. For example, setting this to 5 means that if the price has already moved more than 5% since the watched wallet bought, your mirror buy will not execute. This protects you from entering at a significantly worse price. Default: **disabled**.
+
+### Consecutive Loss Auto Disable
+
+After a watched wallet produces this many consecutive losing trades, the wallet is automatically disabled and you receive a `mirror_wallet_auto_disabled` notification. You can re-enable the wallet manually at any time from the Mirror tab. Default: **disabled**.
+
 ## Watched Position Behavior
 
 Positions opened through mirroring follow the same exit rules as your own positions. You can manually exit them, apply per-position strategy overrides, or use partial sells. The only difference is that watched positions do not count toward trade streak achievements.

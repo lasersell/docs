@@ -157,6 +157,77 @@ if max_tokens is not None:
     response = await client.build_partial_sell_tx(handle, max_tokens, 500, "SOL")
 ```
 
+## Mirror Trading
+
+Configure watch wallets to mirror trades from other wallets. When a watched wallet opens a position on a supported market, the stream sends a `mirror_buy_signal` with an unsigned transaction for your wallet to execute.
+
+```python
+import asyncio
+from lasersell_sdk.stream.client import StreamClient, StreamConfigure
+from lasersell_sdk.stream.session import StreamSession
+from lasersell_sdk.tx import SendTargetHeliusSender, send_transaction, sign_unsigned_tx
+
+async def main():
+    wallet_pubkey = "YOUR_WALLET_PUBKEY"
+
+    client = StreamClient("YOUR_API_KEY")
+    session = await StreamSession.connect(
+        client,
+        StreamConfigure(
+            wallet_pubkeys=[wallet_pubkey],
+            strategy={
+                "target_profit_pct": 50.0,
+                "stop_loss_pct": 25.0,
+            },
+            watch_wallets=[
+                {
+                    "pubkey": "WatchedWalletPubkey...",
+                    "auto_buy": {
+                        "wallet_pubkey": wallet_pubkey,
+                        "amount_quote_units": 100_000_000,
+                        "amount_usd1_units": None,
+                    },
+                    "mirror_sell": False,
+                },
+            ],
+            mirror_config={
+                "max_positions_per_wallet": 1,
+                "cooldown_sec": 30,
+                "max_active_sol": 5.0,
+                "buy_slippage_bps": 2500,
+            },
+        ),
+    )
+
+    while True:
+        event = await session.recv()
+        if event is None:
+            break
+
+        if event.type == "mirror_buy_signal":
+            msg = event.message
+            signed = sign_unsigned_tx(str(msg["unsigned_tx_b64"]), signer)
+            sig = await send_transaction(SendTargetHeliusSender(), signed)
+            session.sender().mirror_buy_result(str(msg["mint"]), True)
+            print(f"Mirror buy submitted: {sig}")
+
+        if event.type == "mirror_buy_failed":
+            msg = event.message
+            print(f"Mirror buy failed: {msg['reason']}")
+
+        if event.type == "exit_signal_with_tx":
+            msg = event.message
+            signed = sign_unsigned_tx(str(msg["unsigned_tx_b64"]), signer)
+            sig = await send_transaction(SendTargetHeliusSender(), signed)
+            print(f"Exit submitted: {sig}")
+
+asyncio.run(main())
+```
+
+The `watch_wallets` list specifies which wallets to mirror. Each entry includes an `auto_buy` configuration that controls how much to spend when mirroring a trade, and a `mirror_sell` flag that determines whether to also mirror sell transactions.
+
+The `mirror_config` dict sets global limits: `max_positions_per_wallet` caps concurrent mirrored positions, `cooldown_sec` enforces a delay between mirror buys, `max_active_sol` limits total SOL exposure, and `buy_slippage_bps` sets the slippage tolerance for mirror buy transactions.
+
 ## Transaction Helpers
 
 ```python

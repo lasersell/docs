@@ -184,6 +184,121 @@ if maxTokens != nil {
 }
 ```
 
+## Mirror Trading
+
+Configure watch wallets to mirror trades from other wallets. When a watched wallet opens a position on a supported market, the stream sends a `MirrorBuySignalServerMessage` with an unsigned transaction for your wallet to execute.
+
+```go
+package main
+
+import (
+    "context"
+    "errors"
+    "fmt"
+    "io"
+    "log"
+
+    "github.com/gagliardetto/solana-go"
+    lasersell "github.com/lasersell/lasersell-sdk/go"
+    "github.com/lasersell/lasersell-sdk/go/stream"
+)
+
+func main() {
+    ctx := context.Background()
+
+    privateKey, err := solana.PrivateKeyFromSolanaKeygenFile("./keypair.json")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    walletPubkey := "YOUR_WALLET_PUBKEY"
+
+    sendMode := "helius_sender"
+    tipLamports := uint64(1000)
+    session, err := stream.ConnectSession(ctx, stream.NewStreamClient("YOUR_API_KEY"), stream.StreamConfigure{
+        WalletPubkeys: []string{walletPubkey},
+        Strategy: stream.StrategyConfigMsg{
+            TargetProfitPct: 50.0,
+            StopLossPct:     25.0,
+        },
+        DeadlineTimeoutSec: 45,
+        SendMode:           &sendMode,
+        TipLamports:        &tipLamports,
+        WatchWallets: []stream.WatchWalletConfig{
+            {
+                Pubkey: "WatchedWalletPubkey...",
+                AutoBuy: &stream.AutoBuyConfig{
+                    WalletPubkey:    walletPubkey,
+                    AmountQuoteUnits: intPtr(100_000_000),
+                },
+                MirrorSell: false,
+            },
+        },
+        MirrorConfig: &stream.MirrorConfig{
+            MaxPositionsPerWallet: 1,
+            CooldownSec:          30,
+            MaxActiveSOL:         5.0,
+            BuySlippageBps:       2500,
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for {
+        event, err := session.Recv(ctx)
+        if errors.Is(err, io.EOF) {
+            break
+        }
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        switch msg := event.Message.(type) {
+        case stream.MirrorBuySignalServerMessage:
+            signedTx, err := lasersell.SignUnsignedTx(msg.UnsignedTxB64, privateKey)
+            if err != nil {
+                log.Printf("Sign error: %v", err)
+                continue
+            }
+            sig, err := lasersell.SendTransaction(
+                ctx, nil, lasersell.SendTargetHeliusSender(), signedTx,
+            )
+            if err != nil {
+                log.Printf("Send error: %v", err)
+                continue
+            }
+            session.Sender().MirrorBuyResult(msg.Mint, true)
+            fmt.Printf("Mirror buy submitted: %s\n", sig)
+
+        case stream.MirrorBuyFailedServerMessage:
+            log.Printf("Mirror buy failed: %s", msg.Reason)
+
+        case stream.ExitSignalWithTxServerMessage:
+            signedTx, err := lasersell.SignUnsignedTx(msg.UnsignedTxB64, privateKey)
+            if err != nil {
+                log.Printf("Sign error: %v", err)
+                continue
+            }
+            sig, err := lasersell.SendTransaction(
+                ctx, nil, lasersell.SendTargetHeliusSender(), signedTx,
+            )
+            if err != nil {
+                log.Printf("Send error: %v", err)
+                continue
+            }
+            fmt.Printf("Exit submitted: %s\n", sig)
+        }
+    }
+}
+
+func intPtr(v int) *int { return &v }
+```
+
+The `WatchWallets` slice specifies which wallets to mirror. Each `WatchWalletConfig` includes an `AutoBuy` configuration that controls how much to spend when mirroring a trade, and a `MirrorSell` flag that determines whether to also mirror sell transactions.
+
+The `MirrorConfig` struct sets global limits: `MaxPositionsPerWallet` caps concurrent mirrored positions, `CooldownSec` enforces a delay between mirror buys, `MaxActiveSOL` limits total SOL exposure, and `BuySlippageBps` sets the slippage tolerance for mirror buy transactions.
+
 ## Transaction Helpers
 
 The second parameter to `SendTransaction` is an `*http.Client`. Pass `nil` to use the SDK's default HTTP client.

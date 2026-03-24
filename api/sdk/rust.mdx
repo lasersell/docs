@@ -154,6 +154,91 @@ if let Some(max_tokens) = session.get_max_sell_at_slippage(position_id, 500) {
 }
 ```
 
+## Mirror Trading
+
+Configure watch wallets to mirror trades from other wallets. When a watched wallet opens a position on a supported market, the stream sends a `MirrorBuySignal` event with an unsigned transaction for your wallet to execute.
+
+```rust
+use lasersell_sdk::stream::client::{StreamClient, StreamConfigure};
+use lasersell_sdk::stream::session::{StreamSession, StreamEvent};
+use lasersell_sdk::stream::proto::{
+    StrategyConfigMsg, WatchWalletConfig, AutoBuyConfig, MirrorConfig,
+};
+use lasersell_sdk::tx::{SendTarget, sign_unsigned_tx, send_transaction};
+use secrecy::SecretString;
+use solana_sdk::signature::read_keypair_file;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let keypair = read_keypair_file("./keypair.json")?;
+    let wallet_pubkey = "YOUR_WALLET_PUBKEY".to_string();
+
+    let client = StreamClient::new(SecretString::new(std::env::var("LASERSELL_API_KEY")?));
+    let session = StreamSession::connect(&client, StreamConfigure {
+        wallet_pubkeys: vec![wallet_pubkey.clone()],
+        strategy: StrategyConfigMsg {
+            target_profit_pct: 50.0,
+            stop_loss_pct: 25.0,
+            trailing_stop_pct: None,
+            sell_on_graduation: None,
+        },
+        deadline_timeout_sec: Some(45),
+        send_mode: Some("helius_sender".to_string()),
+        tip_lamports: Some(1000),
+        watch_wallets: Some(vec![
+            WatchWalletConfig {
+                pubkey: "WatchedWalletPubkey...".into(),
+                auto_buy: Some(AutoBuyConfig {
+                    wallet_pubkey: wallet_pubkey.clone(),
+                    amount_quote_units: Some(100_000_000),
+                    amount_usd1_units: None,
+                }),
+                mirror_sell: false,
+            },
+        ]),
+        mirror_config: Some(MirrorConfig {
+            max_positions_per_wallet: 1,
+            cooldown_sec: 30,
+            max_active_sol: 5.0,
+            buy_slippage_bps: 2500,
+        }),
+    }).await?;
+
+    let http = reqwest::Client::new();
+
+    loop {
+        let event = match session.recv().await {
+            Some(event) => event,
+            None => break,
+        };
+
+        match &event {
+            StreamEvent::MirrorBuySignal { message, .. } => {
+                let signed = sign_unsigned_tx(&message.unsigned_tx_b64, &keypair)?;
+                let sig = send_transaction(&http, &SendTarget::HeliusSender, &signed).await?;
+                session.sender().mirror_buy_result(&message.mint, true);
+                println!("Mirror buy submitted: {sig}");
+            }
+            StreamEvent::MirrorBuyFailed { message, .. } => {
+                eprintln!("Mirror buy failed: {}", message.reason);
+            }
+            StreamEvent::ExitSignalWithTx { message, .. } => {
+                let signed = sign_unsigned_tx(&message.unsigned_tx_b64, &keypair)?;
+                let sig = send_transaction(&http, &SendTarget::HeliusSender, &signed).await?;
+                println!("Exit submitted: {sig}");
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+```
+
+The `watch_wallets` field specifies which wallets to mirror. Each `WatchWalletConfig` includes an `auto_buy` configuration that controls how much to spend when mirroring a trade, and a `mirror_sell` flag that determines whether to also mirror sell transactions.
+
+The `MirrorConfig` struct sets global limits: `max_positions_per_wallet` caps concurrent mirrored positions, `cooldown_sec` enforces a delay between mirror buys, `max_active_sol` limits total SOL exposure, and `buy_slippage_bps` sets the slippage tolerance for mirror buy transactions.
+
 ## Transaction Helpers
 
 ```rust

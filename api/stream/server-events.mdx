@@ -1,6 +1,6 @@
 ---
 title: "Server Events"
-description: "Complete schema and JSON examples for all 9 server message types sent by the Exit Intelligence Stream."
+description: "Complete schema and JSON examples for all 13 server message types sent by the Exit Intelligence Stream."
 ---
 
 ## Message Types
@@ -16,6 +16,9 @@ The server sends messages with a `type` discriminator. All SDKs parse these into
 | `position_opened`       | High     | New position detected and tracking started.    |
 | `position_closed`       | High     | Position tracking ended.                       |
 | `exit_signal_with_tx`   | High     | Exit threshold met; unsigned tx included.      |
+| `mirror_buy_signal`     | High     | Watched wallet bought; unsigned buy tx for your wallet. |
+| `mirror_buy_failed`     | High     | Mirror buy could not be executed.              |
+| `mirror_wallet_auto_disabled` | High | Watch wallet disabled by consecutive loss breaker. |
 | `pnl_update`            | Low      | Periodic profit and loss snapshot.             |
 | `liquidity_snapshot`    | Low      | Slippage bands and liquidity trend (Tier 1+).  |
 | `trade_tick`            | Low      | Real-time trade notification for a tracked position. |
@@ -203,6 +206,82 @@ The most important event. Sent when a position meets your exit criteria. Include
 | `triggered_at_ms`  | `number` | Millisecond timestamp when the signal was generated. |
 | `market_context`   | `object` | Market/pool context for the sell route. May be absent. |
 | `unsigned_tx_b64`  | `string` | Base64 encoded unsigned `VersionedTransaction`.    |
+
+## `mirror_buy_signal`
+
+Sent when a watched wallet opens a position on a supported market and the stream builds an unsigned buy transaction for your wallet. Sign and submit this transaction to mirror the trade.
+
+```json
+{
+  "type": "mirror_buy_signal",
+  "session_id": 42,
+  "watched_wallet": "WatchedWalletPubkey...",
+  "mint": "TokenMint...",
+  "user_wallet": "YourWalletPubkey...",
+  "amount_quote_units": 100000000,
+  "input": "SOL",
+  "unsigned_tx_b64": "AQAAAA...",
+  "slippage_bps": 2500,
+  "send_mode": "helius_sender",
+  "tip_lamports": 1000,
+  "market_context": {
+    "market_type": "pump_swap",
+    "pumpswap": { "pool": "PoolAddress..." }
+  }
+}
+```
+
+| Field                | Type     | Description                                                    |
+|----------------------|----------|----------------------------------------------------------------|
+| `session_id`         | `number` | Session that generated this signal.                            |
+| `watched_wallet`     | `string` | Public key of the watched wallet that triggered the buy.       |
+| `mint`               | `string` | Token mint address being purchased.                            |
+| `user_wallet`        | `string` | Your wallet that will execute the buy transaction.             |
+| `amount_quote_units` | `number` | Buy amount in quote asset atomic units.                        |
+| `input`              | `string` | Quote asset used for the buy: `"SOL"` or `"USD1"`.            |
+| `unsigned_tx_b64`    | `string` | Base64 encoded unsigned `VersionedTransaction`.                |
+| `slippage_bps`       | `number` | Slippage tolerance in basis points.                            |
+| `send_mode`          | `string` | Transaction submission mode. May be absent.                    |
+| `tip_lamports`       | `number` | Priority fee tip in lamports. May be absent.                   |
+| `market_context`     | `object` | Market/pool context for the buy route. May be absent. See [Market Context](/api/reference/market-context). |
+
+## `mirror_buy_failed`
+
+Sent when a mirror buy cannot be executed. Common reasons include insufficient balance, no route found, or pool liquidity below the minimum threshold.
+
+```json
+{
+  "type": "mirror_buy_failed",
+  "watched_wallet": "WatchedWalletPubkey...",
+  "mint": "TokenMint...",
+  "reason": "insufficient_balance"
+}
+```
+
+| Field            | Type     | Description                                          |
+|------------------|----------|------------------------------------------------------|
+| `watched_wallet` | `string` | Public key of the watched wallet that triggered the buy. |
+| `mint`           | `string` | Token mint address that was being purchased.         |
+| `reason`         | `string` | Machine readable reason the buy failed (e.g., `"insufficient_balance"`, `"no_route"`, `"below_min_liquidity"`, `"cooldown_active"`, `"max_positions_reached"`). |
+
+## `mirror_wallet_auto_disabled`
+
+Sent when a watched wallet is automatically disabled by the consecutive loss breaker. After receiving this event the stream will no longer mirror trades from this wallet until you re-enable it.
+
+```json
+{
+  "type": "mirror_wallet_auto_disabled",
+  "watched_wallet": "WatchedWalletPubkey...",
+  "reason": "consecutive_loss_limit_reached",
+  "loss_count": 3
+}
+```
+
+| Field            | Type     | Description                                             |
+|------------------|----------|---------------------------------------------------------|
+| `watched_wallet` | `string` | Public key of the wallet that was disabled.             |
+| `reason`         | `string` | Human readable description of why the wallet was disabled. |
+| `loss_count`     | `number` | Number of consecutive losing trades that triggered the disable. |
 
 ## `pnl_update`
 

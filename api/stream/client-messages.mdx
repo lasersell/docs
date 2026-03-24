@@ -1,6 +1,6 @@
 ---
 title: "Client Messages"
-description: "Complete schema and JSON examples for all 8 client message types sent to the Exit Intelligence Stream."
+description: "Complete schema and JSON examples for all 9 client message types sent to the Exit Intelligence Stream."
 ---
 
 ## Message Types
@@ -15,6 +15,7 @@ description: "Complete schema and JSON examples for all 8 client message types s
 | `update_wallets`       | Add or remove wallets mid session.                 |
 | `update_position_strategy` | Override strategy for a single position.    |
 | `update_watch_wallets`     | Add or update watch wallets for copy trading.|
+| `mirror_buy_result`        | Report outcome of a mirror buy transaction.  |
 
 ## `ping`
 
@@ -52,7 +53,17 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
   "watch_wallets": [
     { "pubkey": "WatchWalletPubkey1..." },
     { "pubkey": "WatchWalletPubkey2...", "auto_buy": { "wallet_pubkey": "YourBuyWallet...", "amount_quote_units": 100000000 } }
-  ]
+  ],
+  "mirror_config": {
+    "max_positions_per_wallet": 1,
+    "cooldown_sec": 30,
+    "skip_creator_tokens": false,
+    "max_active_sol": 5.0,
+    "buy_slippage_bps": 2500,
+    "min_liquidity_sol": null,
+    "max_entry_drift_pct": null,
+    "max_consecutive_losses": null
+  }
 }
 ```
 
@@ -64,6 +75,22 @@ Sent once after receiving `hello_ok`. Sets the wallets to watch and the strategy
 | `send_mode`            | `string`   | No       | Transaction submission mode: `"rpc"`, `"helius_sender"`, or `"astralane"`. Default: `"rpc"`. |
 | `tip_lamports`         | `number`   | No       | Priority fee tip in lamports. Default: `1000` (0.001 SOL). |
 | `watch_wallets`        | `WatchWalletEntryMsg[]` | No       | Optional list of external wallets to mirror for copy trading. Each entry has `pubkey` (string) and optional `auto_buy` (AutoBuyConfigMsg). |
+| `mirror_config`        | `MirrorConfigMsg` | No  | Optional hardening settings for mirror trading. See [Mirror Config](#mirror-config) below. |
+
+### Mirror Config
+
+The `mirror_config` object controls safety limits and behavior for mirror (copy) trading. All fields are optional; the server uses sensible defaults when omitted.
+
+| Field                      | Type      | Default | Description                                                     |
+|----------------------------|-----------|---------|-----------------------------------------------------------------|
+| `max_positions_per_wallet` | `number`  | `1`     | Maximum concurrent mirrored positions per watched wallet. Additional signals are ignored until an existing position closes. |
+| `cooldown_sec`             | `number`  | `30`    | Minimum seconds between mirror buys from the same watched wallet. |
+| `skip_creator_tokens`      | `boolean` | `false` | When `true`, ignore buy signals where the watched wallet is the token creator. |
+| `max_active_sol`           | `number`  | `5.0`   | Maximum total SOL exposure across all active mirrored positions. New signals are skipped when this cap would be exceeded. |
+| `buy_slippage_bps`         | `number`  | `2500`  | Slippage tolerance in basis points for mirror buy transactions (2500 = 25%). |
+| `min_liquidity_sol`        | `number`  | `null`  | Minimum pool liquidity in SOL required to execute a mirror buy. `null` to disable. |
+| `max_entry_drift_pct`      | `number`  | `null`  | Maximum allowed price drift (%) from the watched wallet's entry price. `null` to disable. |
+| `max_consecutive_losses`   | `number`  | `null`  | After this many consecutive losing trades from a watched wallet, the wallet is auto-disabled and a `mirror_wallet_auto_disabled` event is sent. `null` to disable. |
 
 The SDKs send `configure` automatically when you call `StreamClient.connect()` or `StreamSession.connect()`.
 
@@ -378,10 +405,11 @@ Add or update watch wallets mid-session for copy trading. Replaces the current w
 
 Each `WatchWalletEntryMsg` has:
 
-| Field      | Type              | Required | Description                                     |
-|------------|-------------------|----------|-------------------------------------------------|
-| `pubkey`   | `string`          | Yes      | Public key of the wallet to watch.              |
-| `auto_buy` | `AutoBuyConfigMsg` | No      | If set, automatically mirror buys from this wallet. |
+| Field         | Type              | Required | Description                                     |
+|---------------|-------------------|----------|-------------------------------------------------|
+| `pubkey`      | `string`          | Yes      | Public key of the wallet to watch.              |
+| `auto_buy`    | `AutoBuyConfigMsg` | No      | If set, automatically mirror buys from this wallet. |
+| `mirror_sell` | `boolean`         | No       | Reserved for future use. When `true`, mirror sells from this wallet in addition to buys. Default: `false`. Currently unused. |
 
 `AutoBuyConfigMsg`:
 
@@ -427,5 +455,40 @@ sender.UpdateWatchWallets([]stream.WatchWalletEntryMsg{
         WalletPubkey: "YourBuyWallet...", AmountQuoteUnits: 100000000,
     }},
 })
+```
+</CodeGroup>
+
+## `mirror_buy_result`
+
+Reports the outcome of a mirror buy transaction back to the stream. Send this after you sign and submit (or fail to submit) the transaction from a `mirror_buy_signal` event. The stream uses this feedback to update internal state, track consecutive losses, and manage cooldown timers.
+
+```json
+{
+  "type": "mirror_buy_result",
+  "mint": "TokenMint...",
+  "success": true
+}
+```
+
+| Field     | Type      | Required | Description                                                  |
+|-----------|-----------|----------|--------------------------------------------------------------|
+| `mint`    | `string`  | Yes      | Token mint address from the original `mirror_buy_signal`.    |
+| `success` | `boolean` | Yes      | `true` if the transaction was signed and submitted successfully, `false` otherwise. |
+
+<CodeGroup>
+```typescript TypeScript
+session.sender().mirrorBuyResult("TokenMint...", true);
+```
+
+```python Python
+session.sender().mirror_buy_result("TokenMint...", True)
+```
+
+```rust Rust
+session.sender().mirror_buy_result("TokenMint...", true);
+```
+
+```go Go
+sender.MirrorBuyResult("TokenMint...", true)
 ```
 </CodeGroup>
