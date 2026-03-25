@@ -1,0 +1,723 @@
+openapi: 3.1.0
+info:
+  title: LaserSell API
+  version: 1.0.0
+  description: |
+    The LaserSell API builds unsigned Solana transactions for buying and selling tokens across supported DEXs.
+    All transactions are non-custodial: the API returns unsigned `VersionedTransaction` payloads that you sign locally with your own keypair.
+
+    Supported markets: Pump.fun, PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2).
+
+servers:
+  - url: https://api.lasersell.io
+    description: Production
+
+security:
+  - apiKey: []
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your LaserSell API key. Obtain one from the [LaserSell dashboard](https://www.lasersell.io).
+
+  schemas:
+    # ── Sell ──────────────────────────────────────────────
+    BuildSellTxRequest:
+      type: object
+      required:
+        - mint
+        - user_pubkey
+        - amount_tokens
+        - output
+        - slippage_bps
+      properties:
+        mint:
+          type: string
+          description: Token mint address (base58).
+          example: "So11111111111111111111111111111111111111112"
+        user_pubkey:
+          type: string
+          description: Your wallet public key (base58).
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        amount_tokens:
+          type: integer
+          description: Amount to sell in the token's atomic units.
+          example: 1000000
+        output:
+          type: string
+          enum: ["SOL", "USD1"]
+          description: Desired output asset.
+          example: "SOL"
+        slippage_bps:
+          type: integer
+          description: Maximum slippage tolerance in basis points (e.g., `2000` = 20%).
+          example: 2000
+        mode:
+          type: string
+          enum: ["fast", "secure"]
+          default: "fast"
+          description: Routing mode hint.
+        market_context:
+          type: object
+          description: Pre-resolved market context. Omit to let the server resolve automatically.
+        send_mode:
+          type: string
+          enum: ["helius_sender", "astralane", "rpc"]
+          description: Transaction send mode.
+        tip_lamports:
+          type: integer
+          description: Optional priority fee tip in lamports.
+        partner_fee_recipient:
+          type: string
+          description: Partner fee recipient wallet (base58 pubkey).
+        partner_fee_bps:
+          type: integer
+          description: Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`.
+          maximum: 50
+        partner_fee_lamports:
+          type: integer
+          description: Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`.
+          maximum: 50000000
+
+    # ── Buy ───────────────────────────────────────────────
+    BuildBuyTxRequest:
+      type: object
+      required:
+        - mint
+        - user_pubkey
+        - slippage_bps
+      properties:
+        mint:
+          type: string
+          description: Token mint address to buy (base58).
+          example: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        user_pubkey:
+          type: string
+          description: Your wallet public key (base58).
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        amount:
+          type: number
+          description: |
+            Human-readable amount to spend (e.g., `0.1` for 0.1 SOL, `10.0` for 10 USD1).
+            Mutually exclusive with `amount_in_total`. Exactly one of `amount` or `amount_in_total` must be provided.
+          example: 0.1
+        amount_in_total:
+          type: integer
+          description: |
+            Amount to spend in input-asset atomic units (e.g., lamports for SOL).
+            Mutually exclusive with `amount`. Exactly one of `amount` or `amount_in_total` must be provided.
+          example: 100000000
+        slippage_bps:
+          type: integer
+          description: Maximum slippage tolerance in basis points (e.g., `2000` = 20%).
+          example: 2000
+        input:
+          type: string
+          enum: ["SOL", "USD1"]
+          default: "SOL"
+          description: Input asset.
+        mode:
+          type: string
+          enum: ["fast", "secure"]
+          default: "fast"
+          description: Routing mode hint.
+        send_mode:
+          type: string
+          enum: ["helius_sender", "astralane", "rpc"]
+          description: Transaction send mode.
+        tip_lamports:
+          type: integer
+          description: Optional priority fee tip in lamports.
+        partner_fee_recipient:
+          type: string
+          description: Partner fee recipient wallet (base58 pubkey).
+        partner_fee_bps:
+          type: integer
+          description: Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`.
+          maximum: 50
+        partner_fee_lamports:
+          type: integer
+          description: Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`.
+          maximum: 50000000
+
+    # ── Shared Tx Response ────────────────────────────────
+    BuildTxResponse:
+      type: object
+      required:
+        - tx
+      properties:
+        tx:
+          type: string
+          description: Base64-encoded unsigned Solana `VersionedTransaction`. Sign this locally with your keypair before submitting.
+          example: "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..."
+        route:
+          type: object
+          description: Routing metadata.
+          properties:
+            market_type:
+              type: string
+              description: DEX used for this route.
+              example: "pumpswap"
+            pool_id:
+              type: string
+              description: Pool address used.
+        debug:
+          type: object
+          description: Debug information (included when available).
+
+    # ── Account ───────────────────────────────────────────
+    AccountResponse:
+      type: object
+      required:
+        - tier
+        - tier_name
+        - limits
+      properties:
+        tier:
+          type: integer
+          enum: [0, 1, 2]
+          description: Numeric tier identifier.
+          example: 1
+        tier_name:
+          type: string
+          enum: ["free", "tier_1", "tier_2"]
+          description: Human-readable plan name.
+          example: "tier_1"
+        limits:
+          $ref: "#/components/schemas/AccountLimits"
+
+    AccountLimits:
+      type: object
+      required:
+        - max_wallets
+        - max_positions_per_wallet
+        - max_positions_per_session
+      properties:
+        max_wallets:
+          type: integer
+          description: Maximum wallets you can track simultaneously.
+          example: 5
+        max_positions_per_wallet:
+          type: integer
+          description: Maximum open positions per wallet.
+          example: 100
+        max_positions_per_session:
+          type: integer
+          description: Maximum total open positions across all wallets.
+          example: 500
+
+    # ── History ───────────────────────────────────────────
+    TradeHistoryResponse:
+      type: object
+      required:
+        - trades
+      properties:
+        trades:
+          type: array
+          description: Array of trade records, ordered by most recent first.
+          items:
+            $ref: "#/components/schemas/TradeHistoryItem"
+        total:
+          type:
+            - integer
+            - "null"
+          description: Estimated total number of matching trades for pagination.
+          example: 42
+
+    TradeHistoryItem:
+      type: object
+      required:
+        - id
+        - session_id
+        - position_id
+        - wallet_pubkey
+        - mint
+        - entry_quote_units
+        - tokens
+        - opened_at
+      properties:
+        id:
+          type: integer
+          description: Unique trade record identifier.
+          example: 42
+        session_id:
+          type: integer
+          description: Stream session that produced this trade.
+          example: 1001
+        position_id:
+          type: integer
+          description: Position identifier within the session.
+          example: 3
+        wallet_pubkey:
+          type: string
+          description: Wallet public key that held the position (base58).
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        mint:
+          type: string
+          description: Token mint address (base58).
+          example: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        entry_quote_units:
+          type: integer
+          description: Amount spent to open the position in quote asset atomic units.
+          example: 500000000
+        exit_quote_units:
+          type:
+            - integer
+            - "null"
+          description: Proceeds received on close in quote asset atomic units.
+          example: 650000000
+        profit_quote_units:
+          type:
+            - integer
+            - "null"
+          description: Net profit or loss in quote asset atomic units.
+          example: 150000000
+        tokens:
+          type: integer
+          description: Number of tokens acquired at entry in atomic units.
+          example: 1000000
+        exit_reason:
+          type:
+            - string
+            - "null"
+          enum: ["target_profit", "stop_loss", "trailing_stop", "manual", null]
+          description: Why the position was closed.
+          example: "target_profit"
+        market_kind:
+          type:
+            - string
+            - "null"
+          description: DEX or launchpad the token was traded on.
+          example: "PumpFun"
+        strategy_target_profit_pct:
+          type:
+            - number
+            - "null"
+          description: Target profit percentage configured when the position opened.
+          example: 30.0
+        strategy_stop_loss_pct:
+          type:
+            - number
+            - "null"
+          description: Stop loss percentage configured when the position opened.
+          example: 50.0
+        strategy_trailing_stop_pct:
+          type:
+            - number
+            - "null"
+          description: Trailing stop percentage configured when the position opened.
+          example: 20.0
+        opened_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the position was opened.
+          example: "2026-03-07T12:00:00Z"
+        closed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: ISO 8601 timestamp when the position was closed.
+          example: "2026-03-07T12:30:00Z"
+
+    # ── Wallet Registration ───────────────────────────────
+    RegisterWalletRequest:
+      type: object
+      required:
+        - wallet_pubkey
+        - signature
+        - message
+      properties:
+        wallet_pubkey:
+          type: string
+          description: Solana wallet public key to register (base58).
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        signature:
+          type: string
+          description: Ed25519 signature of the message, base58-encoded.
+        message:
+          type: string
+          description: |
+            Structured message in the format `lasersell-register:<pubkey>:<unix_timestamp>`.
+            The timestamp must be within 5 minutes of the server's current time.
+          example: "lasersell-register:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM:1706000000"
+        label:
+          type: string
+          description: Optional human-readable label for the wallet.
+          example: "My Trading Wallet"
+
+    RegisterWalletResponse:
+      type: object
+      required:
+        - wallet_pubkey
+        - registered
+      properties:
+        wallet_pubkey:
+          type: string
+          description: The registered wallet public key.
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        registered:
+          type: boolean
+          description: Whether the wallet was successfully registered.
+          example: true
+
+    UnregisterWalletRequest:
+      type: object
+      required:
+        - wallet_pubkey
+      properties:
+        wallet_pubkey:
+          type: string
+          description: Solana wallet public key to unregister (base58).
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+
+    UnregisterWalletResponse:
+      type: object
+      required:
+        - wallet_pubkey
+        - removed
+      properties:
+        wallet_pubkey:
+          type: string
+          description: The unregistered wallet public key.
+          example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        removed:
+          type: boolean
+          description: Whether the wallet was successfully removed.
+          example: true
+
+    # ── Errors ────────────────────────────────────────────
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+          example: "invalid mint address"
+
+    UnsupportedResponse:
+      type: object
+      required:
+        - status
+        - reason
+        - message
+      properties:
+        status:
+          type: string
+          const: "unsupported"
+        reason:
+          type: string
+          enum: ["no_route", "invalid_mint", "unsupported_token_program"]
+          description: Machine-readable reason code.
+        message:
+          type: string
+          description: Human and AI-readable explanation.
+          example: "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
+
+    NotIndexedResponse:
+      type: object
+      required:
+        - status
+        - mint
+        - reason
+      properties:
+        status:
+          type: string
+          const: "not_indexed"
+        mint:
+          type: string
+          description: The mint address that is not yet indexed.
+        reason:
+          type: string
+          example: "mint not indexed yet; try again shortly"
+
+paths:
+  # ── POST /v1/sell ───────────────────────────────────────
+  /v1/sell:
+    post:
+      operationId: buildSellTx
+      summary: Build Sell Transaction
+      description: |
+        Build an unsigned sell transaction to swap tokens for SOL or USD1 via one of the supported DEXs.
+
+        The response contains a base64-encoded unsigned `VersionedTransaction`. Sign it locally with your keypair and submit it to the network.
+      tags:
+        - Trading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuildSellTxRequest"
+      responses:
+        "200":
+          description: Unsigned sell transaction built successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildTxResponse"
+        "400":
+          description: Bad request (invalid parameters, invalid mint, or unsupported token program).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - $ref: "#/components/schemas/UnsupportedResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Unsupported market or mint not indexed yet.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UnsupportedResponse"
+                  - $ref: "#/components/schemas/NotIndexedResponse"
+        "422":
+          description: Valid request but no viable route found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited. Back off and retry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── POST /v1/buy ────────────────────────────────────────
+  /v1/buy:
+    post:
+      operationId: buildBuyTx
+      summary: Build Buy Transaction
+      description: |
+        Build an unsigned buy transaction to swap SOL or USD1 for tokens via one of the supported DEXs.
+
+        The response contains a base64-encoded unsigned `VersionedTransaction`. Sign it locally with your keypair and submit it to the network.
+      tags:
+        - Trading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuildBuyTxRequest"
+      responses:
+        "200":
+          description: Unsigned buy transaction built successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildTxResponse"
+        "400":
+          description: Bad request (invalid parameters, invalid mint, or unsupported token program).
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - $ref: "#/components/schemas/UnsupportedResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Unsupported market or mint not indexed yet.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UnsupportedResponse"
+                  - $ref: "#/components/schemas/NotIndexedResponse"
+        "422":
+          description: Valid request but no viable route found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limited. Back off and retry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── GET /v1/account ─────────────────────────────────────
+  /v1/account:
+    get:
+      operationId: getAccount
+      summary: Get Account
+      description: Retrieve your account tier, plan name, and usage limits.
+      tags:
+        - Account
+      responses:
+        "200":
+          description: Account details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── GET /v1/history ─────────────────────────────────────
+  /v1/history:
+    get:
+      operationId: getTradeHistory
+      summary: Get Trade History
+      description: Fetch paginated trade history for your account, ordered by most recent first.
+      tags:
+        - Account
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of trades to return (capped at 200).
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+            example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Number of trades to skip for pagination.
+          schema:
+            type: integer
+            default: 0
+            example: 0
+        - name: mint
+          in: query
+          required: false
+          description: Filter results to a specific token mint address (base58).
+          schema:
+            type: string
+            example: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        - name: wallet
+          in: query
+          required: false
+          description: Filter results to a specific wallet public key (base58).
+          schema:
+            type: string
+            example: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+      responses:
+        "200":
+          description: Trade history page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeHistoryResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── POST /v1/wallets/register ───────────────────────────
+  /v1/wallets/register:
+    post:
+      operationId: registerWallet
+      summary: Register Wallet
+      description: |
+        Register a wallet by proving ownership with an Ed25519 signature. Registration is required before connecting wallets to the Exit Intelligence Stream.
+
+        No on-chain transaction is needed. Generate the proof locally using your keypair and the SDK's `proveOwnership` helper.
+      tags:
+        - Wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterWalletRequest"
+      responses:
+        "200":
+          description: Wallet registered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterWalletResponse"
+        "400":
+          description: Invalid pubkey format, malformed message, or expired timestamp (>5 min).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Signature verification failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── DELETE /v1/wallets ──────────────────────────────────
+  /v1/wallets:
+    delete:
+      operationId: unregisterWallet
+      summary: Unregister Wallet
+      description: Remove a wallet registration from your account.
+      tags:
+        - Wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnregisterWalletRequest"
+      responses:
+        "200":
+          description: Wallet unregistered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnregisterWalletResponse"
+        "401":
+          description: Unauthorized. Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: Trading
+    description: Build unsigned buy and sell transactions.
+  - name: Account
+    description: Account details and trade history.
+  - name: Wallets
+    description: Wallet registration for the Exit Intelligence Stream.

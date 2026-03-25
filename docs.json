@@ -5,6 +5,17 @@
   "colors": {
     "primary": "#0D9373"
   },
+  "openapi": "openapi.yaml",
+  "api": {
+    "baseUrl": "https://api.lasersell.io",
+    "auth": {
+      "method": "key",
+      "name": "x-api-key"
+    },
+    "playground": {
+      "mode": "simple"
+    }
+  },
   "navigation": {
     "languages": [
       {
@@ -108,38 +119,6 @@
             ]
           },
           {
-            "tab": "CLI",
-            "groups": [
-              {
-                "group": "Getting Started",
-                "pages": [
-                  "start-here/quickstart",
-                  "installation/installation"
-                ]
-              },
-              {
-                "group": "Onboarding",
-                "pages": [
-                  "onboarding/initial-setup",
-                  "onboarding/lasersell-ui",
-                  "onboarding/example-configuration"
-                ]
-              },
-              {
-                "group": "Supported Platforms",
-                "pages": [
-                  "onboarding/platform-and-coin-support"
-                ]
-              },
-              {
-                "group": "Security",
-                "pages": [
-                  "security/wallet-encryption"
-                ]
-              }
-            ]
-          },
-          {
             "tab": "API",
             "groups": [
               {
@@ -157,7 +136,8 @@
                   "api/exit-api/buy",
                   "api/exit-api/account",
                   "api/exit-api/history",
-                  "api/exit-api/wallets",
+                  "api/exit-api/wallets-register",
+                  "api/exit-api/wallets-unregister",
                   "api/exit-api/error-handling"
                 ]
               },
@@ -194,6 +174,38 @@
                   "api/reference/partner-fees",
                   "api/reference/rate-limits",
                   "api/reference/market-context"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "CLI",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "start-here/quickstart",
+                  "installation/installation"
+                ]
+              },
+              {
+                "group": "Onboarding",
+                "pages": [
+                  "onboarding/initial-setup",
+                  "onboarding/lasersell-ui",
+                  "onboarding/example-configuration"
+                ]
+              },
+              {
+                "group": "Supported Platforms",
+                "pages": [
+                  "onboarding/platform-and-coin-support"
+                ]
+              },
+              {
+                "group": "Security",
+                "pages": [
+                  "security/wallet-encryption"
                 ]
               }
             ]

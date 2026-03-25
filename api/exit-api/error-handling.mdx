@@ -1,75 +1,7 @@
 ---
 title: "Error Handling"
-description: "HTTP status codes, error envelope format, ExitApiError kinds, and retry behavior for the LaserSell API."
+description: "SDK error types, retryability, and retry configuration for the LaserSell API."
 ---
-
-## HTTP Status Codes
-
-| Status | Meaning                            | Retryable |
-|--------|------------------------------------|-----------|
-| 200    | Success                            | N/A       |
-| 400    | Bad request (invalid parameters, invalid mint, unsupported token program) | No  |
-| 401    | Unauthorized (missing or invalid API key) | No |
-| 404    | Unsupported market or mint not indexed yet | No (see below) |
-| 422    | Unprocessable (valid request but no viable route) | No |
-| 429    | Rate limited                       | Yes       |
-| 502    | Bad gateway (upstream RPC or DEX failure) | Yes |
-| 503    | Service unavailable (router not ready or paused) | Yes |
-| 500    | Internal server error              | Yes       |
-
-## Response Envelopes
-
-### Success
-
-```json
-{
-  "status": "ok",
-  "tx": "base64-encoded unsigned transaction",
-  "route": { "market_type": "pumpswap", "pool_id": "..." }
-}
-```
-
-### Unsupported Market
-
-Returned when a mint has no viable route on any supported DEX. The `message` field provides a human and AI-readable explanation.
-
-```json
-{
-  "status": "unsupported",
-  "reason": "no_route",
-  "message": "No supported market found for this mint. Supported DEXs: PumpSwap, Raydium (CPMM, Launchpad), Meteora (DBC, DAMM v2), Pump.fun."
-}
-```
-
-| Reason | Status | Description |
-|--------|--------|-------------|
-| `no_route` | 404 | No supported DEX has a pool for this mint |
-| `invalid_mint` | 400 | The mint address does not exist on-chain |
-| `unsupported_token_program` | 400 | Token uses a program other than SPL Token or Token-2022 |
-
-### Not Indexed
-
-Returned when the mint exists but hasn't been resolved yet. Retry after a short delay.
-
-```json
-{
-  "status": "not_indexed",
-  "mint": "So11111111111111111111111111111111111111112",
-  "reason": "mint not indexed yet; try again shortly"
-}
-```
-
-### Error
-
-General error responses for validation failures, rate limits, and server errors.
-
-```json
-{
-  "error": "descriptive error message"
-}
-```
-
-The SDKs parse all response variants and surface them through the `ExitApiError` type.
 
 ## `ExitApiError` Kinds
 
@@ -226,13 +158,3 @@ client := lasersell.NewExitAPIClientWithOptions("YOUR_API_KEY", lasersell.ExitAP
 })
 ```
 </CodeGroup>
-
-## Best Practices
-
-- **Do not retry** `400`, `401`, or `422` errors. These indicate a request or authentication problem that must be fixed in code.
-- **Do not retry** `404` with `"status": "unsupported"`. The mint has no supported market.
-- **Retry once** on `404` with `"status": "not_indexed"`. The mint may need a moment to resolve.
-- **Back off exponentially** on `429` responses. The built in retry handles this automatically.
-- **Retry with backoff** on `502` and `503` errors. These are transient infrastructure issues.
-- **Log error details** including `kind`, `status`, and `body` for debugging.
-- If you see consistent `envelope_status` errors, verify your `mint` address and `user_pubkey` are correct.

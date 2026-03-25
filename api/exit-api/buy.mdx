@@ -1,85 +1,15 @@
 ---
-title: "POST /v1/buy"
-description: "Build an unsigned buy transaction to swap SOL for tokens via the LaserSell API."
+title: "Build Buy Transaction"
+openapi: "POST /v1/buy"
 ---
 
 <Warning>
-If you plan to track this buy with the Exit Intelligence Stream, you **must** connect the stream **before** submitting the buy transaction. The stream detects new positions by observing on chain token arrivals in real time. If the stream is not connected when the buy lands, the position will not be tracked and no exit signals will be generated for it.
+If you plan to track this buy with the Exit Intelligence Stream, you **must** connect the stream **before** submitting the buy transaction. The stream detects new positions by observing on-chain token arrivals in real time. If the stream is not connected when the buy lands, the position will not be tracked and no exit signals will be generated for it.
 </Warning>
 
-## Endpoint
-
-```
-POST https://api.lasersell.io/v1/buy
-```
-
-## Headers
-
-| Header         | Required | Description                     |
-|----------------|----------|---------------------------------|
-| `Content-Type` | Yes      | Must be `application/json`      |
-| `x-api-key`    | Yes      | Your LaserSell API key          |
-
-## Request Body: `BuildBuyTxRequest`
-
-| Field                   | Type     | Required | Description                                                                 |
-|-------------------------|----------|----------|-----------------------------------------------------------------------------|
-| `mint`                  | `string` | Yes      | Token mint address to buy (base58).                                         |
-| `user_pubkey`           | `string` | Yes      | Your wallet public key (base58).                                            |
-| `amount`                | `number` | No*      | Human-readable amount to spend (e.g., `0.1` for 0.1 SOL, `10.0` for 10 USD1). Mutually exclusive with `amount_in_total`. |
-| `amount_in_total`       | `number` | No*      | Amount to spend in input-asset atomic units (e.g., lamports for SOL). Mutually exclusive with `amount`. |
-| `slippage_bps`          | `number` | Yes      | Maximum slippage tolerance in basis points (e.g., `2000` = 20%).            |
-| `input`                 | `string` | No       | Input asset: `"SOL"` (default) or `"USD1"`.                                 |
-| `mode`                  | `string` | No       | Routing mode hint. Valid values: `"fast"`, `"secure"`. Defaults to `"fast"`. |
-| `send_mode`             | `string` | No       | Transaction send mode: `"helius_sender"`, `"astralane"`, or `"rpc"`.        |
-| `tip_lamports`          | `number` | No       | Optional priority fee tip in lamports.                                      |
-| `partner_fee_recipient` | `string` | No       | Partner fee recipient wallet (base58 pubkey).                               |
-| `partner_fee_bps`       | `number` | No       | Partner fee in basis points (max 50 = 0.5%). Mutually exclusive with `partner_fee_lamports`. |
-| `partner_fee_lamports`  | `number` | No       | Partner fee as flat SOL lamports (max 50,000,000). Mutually exclusive with `partner_fee_bps`. |
-
 <Note>
-**\*** Exactly one of `amount` or `amount_in_total` must be provided. `amount` is automatically converted to atomic units based on the `input` asset (SOL: 10^9, USD1: 10^6).
+Exactly one of `amount` or `amount_in_total` must be provided. `amount` is automatically converted to atomic units based on the `input` asset (SOL: 10^9, USD1: 10^6).
 </Note>
-
-## Response: `BuildTxResponse`
-
-| Field   | Type     | Description                                     |
-|---------|----------|-------------------------------------------------|
-| `tx`    | `string` | Base64 encoded unsigned Solana `VersionedTransaction`. |
-| `route` | `object` | Optional routing metadata.                      |
-| `debug` | `object` | Optional debug information.                     |
-
-## curl Examples
-
-Using human-readable `amount`:
-
-```bash
-curl -X POST https://api.lasersell.io/v1/buy \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -d '{
-    "mint": "TOKEN_MINT_ADDRESS",
-    "user_pubkey": "YOUR_WALLET_PUBKEY",
-    "amount": 0.1,
-    "slippage_bps": 2000,
-    "input": "SOL"
-  }'
-```
-
-Using atomic `amount_in_total`:
-
-```bash
-curl -X POST https://api.lasersell.io/v1/buy \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -d '{
-    "mint": "TOKEN_MINT_ADDRESS",
-    "user_pubkey": "YOUR_WALLET_PUBKEY",
-    "amount_in_total": 100000000,
-    "slippage_bps": 2000,
-    "input": "SOL"
-  }'
-```
 
 ## SDK Examples
 
