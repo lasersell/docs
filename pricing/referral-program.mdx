@@ -1,0 +1,97 @@
+---
+title: "Referral Program"
+description: "Earn from every trade your referrals make. Three tier trading fee referrals plus subscription commissions."
+---
+
+Invite traders to LaserSell and earn a share of their trading fees in SOL. Build a referral chain up to three levels deep, and earn subscription commissions when your referrals upgrade to a paid plan.
+
+## How It Works
+
+<Steps>
+  <Step title="Join the Program">
+    Sign in to your [LaserSell dashboard](https://app.lasersell.io/referrals) and claim a unique referral username. Your link becomes `lasersell.io/@you`.
+  </Step>
+  <Step title="Share Your Link">
+    Send your referral link to friends, communities, or your audience. When someone signs up through your link, they are permanently linked to you.
+  </Step>
+  <Step title="Earn Rewards">
+    Earn a percentage of your referrals' trading fees in SOL, plus subscription commissions in USD. Rewards are claimable after a 30 day hold period.
+  </Step>
+</Steps>
+
+## Trading Fee Referrals
+
+Every time one of your referrals executes a trade through the LaserSell router, you earn a percentage of the protocol fee that LaserSell collects. Earnings extend up to three levels deep in your referral chain.
+
+| Tier | Relationship | Your Earning |
+|------|-------------|--------------|
+| **Tier 1** | You refer Alice (direct) | **30%** of Alice's trading fee |
+| **Tier 2** | Alice refers Bob | **3%** of Bob's trading fee |
+| **Tier 3** | Bob refers Carol | **2%** of Carol's trading fee |
+
+<Accordion title="Example calculation">
+A free tier user pays a 2% trading fee on a 1 SOL sell. That is 0.02 SOL in fees.
+
+- **Tier 1 referrer** earns 30% of 0.02 SOL = **0.006 SOL**
+- **Tier 2 referrer** earns 3% of 0.02 SOL = **0.0006 SOL**
+- **Tier 3 referrer** earns 2% of 0.02 SOL = **0.0004 SOL**
+
+Paid tier users pay lower fees (0.9% on Professional, 0.5% on Advanced), so the per trade earning is smaller, but active traders generate consistent volume.
+</Accordion>
+
+## Subscription Referrals
+
+When a user you **directly referred** subscribes to a paid plan, you earn a **15% recurring commission** on every invoice they pay, for as long as they remain subscribed. Subscription commissions apply to direct referrals only (Tier 1). The multi tier chain does not apply to subscriptions.
+
+| Plan | Monthly Price | Your Commission |
+|------|--------------|----------------|
+| Professional Edition | $99/mo | **$14.85/mo** (recurring) |
+| Advanced Exit Engine | $249/mo | **$37.35/mo** (recurring) |
+
+Subscription commissions are paid in USD through **Stripe Connect**. Connect your bank account from the referral dashboard to receive payouts.
+
+## Payouts
+
+### Trading fee earnings (SOL)
+
+Trading fee earnings are paid in SOL to any Solana wallet address you provide. You can claim your earnings from the referral dashboard whenever your claimable balance exceeds **0.01 SOL**.
+
+Payouts are sent from the LaserSell treasury wallet. The USD value of your earnings is determined by your referrals' trading volume and the fee tier they are on.
+
+### Subscription earnings (USD)
+
+Subscription commissions are paid in USD through Stripe Connect. After connecting your bank account, claimable commissions are transferred automatically.
+
+## Rules and Requirements
+
+<CardGroup cols={2}>
+  <Card title="Username" icon="user">
+    Alphanumeric only, 3 to 15 characters. You choose it once and it cannot be changed. Certain reserved names (admin, support, etc.) are blocked.
+  </Card>
+  <Card title="30 Day Hold" icon="clock">
+    All earnings enter a 30 day hold period before becoming claimable. This protects against chargebacks and fraud.
+  </Card>
+  <Card title="Volume Threshold" icon="shield">
+    Your referral must accumulate at least **10 SOL** in total trading volume before your earnings from their trades unlock. This prevents self referral abuse.
+  </Card>
+  <Card title="One Referrer Per Account" icon="link">
+    Each account can only be referred by one person. The referral link used at signup is permanent and cannot be changed.
+  </Card>
+</CardGroup>
+
+## Earning Status Lifecycle
+
+Each earning goes through the following stages:
+
+| Status | Meaning |
+|--------|---------|
+| **Locked** | Your referral has not yet reached the 10 SOL volume threshold. Earnings accrue but are not yet eligible. |
+| **Pending** | Volume threshold met. The 30 day hold period is active. |
+| **Claimable** | The hold period has passed. You can claim this earning from the dashboard. |
+| **Claimed** | Paid out to your wallet (SOL) or bank account (USD). |
+
+## Get Started
+
+<Card title="Join the Referral Program" icon="arrow-right" href="https://app.lasersell.io/referrals">
+  Sign in to your dashboard to claim your username and start earning.
+</Card>
