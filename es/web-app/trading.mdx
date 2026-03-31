@@ -1,0 +1,100 @@
+---
+title: "Trading"
+description: "Configura estrategias de salida y monitorea posiciones desde tu navegador."
+---
+
+La página de Trading es el centro de control principal para web trading. Tiene dos pestañas: **Positions** para monitorear tus operaciones activas, y **Copy Trading** para replicar las operaciones de otras wallets.
+
+## Primeros pasos
+
+Si aún no has iniciado una sesión de web trading, la página de Trading muestra un formulario de configuración:
+
+1. **Selecciona las wallets** a monitorear (de tus wallets registradas)
+2. **Configura tu estrategia de salida** (objetivo de ganancia, stop loss, trailing stop, deslizamiento máximo)
+3. Haz clic en **Start Web Trading**
+
+Una vez iniciado, LaserSell monitorea tus wallets y ejecuta operaciones automáticamente cuando se alcanzan los umbrales de tu estrategia.
+
+## Pestaña de posiciones
+
+La pestaña de posiciones utiliza un diseño de tres columnas:
+
+- **Izquierda**: Lista de todas las posiciones abiertas con resumen de PnL
+- **Centro**: Vista detallada de la posición seleccionada (información del token, precio de entrada, ganancia actual, botón de venta)
+- **Derecha**: Configuración de la estrategia de salida (editable en cualquier momento)
+
+### Configuración de la estrategia de salida
+
+| Configuración | Descripción |
+|---------|-------------|
+| **Target Profit %** | Vender cuando la ganancia alcance este porcentaje |
+| **Stop Loss %** | Vender cuando la pérdida alcance este porcentaje |
+| **Trailing Stop %** | Asegurar ganancias siguiendo el precio por este porcentaje |
+| **Max Slippage %** | Deslizamiento máximo aceptable en ventas automáticas (predeterminado 5%) |
+| **Sell on Graduation** | Vender automáticamente cuando un token gradúa de pump.fun a Raydium |
+
+Los cambios se aplican inmediatamente a todas las posiciones activas.
+
+### Venta manual
+
+Haz clic en **Sell Now** en cualquier posición para ejecutar una venta inmediata, independientemente de los umbrales de la estrategia.
+
+## Pestaña de copy trading
+
+El copy trading te permite replicar automáticamente las operaciones de otras wallets.
+
+### Agregar una watch wallet
+
+1. Haz clic en **Add Watch Wallet**
+2. Ingresa una dirección de wallet Solana o un nombre de dominio `.sol` (resuelto via SNS)
+3. Establece un apodo y monto de compra automática (en SOL)
+4. La wallet se agrega a tu lista de seguimiento
+
+Cuando una wallet observada compra un token, LaserSell ejecuta automáticamente la misma compra con tu wallet.
+
+### Configuración de mirror
+
+| Configuración | Descripción |
+|---------|-------------|
+| **Max positions per wallet** | Limitar las posiciones de mirror concurrentes |
+| **Cooldown** | Tiempo mínimo entre compras de mirror |
+| **Skip creator tokens** | Ignorar tokens creados por la wallet observada |
+| **Max active SOL** | Tope de SOL total desplegado en posiciones de mirror |
+| **Buy slippage** | Deslizamiento máximo para compras de mirror |
+| **Min pool liquidity** | Omitir tokens con baja liquidez |
+| **Max entry drift** | Omitir si el precio se ha desviado demasiado de la entrada de la wallet observada |
+| **Max consecutive losses** | Desactivar automáticamente la wallet observada después de N pérdidas consecutivas |
+
+## Controles de sesión
+
+Usa el **botón de agente** (icono de encendido en el encabezado) para iniciar o detener el web trading. El punto de estado muestra:
+
+- 🟢 **Verde**: Activo y monitoreando
+- 🔵 **Azul**: Observando nuevas posiciones
+- 🟡 **Amarillo**: Pausado (error o inactividad)
+- ⚪ **Gris**: Detenido
+
+<Warning>
+  Si estás monitoreando la misma wallet desde la aplicación de escritorio y la web app, ambas intentarán vender cuando se alcance un umbral. Desactiva una cuando cambies a la otra.
+</Warning>
+
+## Límites por nivel
+
+Tu nivel de suscripción determina la capacidad disponible para web trading. Estos mismos límites aplican en la aplicación de escritorio y la API.
+
+| | Free | Professional | Advanced |
+|--|------|-------------|----------|
+| **Wallets** | 1 | 5 | 200 |
+| **Posiciones por wallet** | 2 | 100 | 100 |
+| **Watch wallets** | 2 | 10 | 25 |
+| **Tiempo de sesión** | 45 min | Sin límite | Sin límite |
+| **Monitoreo continuo** | No | Sí | Sí |
+| **Exit Ladder** | No | Sí | Sí |
+| **Liquidity Guard** | No | Sí | Sí |
+| **Behavioral Insights** | No | Sí | Sí |
+
+Los usuarios del nivel Free tienen acceso completo al web trading con estrategias de salida básicas (objetivo de ganancia, stop loss, trailing stop). Actualiza a Professional para estrategias avanzadas, monitoreo continuo y mayor capacidad.
+
+<Card title="Comparar todos los planes" icon="arrow-right" href="https://www.lasersell.io/pricing">
+  Consulta la comparación completa de características en nuestra página de precios.
+</Card>

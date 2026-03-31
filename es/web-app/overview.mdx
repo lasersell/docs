@@ -1,0 +1,63 @@
+---
+title: "Resumen de la Web App"
+description: "Opera desde tu navegador con ejecución automática, incluso cuando cierras la pestaña."
+---
+
+La Web App de LaserSell lleva el trading automatizado a tu navegador. Configura tu estrategia de salida, deposita fondos en tu wallet y LaserSell ejecuta operaciones en tu nombre las 24 horas del día, los 7 días de la semana, incluso cuando tu navegador está cerrado.
+
+## Cómo funciona
+
+<Steps>
+  <Step title="Configura tu wallet">
+    Cuando inicias sesión, [Privy](https://privy.io) crea automáticamente una wallet segura para ti. También puedes importar una wallet existente. Tus claves privadas se almacenan en un Trusted Execution Environment (TEE) y nunca tocan los servidores de LaserSell.
+  </Step>
+  <Step title="Deposita fondos en tu wallet">
+    Envía SOL a la dirección de tu wallet desde cualquier wallet externa (Phantom, Backpack, etc.). La dirección y el saldo de tu wallet son visibles en la página de Wallet.
+  </Step>
+  <Step title="Configura tu estrategia">
+    Establece tu estrategia de salida: objetivo de ganancia, stop loss, trailing stop y deslizamiento máximo. Estas reglas determinan cuándo LaserSell vende automáticamente tus posiciones.
+  </Step>
+  <Step title="Comienza a operar">
+    Haz clic en "Start Web Trading" y LaserSell comienza a monitorear tus wallets. Cuando una posición alcanza los umbrales de tu estrategia, la operación se ejecuta automáticamente usando tu wallet.
+  </Step>
+</Steps>
+
+## Web App vs aplicación de escritorio
+
+Ambos clientes se conectan a la misma infraestructura de LaserSell, pero funcionan de manera diferente internamente.
+
+| Característica | Aplicación de escritorio | Web App |
+|---------|------------|---------|
+| **Firma** | Tu par de claves local | Wallet Privy TEE (firma delegada) |
+| **Ejecución sin conexión** | No (la app debe estar abierta) | Sí (el servidor ejecuta mientras estás fuera) |
+| **Wallet** | Importar/generar localmente | Privy embebida o importada |
+| **Copy trading** | Sí | Sí |
+| **Monitoreo de posiciones** | Sí | Sí |
+| **Compra de tokens** | Sí | Aún no |
+| **Búsqueda de tokens** | Sí | Aún no |
+
+## Conceptos clave
+
+### Wallets de Privy
+
+Tu wallet de web trading está gestionada por [Privy](https://privy.io), una empresa de infraestructura de wallets [adquirida por Stripe](https://privy.io/blog/announcing-our-acquisition-by-stripe). Privy almacena tu clave privada en un Trusted Execution Environment (TEE), un enclave aislado por hardware que impide que cualquier persona, incluido LaserSell, acceda directamente a tu clave.
+
+Cuando una operación necesita ejecutarse, LaserSell solicita a Privy que firme la transacción. Privy la firma dentro del TEE y devuelve la transacción firmada. Luego, LaserSell la envía a la red Solana.
+
+### Monitoreo continuo
+
+Cuando el web trading está activo, LaserSell mantiene una conexión persistente con su infraestructura de monitoreo en tu nombre. Tus posiciones se rastrean en tiempo real y las señales de salida se ejecutan inmediatamente cuando se alcanzan los umbrales de tu estrategia.
+
+Puedes activar y desactivar el web trading usando el icono de encendido en el encabezado del dashboard. Cuando cambias a la aplicación de escritorio, desactiva el web trading para evitar intentos de venta duplicados en la misma wallet.
+
+### Estados de sesión
+
+| Estado | Qué significa |
+|-------|--------------|
+| **Activo** | Stream conectado, posiciones monitoreadas, operaciones se ejecutan automáticamente |
+| **Pausado** | Detenido temporalmente (error o pausa manual) |
+| **Detenido** | Web trading apagado, sin consumo de recursos |
+
+<Card title="Comenzar" icon="arrow-right" href="/web-app/wallet">
+  Configura tu wallet y comienza a operar desde tu navegador.
+</Card>

@@ -1,0 +1,99 @@
+---
+title: "Programa de referidos"
+description: "Gana con cada operación que hacen tus referidos. Comisiones de trading en tres niveles más comisiones por suscripciones."
+---
+
+Invita a traders a LaserSell y gana una parte de sus comisiones de trading en SOL. Construye una cadena de referidos de hasta tres niveles de profundidad y gana comisiones por suscripciones cuando tus referidos actualicen a un plan de pago.
+
+## Cómo funciona
+
+<Steps>
+  <Step title="Únete al programa">
+    Inicia sesión en tu [dashboard de LaserSell](https://app.lasersell.io/referrals) y reclama un nombre de usuario de referido único. Tu enlace será `lasersell.io/@tu_usuario`.
+  </Step>
+  <Step title="Comparte tu enlace">
+    Envía tu enlace de referido a amigos, comunidades o tu audiencia. Cuando alguien se registra a través de tu enlace, queda permanentemente vinculado a ti.
+  </Step>
+  <Step title="Gana recompensas">
+    Gana un porcentaje de las comisiones de trading de tus referidos en SOL, más comisiones por suscripciones en USD. Las recompensas son reclamables después de un periodo de retención de 7 días.
+  </Step>
+</Steps>
+
+## Referidos por comisiones de trading
+
+Cada vez que uno de tus referidos ejecuta una operación a través del router de LaserSell, ganas un porcentaje de la comisión de protocolo que LaserSell cobra. Las ganancias se extienden hasta tres niveles de profundidad en tu cadena de referidos.
+
+| Nivel | Relación | Tu ganancia |
+|------|-------------|--------------|
+| **Nivel 1** | Tú refieres a Alice (directo) | **30%** de la comisión de trading de Alice |
+| **Nivel 2** | Alice refiere a Bob | **3%** de la comisión de trading de Bob |
+| **Nivel 3** | Bob refiere a Carol | **2%** de la comisión de trading de Carol |
+
+<Accordion title="Ejemplo de cálculo">
+Un usuario del nivel Free paga una comisión de trading del 2% en una venta de 1 SOL. Eso es 0.02 SOL en comisiones.
+
+- **Referidor de nivel 1** gana 30% de 0.02 SOL = **0.006 SOL**
+- **Referidor de nivel 2** gana 3% de 0.02 SOL = **0.0006 SOL**
+- **Referidor de nivel 3** gana 2% de 0.02 SOL = **0.0004 SOL**
+
+Los usuarios de niveles de pago tienen comisiones más bajas (0.9% en Professional, 0.5% en Advanced), por lo que la ganancia por operación es menor, pero los traders activos generan un volumen constante.
+</Accordion>
+
+## Referidos por suscripciones
+
+Cuando un usuario que **referiste directamente** se suscribe a un plan de pago, ganas una **comisión recurrente del 30%** en cada factura que pague, mientras permanezca suscrito. Las comisiones por suscripciones aplican solo a referidos directos (Nivel 1). La cadena de múltiples niveles no aplica a suscripciones.
+
+| Plan | Precio mensual | Tu comisión |
+|------|--------------|----------------|
+| Professional Edition | $99/mes | **$29.70/mes** (recurrente)* |
+| Advanced Exit Engine | $249/mes | **$74.70/mes** (recurrente)* |
+
+*Los montos mostrados son antes de las comisiones estándar de pago de Stripe. Stripe puede deducir una pequeña comisión cuando retiras a tu cuenta bancaria.
+
+Las comisiones por suscripciones se pagan en USD a través de **Stripe Connect**. Conecta tu cuenta bancaria desde el dashboard de referidos para recibir pagos.
+
+## Pagos
+
+### Ganancias por comisiones de trading (SOL)
+
+Las ganancias por comisiones de trading se pagan en SOL a cualquier dirección de wallet Solana que proporciones. Puedes reclamar tus ganancias desde el dashboard de referidos siempre que tu saldo reclamable supere **0.01 SOL**.
+
+Los pagos se envían desde la wallet de tesorería de LaserSell. El valor en USD de tus ganancias está determinado por el volumen de trading de tus referidos y el nivel de comisión en el que se encuentran.
+
+### Ganancias por suscripciones (USD)
+
+Las comisiones por suscripciones se pagan en USD a través de Stripe Connect. Después de conectar tu cuenta bancaria, las comisiones reclamables se transfieren automáticamente.
+
+## Reglas y requisitos
+
+<CardGroup cols={2}>
+  <Card title="Nombre de usuario" icon="user">
+    Solo alfanumérico, de 3 a 15 caracteres. Lo eliges una vez y no se puede cambiar. Ciertos nombres reservados (admin, support, etc.) están bloqueados.
+  </Card>
+  <Card title="Retención de 7 días" icon="clock">
+    Todas las ganancias entran en un periodo de retención de 7 días antes de ser reclamables. Esto protege contra contracargos y fraude.
+  </Card>
+  <Card title="Umbral de volumen" icon="shield">
+    Tu referido debe acumular al menos **10 SOL** en volumen total de trading antes de que se desbloqueen tus ganancias por sus operaciones. Esto previene el abuso por auto referencia.
+  </Card>
+  <Card title="Un referidor por cuenta" icon="link">
+    Cada cuenta solo puede ser referida por una persona. El enlace de referido utilizado al registrarse es permanente y no se puede cambiar.
+  </Card>
+</CardGroup>
+
+## Ciclo de vida del estado de ganancias
+
+Cada ganancia pasa por las siguientes etapas:
+
+| Estado | Significado |
+|--------|---------|
+| **Bloqueado** | Tu referido aún no ha alcanzado el umbral de volumen de 10 SOL. Las ganancias se acumulan pero aún no son elegibles. |
+| **Pendiente** | Se alcanzó el umbral de volumen. El periodo de retención de 7 días está activo. |
+| **Reclamable** | El periodo de retención ha pasado. Puedes reclamar esta ganancia desde el dashboard. |
+| **Reclamado** | Pagado a tu wallet (SOL) o cuenta bancaria (USD). |
+
+## Comenzar
+
+<Card title="Únete al programa de referidos" icon="arrow-right" href="https://app.lasersell.io/referrals">
+  Inicia sesión en tu dashboard para reclamar tu nombre de usuario y comenzar a ganar.
+</Card>

@@ -1,0 +1,80 @@
+---
+title: "Seguridad"
+description: "Cómo LaserSell protege tus fondos y claves privadas en la web app."
+---
+
+La web app utiliza un modelo de seguridad diferente al de la aplicación de escritorio. Comprender las diferencias te ayuda a tomar decisiones informadas sobre qué cliente usar.
+
+## Modelo de confianza
+
+| | Aplicación de escritorio | Web App |
+|--|------------|---------|
+| **Modelo** | No custodial (firma local) | No custodial (firma delegada via Privy TEE) |
+| **Quién firma** | Tú, localmente | El TEE de Privy, en tu nombre |
+| **Quién envía** | Tú eliges (RPC, Helius, etc.) | Los servidores de LaserSell via su propio RPC |
+| **Ubicación de la clave** | Tu máquina (cifrada) | Trusted Execution Environment de Privy |
+| **¿LaserSell ve tu clave?** | Nunca | Nunca (el TEE está aislado por hardware) |
+
+## Privy TEE
+
+[Privy](https://privy.io) es una empresa de infraestructura de wallets [adquirida por Stripe](https://privy.io/blog/announcing-our-acquisition-by-stripe). Privy almacena tu clave privada en un **Trusted Execution Environment** (TEE), un enclave aislado por hardware. La clave nunca sale del TEE, ni siquiera al firmar transacciones. LaserSell solicita a Privy que firme una transacción, Privy la firma dentro del TEE y devuelve solo el resultado firmado.
+
+Esto significa:
+- Los servidores de LaserSell nunca tienen acceso a tu clave privada
+- Una vulneración de los servidores de LaserSell no puede filtrar tu clave
+- Puedes exportar tu clave en cualquier momento a través de la interfaz segura de Privy
+
+## Verificación de propiedad de la wallet
+
+Cuando registras una wallet, la web app firma un mensaje de prueba (`lasersell-register:<pubkey>:<timestamp>`) usando la API `signMessage` de Privy. Esta firma ed25519 es verificada por los servidores de LaserSell, demostrando que controlas la wallet. Este es el mismo flujo de verificación que usa la aplicación de escritorio.
+
+## Flujo de transacciones
+
+Cuando se activa una venta automática:
+
+1. El servidor de monitoreo de LaserSell detecta que se alcanzó un umbral de la estrategia
+2. Se construye una transacción sin firmar (igual que en escritorio)
+3. LaserSell solicita a Privy que **firme** la transacción (solo firma, no envío)
+4. Privy firma dentro del TEE y devuelve la transacción firmada
+5. LaserSell envía la transacción firmada a Solana a través de su propio RPC
+6. Recibes una notificación con la firma de la transacción
+
+En ningún momento los servidores de LaserSell ven tu clave privada. La firma y el almacenamiento de claves ocurren enteramente dentro de la infraestructura de Privy.
+
+## Protección de datos
+
+| Datos | Almacenamiento | Acceso |
+|------|---------|--------|
+| API keys | Cifradas en Supabase | La seguridad a nivel de columna previene el acceso del navegador a las claves sin procesar |
+| Claves privadas de wallets | Privy TEE | Nunca accesibles para LaserSell |
+| Estado de sesión de trading | Supabase (protegido por RLS) | Solo tus propias sesiones son visibles |
+| Notificaciones | Supabase (protegido por RLS) | Solo tus propias notificaciones son visibles |
+| Suscripciones push | Supabase (protegido por RLS) | Gestionadas por el usuario |
+
+## Eliminar tu clave de Privy
+
+Si deseas eliminar completamente tu clave privada de la infraestructura de Privy:
+
+### Wallets importadas
+1. Ve a la página de **Wallet** en tu dashboard
+2. Haz clic en el icono de papelera en la tarjeta de la wallet importada
+3. Esto elimina la wallet de LaserSell Y borra la clave del TEE de Privy
+4. La clave se destruye permanentemente en el enclave
+
+### Wallets embebidas
+Las wallets embebidas están vinculadas a tu cuenta de Privy. Para eliminarlas:
+1. **Exporta tu clave privada primero** (haz clic en "Export Key" en la tarjeta de la wallet)
+2. Guarda la clave exportada de forma segura en tu propia wallet (Phantom, Backpack, etc.)
+3. Contacta a [soporte](https://docs.lasersell.io/getting-support/support) para solicitar la eliminación de tu cuenta de Privy
+4. Una vez que se elimine tu cuenta de Privy, la clave de la wallet embebida se destruye permanentemente
+
+<Warning>
+  Eliminar una wallet o cuenta de Privy es irreversible. Si no has exportado tu clave privada, perderás permanentemente el acceso a cualquier fondo en esa wallet.
+</Warning>
+
+## Recomendaciones
+
+- Usa una **wallet dedicada al trading** para web trading en lugar de tu wallet principal de almacenamiento
+- **Desactiva el web trading** cuando cambies a la aplicación de escritorio para evitar intentos de venta duplicados
+- **Exporta tu clave privada** después de importar una wallet como respaldo
+- Revisa la configuración de **deslizamiento máximo** de tu estrategia de salida (predeterminado 5%) para protegerte contra MEV durante la ejecución desatendida

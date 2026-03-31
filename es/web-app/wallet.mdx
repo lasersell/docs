@@ -1,0 +1,78 @@
+---
+title: "Gestión de wallets"
+description: "Gestiona tus wallets de Privy, importa wallets existentes, deposita y retira SOL."
+---
+
+La página de Wallet te permite gestionar las wallets utilizadas para web trading. Cada wallet está protegida por el Trusted Execution Environment (TEE) de Privy.
+
+## Wallet embebida
+
+Cuando inicias sesión por primera vez, Privy crea automáticamente una wallet Solana embebida para ti. Esta wallet aparece en la página de Wallet con la etiqueta "LaserSell Wallet" y está lista para usar de inmediato.
+
+Tu wallet embebida está vinculada a la identidad de tu cuenta, no a tu navegador. Puedes acceder a la misma wallet desde cualquier dispositivo iniciando sesión en tu cuenta de LaserSell.
+
+## Importar una wallet
+
+Puedes importar una wallet Solana existente para usar en web trading.
+
+<Steps>
+  <Step title="Haz clic en Import Wallet">
+    En la página de Wallet, haz clic en el botón "Import Wallet".
+  </Step>
+  <Step title="Ingresa tu clave privada">
+    Pega tu clave privada codificada en base58. La clave se envía directamente desde tu navegador al TEE de Privy. Nunca pasa por los servidores de LaserSell.
+  </Step>
+  <Step title="Wallet registrada">
+    LaserSell verifica la propiedad firmando un mensaje de prueba con tu wallet y luego la registra para trading.
+  </Step>
+</Steps>
+
+<Info>
+  Tu clave privada está cifrada y almacenada en el Trusted Execution Environment de Privy. [Conoce más sobre la seguridad de Privy](https://docs.privy.io/guide/security).
+</Info>
+
+## Depositar SOL
+
+Para operar, tu wallet necesita SOL tanto para comprar tokens como para pagar comisiones de transacción.
+
+1. Ve a la página de Wallet
+2. Haz clic en **Copy Address** en tu wallet
+3. Envía SOL desde tu wallet externa (Phantom, Backpack, etc.) a esa dirección
+
+## Retirar SOL
+
+Haz clic en **Withdraw** en cualquier wallet para enviar SOL o tokens a una dirección externa. El retiro se firma por Privy y se envía a través del RPC de Solana de LaserSell.
+
+## Exportar tu clave privada
+
+Para wallets embebidas, puedes exportar tu clave privada en cualquier momento.
+
+1. Haz clic en **Export Key** en la tarjeta de la wallet
+2. Privy abre una ventana segura mostrando tu clave privada
+3. Cópiala y guárdala de forma segura
+
+LaserSell nunca ve tu clave privada durante la exportación. Todo el proceso ocurre dentro del iframe seguro de Privy.
+
+## Eliminar una wallet
+
+Para eliminar una wallet importada, haz clic en el icono de papelera en la tarjeta de la wallet. Esto elimina la wallet de LaserSell y borra permanentemente la clave privada del TEE de Privy.
+
+Las wallets embebidas no se pueden eliminar directamente desde el dashboard ya que están vinculadas a tu cuenta de Privy. Para eliminar completamente una wallet embebida, exporta la clave privada primero y luego contacta a soporte para solicitar la eliminación de la cuenta.
+
+<Warning>
+  Eliminar una wallet es irreversible. Exporta tu clave privada antes de eliminarla si deseas mantener acceso a los fondos.
+</Warning>
+
+## Wallet activa
+
+Si tienes múltiples wallets, puedes establecer cuál es la activa haciendo clic en **Set Active** en la tarjeta de la wallet. La wallet activa se resalta en azul y se usa como predeterminada para nuevas sesiones de trading.
+
+## Seguridad de la wallet
+
+| Propiedad | Detalle |
+|----------|--------|
+| **Almacenamiento de claves** | Privy TEE (enclave aislado por hardware) |
+| **Acceso a claves** | LaserSell puede solicitar a Privy que firme, pero nunca ve la clave |
+| **Prueba de wallet** | La firma ed25519 demuestra la propiedad en el registro |
+| **Multidispositivo** | La misma wallet en todos los navegadores y dispositivos |
+| **Exportación** | El usuario puede exportar la clave privada en cualquier momento a través de la interfaz segura de Privy |

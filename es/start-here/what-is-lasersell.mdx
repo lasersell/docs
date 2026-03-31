@@ -3,27 +3,61 @@ title: "¿Qué es LaserSell?"
 description: "LaserSell es un motor de salida automatizado y no custodial para Solana. Detecta tus compras, monitorea el PnL en tiempo real y vende automáticamente cuando se cumplen tus condiciones."
 ---
 
-LaserSell es un motor de salida automatizado para la red Solana. Funciona en segundo plano, detecta los nuevos tokens que compras (o creas), monitorea tu PnL en tiempo real y ejecuta ventas automáticamente cuando se cumplen tus condiciones. Tus claves permanecen en tu máquina, cifradas y bajo tu control.
+LaserSell es un motor de salida automatizado para la red Solana. Monitorea tu wallet en la cadena, detecta los nuevos tokens que compras, rastrea tu PnL en tiempo real y ejecuta ventas automáticamente cuando se cumplen tus condiciones. Tus claves siempre están bajo tu control.
 
 ## Cómo funciona
 
 1. **Compras un token** en cualquier plataforma que ya uses.
 2. **LaserSell detecta la compra** monitoreando tu wallet en la cadena.
 3. **Tu estrategia de salida se ejecuta automáticamente.** LaserSell evalúa las condiciones de take profit, stop loss, trailing stop, deadline y venta por graduación en cada actualización de precio.
-4. **En el momento en que se cumple una condición, LaserSell vende.** La transacción se construye, se firma localmente y se transmite directamente a la red Solana.
+4. **En el momento en que se cumple una condición, LaserSell vende.** La transacción se construye, se firma y se transmite directamente a la red Solana.
 
 Sin clics manuales, sin ventanas de confirmación, sin cambiar entre pestañas.
 
 ## Lo que LaserSell no es
 
-- **No es un servicio custodial.** Tus claves privadas están cifradas en tu máquina. Nunca tenemos acceso a ellas.
-- **No es un sitio web al que conectas tu wallet.** LaserSell es un cliente local que se ejecuta en tu máquina, o un SDK/API que integras en tu propia aplicación.
+- **No es un servicio custodial.** Nunca tenemos acceso a tus claves privadas.
+  - **Aplicación de escritorio:** Las claves están cifradas y almacenadas localmente en tu máquina. Tú firmas cada transacción.
+  - **Web App:** Las claves se almacenan en el [Trusted Execution Environment (TEE) de Privy](https://docs.privy.io/guide/security), un enclave aislado por hardware al que ni LaserSell ni el personal de Privy pueden acceder. Privy es una [empresa de Stripe](https://privy.io/blog/announcing-our-acquisition-by-stripe). Puedes exportar tu clave en cualquier momento.
+- **No es asesoramiento financiero.** LaserSell es infraestructura de ejecución. Tú defines la estrategia, LaserSell la ejecuta.
 
-## La aplicación de escritorio
+## Elige cómo operas
 
-La [aplicación de escritorio LaserSell](/desktop/overview) es la forma principal de usar LaserSell. Es una aplicación nativa para macOS con monitoreo de posiciones en tiempo real, estrategias de salida multinivel, mirror trading (copia operaciones desde cualquier wallet), wallet Solana integrada con swap, analíticas con gráficos de PnL diario, logros, desbloqueo con Touch ID y soporte para 7 idiomas.
+LaserSell se adapta a ti. Cada cliente se conecta a la misma infraestructura de monitoreo y ejecuta las mismas estrategias.
+
+### Web App
+
+La [Web App de LaserSell](/web-app/overview) es la forma más fácil de comenzar. Inicia sesión, deposita fondos en tu wallet, configura tu estrategia y LaserSell opera por ti las 24 horas del día, los 7 días de la semana, incluso cuando tu navegador está cerrado.
+
+- Sin descargas, sin instalación, funciona en cualquier dispositivo
+- Ejecución automatizada a través del Trusted Execution Environment de Privy
+- Monitoreo de posiciones en tiempo real con actualizaciones de PnL en vivo
+- Copy trading para replicar automáticamente las operaciones de cualquier wallet
+- Notificaciones push para eventos de trading mientras estás fuera
+
+[Comenzar con la Web App →](/web-app/overview)
+
+### Aplicación de escritorio
+
+La [aplicación de escritorio de LaserSell](/desktop/overview) está diseñada para traders que quieren control local completo. Tus claves permanecen en tu máquina, firmas cada transacción y eliges tu propio RPC y emisor de transacciones.
+
+- Aplicación nativa para macOS con monitoreo de posiciones en tiempo real
+- Estrategias de salida multinivel y mirror trading
+- Wallet Solana integrada con swap
+- Analíticas con gráficos de PnL diario, logros e insights
+- Desbloqueo con Touch ID y soporte para 7 idiomas
 
 [Comenzar con la aplicación de escritorio →](/desktop/installation)
+
+### API y SDK
+
+El mismo motor de salida está disponible a través de [LaserSell API y SDK](/api/overview) para desarrolladores que quieran construir sus propios clientes, bots o plataformas de trading.
+
+- Disponible en [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust) y [Go](/api/sdk/go)
+- Acceso completo a la API de construcción de transacciones y al stream en tiempo real
+- Construye estrategias personalizadas, alertas, dashboards o agentes autónomos
+
+[Explorar la API →](/api/overview)
 
 ## Quién usa LaserSell
 
@@ -33,7 +67,6 @@ Si operas con memecoins en Solana, LaserSell te ofrece salidas automatizadas par
 
 - Take profit, stop loss, trailing stop, deadline timeout y venta por graduación se ejecutan en paralelo.
 - Funciona con cualquier método de entrada. Compra en cualquier plataforma o wallet que ya uses.
-- Usa la [aplicación de escritorio](/desktop/overview) para una interfaz visual o el [CLI](/start-here/quickstart) para operación sin interfaz gráfica.
 
 ### Desplegadores
 
@@ -41,9 +74,7 @@ Si lanzas tokens usando herramientas como RapidLaunch, Uxento o J7 Tracker, Lase
 
 ### Desarrolladores
 
-El mismo motor de salida que impulsa el cliente LaserSell está disponible a través del [SDK y LaserSell API](/api/overview). Construye tus propios bots de trading, plataformas o estrategias personalizadas sobre la inteligencia de salida en tiempo real, el soporte multiprotocolo y la construcción de transacciones de LaserSell.
-
-Disponible en [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust) y [Go](/api/sdk/go).
+Construye tus propios bots de trading, plataformas o estrategias personalizadas sobre la inteligencia de salida en tiempo real, el soporte multiprotocolo y la construcción de transacciones de LaserSell.
 
 ## Protocolos soportados
 
@@ -57,6 +88,14 @@ Detalles completos: [Soporte de plataformas y monedas](/onboarding/platform-and-
 
 ## Primeros pasos
 
-- **Aplicación de escritorio:** [Descargar e instalar](/desktop/installation)
-- **CLI:** [Inicio rápido](/start-here/quickstart)
-- **API y SDK:** [Resumen de la API](/api/overview)
+<CardGroup cols={3}>
+  <Card title="Web App" icon="globe" href="/web-app/overview">
+    Opera desde tu navegador con ejecución automática, incluso sin conexión.
+  </Card>
+  <Card title="Aplicación de escritorio" icon="desktop" href="/desktop/installation">
+    Control local completo con experiencia nativa de macOS.
+  </Card>
+  <Card title="API & SDK" icon="code" href="/api/overview">
+    Construye tu propio cliente o bot de trading.
+  </Card>
+</CardGroup>

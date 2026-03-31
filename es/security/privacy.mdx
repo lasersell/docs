@@ -3,7 +3,7 @@ title: "Privacidad y datos"
 description: "Qué datos recopila LaserSell, a dónde van y tus controles sobre ellos."
 ---
 
-LaserSell está construido sobre una filosofía de red de "mínimo privilegio". Toda la construcción y firma de transacciones ocurre localmente en tu máquina. Solo transmitimos datos estrictamente necesarios para autenticar tu cuenta, proporcionar servicios de API e impulsar la plataforma.
+LaserSell está construido sobre una filosofía de red de "mínimo privilegio". Para la aplicación de escritorio y los clientes API/SDK, toda la construcción y firma de transacciones ocurre localmente en tu máquina. Para la web app, la firma es gestionada por el Trusted Execution Environment (TEE) de Privy. Solo transmitimos datos estrictamente necesarios para autenticar tu cuenta, proporcionar servicios de API e impulsar la plataforma.
 
 Esta página resume qué datos salen de tu máquina y a dónde van. La política de privacidad legal completa está en [lasersell.io/privacy](https://www.lasersell.io/privacy).
 
@@ -13,23 +13,24 @@ Esto nunca sale de tu máquina:
 
 | Datos | Detalles |
 | :--- | :--- |
-| **Claves privadas y frases semilla** | Cifradas en tu disco en el almacén de claves. Nunca se transmiten. |
-| **Configuración de estrategia** | Tu TP, SL, trailing stop, deadline y otros ajustes se ejecutan enteramente de forma local. |
-| **Construcción y firma de transacciones** | Las transacciones se construyen y firman en tu máquina, luego se envían directamente a la red Solana a través de tu RPC. |
+| **Claves privadas y frases semilla** | Escritorio: cifradas en tu disco en el almacén de claves, nunca se transmiten. Web app: almacenadas en el TEE de Privy, nunca accesibles para los servidores de LaserSell. |
+| **Configuración de estrategia** | Escritorio: se ejecuta enteramente de forma local. Web app: almacenada en nuestra base de datos para mantener tu sesión entre visitas del navegador. |
+| **Construcción y firma de transacciones** | Escritorio: las transacciones se construyen y firman en tu máquina. Web app: las transacciones se construyen del lado del servidor, se firman por el TEE de Privy y se envían a través del RPC de LaserSell. |
 
 ## Lo que recopilamos
 
 ### Autenticación y cuentas
 
 - **Correo electrónico y credenciales**: almacenados en Supabase para la autenticación de cuentas en [app.lasersell.io](https://app.lasersell.io).
+- **Fotos de perfil**: almacenadas en Supabase Storage si subes una. Puedes eliminarla o reemplazarla en cualquier momento.
 - **Datos de perfil OAuth**: si inicias sesión a través de GitHub, X/Twitter o Google, recibimos información de perfil limitada (sin contraseñas).
 - **MFA**: basado en TOTP. No recopilamos números de teléfono.
 
 ### API y actividad de trading
 
 - **Claves públicas de wallets**: enviadas a LaserSell API para autenticación e identificación de sesión.
-- **Claves API**: almacenadas cifradas para la autenticación de endpoints.
-- **Actividad de trading**: a medida que la plataforma evoluciona, planeamos registrar la actividad vinculada a tus claves API (PnL, configuración, frecuencia de trading, direcciones de wallets) para mejorar el producto y proporcionar analíticas.
+- **API keys**: almacenadas cifradas para la autenticación de endpoints.
+- **Actividad de trading**: a medida que la plataforma evoluciona, planeamos registrar la actividad vinculada a tus API keys (PnL, configuración, frecuencia de trading, direcciones de wallets) para mejorar el producto y proporcionar analíticas.
 
 ### Pagos
 
@@ -68,7 +69,8 @@ Compartimos datos con estos proveedores para operar la plataforma:
 
 | Proveedor | Propósito |
 | :--- | :--- |
-| **Stripe** | Procesamiento de pagos |
+| **Stripe** | Procesamiento de pagos y pagos de comisiones de referidos (Stripe Connect) |
+| **Privy** | Gestión de claves de wallet en Trusted Execution Environments (web trading) |
 | **Supabase** | Base de datos y autenticación |
 | **Better Stack** | Gestión de logs (EE.UU.) |
 | **Typeform** | Solicitudes de admisión empresarial |
@@ -83,12 +85,12 @@ Compartimos datos con estos proveedores para operar la plataforma:
 
 ## Tus derechos
 
-- Actualiza tus métodos de autenticación y claves API a través del [dashboard](https://app.lasersell.io).
+- Actualiza tus métodos de autenticación y API keys a través del [dashboard](https://app.lasersell.io).
 - Solicita acceso, corrección o eliminación de tus datos enviando un correo a [support@lasersell.io](mailto:support@lasersell.io).
 
 ## Seguridad
 
-Usamos cifrado para claves API y gestión de sesiones, junto con salvaguardas administrativas y técnicas. Si descubres una vulnerabilidad de seguridad, repórtala a [security@lasersell.io](mailto:security@lasersell.io). Te alentamos a usar nuestra [clave PGP](https://www.lasersell.io/lasersell-pgp-key.asc). Consulta nuestro [security.txt](https://www.lasersell.io/.well-known/security.txt) para las guías completas de divulgación.
+Usamos cifrado para API keys y gestión de sesiones, junto con salvaguardas administrativas y técnicas. Si descubres una vulnerabilidad de seguridad, repórtala a [security@lasersell.io](mailto:security@lasersell.io). Te alentamos a usar nuestra [clave PGP](https://www.lasersell.io/lasersell-pgp-key.asc). Consulta nuestro [security.txt](https://www.lasersell.io/.well-known/security.txt) para las guías completas de divulgación.
 
 ## Jurisdicción
 
