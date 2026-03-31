@@ -56,13 +56,13 @@ Las comisiones por suscripciones se pagan en USD a través de **Stripe Connect**
 
 ### Ganancias por comisiones de trading (SOL)
 
-Las ganancias por comisiones de trading se pagan en SOL a cualquier dirección de wallet Solana que proporciones. Puedes reclamar tus ganancias desde el dashboard de referidos siempre que tu saldo reclamable supere **0.01 SOL**.
+Las ganancias por comisiones de trading se pagan en SOL a cualquier dirección de wallet Solana que proporciones. Todas las ganancias en SOL están sujetas a un **periodo de retención de 7 días** antes de ser reclamables. Puedes reclamar desde el dashboard de referidos cuando tu saldo supere **0.01 SOL**.
 
 Los pagos se envían desde la wallet de tesorería de LaserSell. El valor en USD de tus ganancias está determinado por el volumen de trading de tus referidos y el nivel de comisión en el que se encuentran.
 
 ### Ganancias por suscripciones (USD)
 
-Las comisiones por suscripciones se pagan en USD a través de Stripe Connect. Después de conectar tu cuenta bancaria, las comisiones reclamables se transfieren automáticamente.
+Las comisiones por suscripciones se pagan en USD a través de Stripe Connect sin periodo de retención. Después de conectar tu cuenta bancaria, las comisiones se transfieren según el calendario estándar de pagos de Stripe.
 
 ## Reglas y requisitos
 
@@ -70,8 +70,8 @@ Las comisiones por suscripciones se pagan en USD a través de Stripe Connect. De
   <Card title="Nombre de usuario" icon="user">
     Solo alfanumérico, de 3 a 15 caracteres. Lo eliges una vez y no se puede cambiar. Ciertos nombres reservados (admin, support, etc.) están bloqueados.
   </Card>
-  <Card title="Retención de 7 días" icon="clock">
-    Todas las ganancias entran en un periodo de retención de 7 días antes de ser reclamables. Esto protege contra contracargos y fraude.
+  <Card title="Pagos en SOL" icon="clock">
+    Las ganancias por comisiones de trading se pagan en SOL y están sujetas a un **periodo de retención de 7 días**. Las comisiones por suscripciones no tienen periodo de retención y siguen el calendario estándar de Stripe.
   </Card>
   <Card title="Prueba de referido" icon="gift">
     Los usuarios que se registran a través de tu enlace de referido obtienen **7 días de funciones del nivel Pro** gratis. Más funciones significan más operaciones, lo que significa más ganancias para ti.
@@ -87,9 +87,11 @@ Cada ganancia pasa por las siguientes etapas:
 
 | Estado | Significado |
 |--------|---------|
-| **Pendiente** | El periodo de retención de 7 días está activo. |
+| **Pendiente** | El periodo de retención de 7 días de las ganancias en SOL está activo. |
 | **Reclamable** | El periodo de retención ha pasado. Puedes reclamar esta ganancia desde el dashboard. |
 | **Reclamado** | Pagado a tu wallet (SOL) o cuenta bancaria (USD). |
+
+Nota: estos estados aplican a las ganancias por comisiones de trading en SOL. Las comisiones por suscripciones se gestionan a través de Stripe Connect y no pasan por el proceso de retención.
 
 ## Comenzar
 

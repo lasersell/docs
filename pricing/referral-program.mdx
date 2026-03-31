@@ -56,13 +56,13 @@ Subscription commissions are paid in USD through **Stripe Connect**. Connect you
 
 ### Trading fee earnings (SOL)
 
-Trading fee earnings are paid in SOL to any Solana wallet address you provide. You can claim your earnings from the referral dashboard whenever your claimable balance exceeds **0.01 SOL**.
+Trading fee earnings are paid in SOL to any Solana wallet address you provide. All SOL earnings are subject to a **7 day hold period** before becoming claimable. You can claim from the referral dashboard whenever your claimable balance exceeds **0.01 SOL**.
 
 Payouts are sent from the LaserSell treasury wallet. The USD value of your earnings is determined by your referrals' trading volume and the fee tier they are on.
 
 ### Subscription earnings (USD)
 
-Subscription commissions are paid in USD through Stripe Connect. After connecting your bank account, claimable commissions are transferred automatically.
+Subscription commissions are paid in USD through Stripe Connect. After connecting your bank account, commissions are transferred on Stripe's standard payout schedule.
 
 ## Rules and Requirements
 
@@ -70,8 +70,8 @@ Subscription commissions are paid in USD through Stripe Connect. After connectin
   <Card title="Username" icon="user">
     Alphanumeric only, 3 to 15 characters. You choose it once and it cannot be changed. Certain reserved names (admin, support, etc.) are blocked.
   </Card>
-  <Card title="7 Day Hold" icon="clock">
-    All earnings enter a 7 day hold period before becoming claimable. This protects against chargebacks and fraud.
+  <Card title="SOL Payouts" icon="clock">
+    Trading fee earnings are paid in SOL and subject to a **7 day hold** before becoming claimable. Subscription commissions have no hold period and follow Stripe's standard payout schedule.
   </Card>
   <Card title="Referral Trial" icon="gift">
     Users who sign up through your referral link get **7 days of Pro tier** features for free. More features means more trades, which means more earnings for you.
@@ -87,9 +87,11 @@ Each earning goes through the following stages:
 
 | Status | Meaning |
 |--------|---------|
-| **Pending** | The 7 day hold period is active. |
+| **Pending** | SOL trading fee earnings are in the 7 day hold period. |
 | **Claimable** | The hold period has passed. You can claim this earning from the dashboard. |
 | **Claimed** | Paid out to your wallet (SOL) or bank account (USD). |
+
+Note: these statuses apply to SOL trading fee earnings. Subscription commissions are handled entirely through Stripe Connect and do not go through the hold process.
 
 ## Get Started
 
