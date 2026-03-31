@@ -1,0 +1,80 @@
+---
+title: "Security"
+description: "How LaserSell protects your funds and private keys in the web app."
+---
+
+The web app uses a different security model from the desktop app. Understanding the differences helps you make informed decisions about which client to use.
+
+## Trust Model
+
+| | Desktop App | Web App |
+|--|------------|---------|
+| **Model** | Non-custodial (local signing) | Non-custodial (delegated signing via Privy TEE) |
+| **Who signs** | You, locally | Privy's TEE, on your behalf |
+| **Who submits** | You choose (RPC, Helius, etc.) | LaserSell's servers via its own RPC |
+| **Key location** | Your machine (encrypted) | Privy's Trusted Execution Environment |
+| **LaserSell sees your key?** | Never | Never (TEE is hardware-isolated) |
+
+## Privy TEE
+
+[Privy](https://privy.io) is a wallet infrastructure company [acquired by Stripe](https://privy.io/blog/announcing-our-acquisition-by-stripe). Privy stores your private key in a **Trusted Execution Environment** (TEE), a hardware-isolated enclave. The key never leaves the TEE, even when signing transactions. LaserSell requests Privy to sign a transaction, Privy signs it inside the TEE, and returns only the signed result.
+
+This means:
+- LaserSell servers never have access to your private key
+- A LaserSell server compromise cannot leak your key
+- You can export your key at any time via Privy's secure UI
+
+## Wallet Ownership Verification
+
+When you register a wallet, the web app signs a proof message (`lasersell-register:<pubkey>:<timestamp>`) using Privy's `signMessage` API. This ed25519 signature is verified by LaserSell's servers, proving you control the wallet. This is the same verification flow used by the desktop app.
+
+## Transaction Flow
+
+When an auto-sell triggers:
+
+1. LaserSell's monitoring server detects a strategy threshold hit
+2. An unsigned transaction is built (same as desktop)
+3. LaserSell requests Privy to **sign** the transaction (sign-only, not submit)
+4. Privy signs inside the TEE and returns the signed transaction
+5. LaserSell submits the signed transaction to Solana via its own RPC
+6. You receive a notification with the transaction signature
+
+At no point do LaserSell's servers see your private key. The signing and key storage are entirely within Privy's infrastructure.
+
+## Data Protection
+
+| Data | Storage | Access |
+|------|---------|--------|
+| API keys | Encrypted in Supabase | Column-level security prevents browser access to raw keys |
+| Wallet private keys | Privy TEE | Never accessible to LaserSell |
+| Trading session state | Supabase (RLS-protected) | Only your own sessions visible |
+| Notifications | Supabase (RLS-protected) | Only your own notifications visible |
+| Push subscriptions | Supabase (RLS-protected) | User-managed |
+
+## Removing Your Key from Privy
+
+If you want to fully remove your private key from Privy's infrastructure:
+
+### Imported Wallets
+1. Go to the **Wallet** page in your dashboard
+2. Click the trash icon on the imported wallet card
+3. This removes the wallet from LaserSell AND deletes the key from Privy's TEE
+4. The key is permanently destroyed in the enclave
+
+### Embedded Wallets
+Embedded wallets are tied to your Privy account. To remove them:
+1. **Export your private key first** (click "Export Key" on the wallet card)
+2. Store the exported key safely in your own wallet (Phantom, Backpack, etc.)
+3. Contact [support](https://docs.lasersell.io/getting-support/support) to request Privy account deletion
+4. Once your Privy account is deleted, the embedded wallet key is permanently destroyed
+
+<Warning>
+  Deleting a wallet or Privy account is irreversible. If you have not exported your private key, you will permanently lose access to any funds in that wallet.
+</Warning>
+
+## Recommendations
+
+- Use a **dedicated trading wallet** for web trading rather than your primary holding wallet
+- **Toggle off web trading** when switching to the desktop app to avoid duplicate sell attempts
+- **Export your private key** after importing a wallet as a backup
+- Review your exit strategy's **max slippage** setting (defaults to 5%) to protect against MEV during unattended execution

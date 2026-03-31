@@ -3,27 +3,61 @@ title: "What Is LaserSell?"
 description: "LaserSell is a non-custodial automated exit engine for Solana. It detects your buys, monitors PnL in real time, and sells automatically when your conditions are met."
 ---
 
-LaserSell is an automated exit engine for the Solana network. It runs in the background, detects new tokens you buy (or create), monitors your PnL in real time, and executes sells automatically when your conditions are met. Your keys stay on your machine, encrypted and under your control.
+LaserSell is an automated exit engine for the Solana network. It monitors your wallet on-chain, detects new tokens you buy, tracks your PnL in real time, and executes sells automatically when your conditions are met. Your keys are always under your control.
 
 ## How It Works
 
 1. **You buy a token** on any platform you already use.
 2. **LaserSell detects the buy** by monitoring your wallet on-chain.
 3. **Your exit strategy runs automatically.** LaserSell evaluates take profit, stop loss, trailing stop, deadline, and sell-on-graduation conditions on every price update.
-4. **The moment a condition is met, LaserSell sells.** The transaction is constructed, signed locally, and broadcast directly to the Solana network.
+4. **The moment a condition is met, LaserSell sells.** The transaction is constructed, signed, and broadcast directly to the Solana network.
 
 No manual clicks, no confirmation popups, no switching between tabs.
 
 ## What LaserSell Is Not
 
-- **Not a custodial service.** Your private keys are encrypted on your machine. We never have access to them.
-- **Not a website you connect your wallet to.** LaserSell is a local client that runs on your machine, or an SDK/API you integrate into your own application.
+- **Not a custodial service.** We never have access to your private keys.
+  - **Desktop App:** Keys are encrypted and stored locally on your machine. You sign every transaction.
+  - **Web App:** Keys are stored in [Privy's Trusted Execution Environment (TEE)](https://docs.privy.io/guide/security), a hardware-isolated enclave that neither LaserSell nor Privy personnel can access. Privy is a [Stripe company](https://privy.io/blog/announcing-our-acquisition-by-stripe). You can export your key at any time.
+- **Not financial advice.** LaserSell is execution infrastructure. You set the strategy, LaserSell executes it.
 
-## The Desktop App
+## Choose How You Trade
 
-The [LaserSell Desktop app](/desktop/overview) is the flagship way to use LaserSell. It is a native macOS application with real-time position monitoring, multi-level exit strategies, mirror trading (copy-trade from any wallet), a built-in Solana wallet with swap, analytics with daily PnL charts, achievements, Touch ID unlock, and support for 7 languages.
+LaserSell meets you where you are. Every client connects to the same monitoring infrastructure and executes the same strategies.
+
+### Web App
+
+The [LaserSell Web App](/web-app/overview) is the easiest way to get started. Sign in, fund your wallet, set your strategy, and LaserSell trades for you 24/7, even when your browser is closed.
+
+- No downloads, no installation, works on any device
+- Automated execution via Privy's Trusted Execution Environment
+- Real-time position monitoring with live PnL updates
+- Copy trading to mirror any wallet's trades automatically
+- Push notifications for trade events while you are away
+
+[Get started with the Web App →](/web-app/overview)
+
+### Desktop App
+
+The [LaserSell Desktop app](/desktop/overview) is built for traders who want full local control. Your keys stay on your machine, you sign every transaction, and you choose your own RPC and transaction sender.
+
+- Native macOS application with real-time position monitoring
+- Multi-level exit strategies and mirror trading
+- Built-in Solana wallet with swap
+- Analytics with daily PnL charts, achievements, and insights
+- Touch ID unlock and support for 7 languages
 
 [Get started with the Desktop app →](/desktop/installation)
+
+### API and SDK
+
+The same exit engine is available through the [LaserSell API and SDK](/api/overview) for developers who want to build their own clients, bots, or trading platforms.
+
+- Available in [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust), and [Go](/api/sdk/go)
+- Full access to the transaction building API and real-time stream
+- Build custom strategies, alerts, dashboards, or autonomous agents
+
+[Explore the API →](/api/overview)
 
 ## Who Uses LaserSell
 
@@ -33,7 +67,6 @@ If you trade memecoins on Solana, LaserSell gives you automated exits so you do 
 
 - Take profit, stop loss, trailing stop, deadline timeout, and sell-on-graduation all run in parallel.
 - Works with any entry method. Buy on any platform or wallet you already use.
-- Use the [Desktop app](/desktop/overview) for a visual interface or the [CLI](/start-here/quickstart) for headless operation.
 
 ### Deployers
 
@@ -41,9 +74,7 @@ If you launch tokens using tools like RapidLaunch, Uxento, or J7 Tracker, LaserS
 
 ### Developers
 
-The same exit engine that powers the LaserSell client is available through the [LaserSell SDK and API](/api/overview). Build your own trading bots, platforms, or custom strategies on top of LaserSell's real-time exit intelligence, multi-protocol support, and transaction building.
-
-Available in [TypeScript](/api/sdk/typescript), [Python](/api/sdk/python), [Rust](/api/sdk/rust), and [Go](/api/sdk/go).
+Build your own trading bots, platforms, or custom strategies on top of LaserSell's real-time exit intelligence, multi-protocol support, and transaction building.
 
 ## Supported Protocols
 
@@ -57,6 +88,14 @@ Full details: [Platform and Coin Support](/onboarding/platform-and-coin-support)
 
 ## Getting Started
 
-- **Desktop App:** [Download and install](/desktop/installation)
-- **CLI:** [Quickstart](/start-here/quickstart)
-- **API and SDK:** [API Overview](/api/overview)
+<CardGroup cols={3}>
+  <Card title="Web App" icon="globe" href="/web-app/overview">
+    Trade from your browser with automatic execution, even offline.
+  </Card>
+  <Card title="Desktop App" icon="desktop" href="/desktop/installation">
+    Full local control with native macOS experience.
+  </Card>
+  <Card title="API & SDK" icon="code" href="/api/overview">
+    Build your own client or trading bot.
+  </Card>
+</CardGroup>

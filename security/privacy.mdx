@@ -3,7 +3,7 @@ title: "Privacy & Data"
 description: "What data LaserSell collects, where it goes, and your controls over it."
 ---
 
-LaserSell is built on a "least privilege" network philosophy. All trade construction and signing happen locally on your machine. We only transmit data strictly necessary to authenticate your account, provide API services, and power the platform.
+LaserSell is built on a "least privilege" network philosophy. For the desktop app and API/SDK clients, all trade construction and signing happen locally on your machine. For the web app, signing is handled by Privy's Trusted Execution Environment (TEE). We only transmit data strictly necessary to authenticate your account, provide API services, and power the platform.
 
 This page summarizes what data leaves your machine and where it goes. The full legal privacy policy is at [lasersell.io/privacy](https://www.lasersell.io/privacy).
 
@@ -13,15 +13,16 @@ These never leave your machine:
 
 | Data | Details |
 | :--- | :--- |
-| **Private keys & seed phrases** | Encrypted on your disk in the keystore. Never transmitted. |
-| **Strategy configuration** | Your TP, SL, trailing stop, deadline, and other settings run entirely locally. |
-| **Trade construction & signing** | Transactions are built and signed on your machine, then sent directly to the Solana network via your RPC. |
+| **Private keys & seed phrases** | Desktop: encrypted on your disk in the keystore, never transmitted. Web app: stored in Privy's TEE, never accessible to LaserSell servers. |
+| **Strategy configuration** | Desktop: runs entirely locally. Web app: stored in our database to maintain your session across browser visits. |
+| **Trade construction & signing** | Desktop: transactions built and signed on your machine. Web app: transactions built server-side, signed by Privy's TEE, submitted via LaserSell's RPC. |
 
 ## What we collect
 
 ### Authentication & accounts
 
-- **Email and credentials**:stored in Supabase for account authentication on [app.lasersell.io](https://app.lasersell.io).
+- **Email and credentials**: stored in Supabase for account authentication on [app.lasersell.io](https://app.lasersell.io).
+- **Profile pictures**: stored in Supabase Storage if you upload one. You can remove or replace it anytime.
 - **OAuth profile data**:if you sign in via GitHub, X/Twitter, or Google, we receive limited profile info (no passwords).
 - **MFA**:TOTP-based. We do not collect phone numbers.
 
@@ -68,7 +69,8 @@ We share data with these providers to operate the platform:
 
 | Provider | Purpose |
 | :--- | :--- |
-| **Stripe** | Payment processing |
+| **Stripe** | Payment processing and referral commission payouts (Stripe Connect) |
+| **Privy** | Wallet key management in Trusted Execution Environments (web trading) |
 | **Supabase** | Database and authentication |
 | **Better Stack** | Log management (U.S.) |
 | **Typeform** | Enterprise intake applications |

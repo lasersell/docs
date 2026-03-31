@@ -34,6 +34,15 @@
                 ]
               },
               {
+                "group": "Trading from Your Browser",
+                "pages": [
+                  "web-app/overview",
+                  "web-app/wallet",
+                  "web-app/trading",
+                  "web-app/security"
+                ]
+              },
+              {
                 "group": "Analytics & Achievements",
                 "pages": [
                   "features/analytics",

@@ -1,0 +1,100 @@
+---
+title: "Trading"
+description: "Configure exit strategies and monitor positions from your browser."
+---
+
+The Trading page is the main control center for web trading. It has two tabs: **Positions** for monitoring your active trades, and **Copy Trading** for mirroring other wallets.
+
+## Getting Started
+
+If you have not started a web trading session yet, the Trading page shows a setup form:
+
+1. **Select wallets** to monitor (from your registered wallets)
+2. **Configure your exit strategy** (target profit, stop loss, trailing stop, max slippage)
+3. Click **Start Web Trading**
+
+Once started, LaserSell monitors your wallets and automatically executes trades when your strategy thresholds are hit.
+
+## Positions Tab
+
+The Positions tab uses a three-column layout:
+
+- **Left**: List of all open positions with P&L summary
+- **Middle**: Detailed view of the selected position (token info, entry price, current profit, sell button)
+- **Right**: Exit strategy settings (editable at any time)
+
+### Exit Strategy Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Target Profit %** | Sell when profit reaches this percentage |
+| **Stop Loss %** | Sell when loss reaches this percentage |
+| **Trailing Stop %** | Lock in profits by trailing the price by this percentage |
+| **Max Slippage %** | Maximum acceptable slippage on auto-sells (default 5%) |
+| **Sell on Graduation** | Auto-sell when a token graduates from pump.fun to Raydium |
+
+Changes are applied immediately to all active positions.
+
+### Manual Sell
+
+Click **Sell Now** on any position to trigger an immediate sell, regardless of strategy thresholds.
+
+## Copy Trading Tab
+
+Copy trading lets you automatically mirror the trades of other wallets.
+
+### Adding a Watch Wallet
+
+1. Click **Add Watch Wallet**
+2. Enter a Solana wallet address or `.sol` domain name (resolved via SNS)
+3. Set a nickname and auto-buy amount (in SOL)
+4. The wallet is added to your watch list
+
+When a watched wallet buys a token, LaserSell automatically executes the same buy with your wallet.
+
+### Mirror Settings
+
+| Setting | Description |
+|---------|-------------|
+| **Max positions per wallet** | Limit concurrent mirror positions |
+| **Cooldown** | Minimum time between mirror buys |
+| **Skip creator tokens** | Ignore tokens created by the watched wallet |
+| **Max active SOL** | Cap total SOL deployed across mirror positions |
+| **Buy slippage** | Maximum slippage for mirror buys |
+| **Min pool liquidity** | Skip tokens with low liquidity |
+| **Max entry drift** | Skip if price has drifted too far from the watched wallet's entry |
+| **Max consecutive losses** | Auto-disable the watched wallet after N consecutive losses |
+
+## Session Controls
+
+Use the **agent toggle** (power icon in the header) to start or stop web trading. The status dot shows:
+
+- 🟢 **Green**: Active and monitoring
+- 🔵 **Blue**: Watching for new positions
+- 🟡 **Yellow**: Paused (error or inactivity)
+- ⚪ **Gray**: Stopped
+
+<Warning>
+  If you are monitoring the same wallet from both the desktop app and the web app, both will try to sell when a threshold is hit. Toggle one off when switching to the other.
+</Warning>
+
+## Tier Limits
+
+Your subscription tier determines the capacity available for web trading. These same limits apply across the desktop app and API.
+
+| | Free | Professional | Advanced |
+|--|------|-------------|----------|
+| **Wallets** | 1 | 5 | 200 |
+| **Positions per wallet** | 2 | 100 | 100 |
+| **Watch wallets** | 2 | 10 | 25 |
+| **Session timeout** | 45 min | None | None |
+| **Always-on monitoring** | No | Yes | Yes |
+| **Exit Ladder** | No | Yes | Yes |
+| **Liquidity Guard** | No | Yes | Yes |
+| **Behavioral Insights** | No | Yes | Yes |
+
+Free tier users have full access to web trading with basic exit strategies (target profit, stop loss, trailing stop). Upgrade to Professional for advanced strategies, always-on monitoring, and higher capacity.
+
+<Card title="Compare All Plans" icon="arrow-right" href="https://www.lasersell.io/pricing">
+  See the full feature comparison on our pricing page.
+</Card>

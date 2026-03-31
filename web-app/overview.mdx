@@ -1,0 +1,63 @@
+---
+title: "Web App Overview"
+description: "Trade from your browser with automatic execution, even when you close the tab."
+---
+
+The LaserSell Web App brings automated trading to your browser. Configure your exit strategy, fund your wallet, and LaserSell executes trades on your behalf 24/7, even when your browser is closed.
+
+## How It Works
+
+<Steps>
+  <Step title="Set Up Your Wallet">
+    When you sign in, a secure wallet is automatically created for you by [Privy](https://privy.io). You can also import an existing wallet. Your private keys are stored in a Trusted Execution Environment (TEE) and never touch LaserSell servers.
+  </Step>
+  <Step title="Fund Your Wallet">
+    Send SOL to your wallet address from any external wallet (Phantom, Backpack, etc.). Your wallet address and balance are visible on the Wallet page.
+  </Step>
+  <Step title="Configure Your Strategy">
+    Set your exit strategy: target profit, stop loss, trailing stop, and maximum slippage. These rules determine when LaserSell automatically sells your positions.
+  </Step>
+  <Step title="Start Trading">
+    Click "Start Web Trading" and LaserSell begins monitoring your wallets. When a position hits your strategy thresholds, the trade executes automatically using your wallet.
+  </Step>
+</Steps>
+
+## Web App vs Desktop App
+
+Both clients connect to the same LaserSell infrastructure, but they work differently under the hood.
+
+| Feature | Desktop App | Web App |
+|---------|------------|---------|
+| **Signing** | Your local keypair | Privy TEE wallet (delegated signing) |
+| **Offline execution** | No (app must be open) | Yes (server executes while you are away) |
+| **Wallet** | Import/generate locally | Privy embedded or imported |
+| **Copy trading** | Yes | Yes |
+| **Position monitoring** | Yes | Yes |
+| **Buying coins** | Yes | Not yet |
+| **Token search** | Yes | Not yet |
+
+## Key Concepts
+
+### Privy Wallets
+
+Your web trading wallet is managed by [Privy](https://privy.io), a wallet infrastructure company [acquired by Stripe](https://privy.io/blog/announcing-our-acquisition-by-stripe). Privy stores your private key in a Trusted Execution Environment (TEE), a hardware-isolated enclave that prevents anyone, including LaserSell, from accessing your key directly.
+
+When a trade needs to execute, LaserSell requests Privy to sign the transaction. Privy signs it inside the TEE and returns the signed transaction. LaserSell then submits it to the Solana network.
+
+### Always-On Monitoring
+
+When web trading is active, LaserSell maintains a persistent connection to its monitoring infrastructure on your behalf. Your positions are tracked in real time, and exit signals are executed immediately when your strategy thresholds are hit.
+
+You can toggle web trading on and off using the power icon in the dashboard header. When you switch to the desktop app, toggle web trading off to avoid duplicate sell attempts on the same wallet.
+
+### Session States
+
+| State | What It Means |
+|-------|--------------|
+| **Active** | Stream connected, positions monitored, trades execute automatically |
+| **Paused** | Temporarily stopped (error or manual pause) |
+| **Stopped** | Web trading is off, no resources consumed |
+
+<Card title="Get Started" icon="arrow-right" href="/web-app/wallet">
+  Set up your wallet and start trading from your browser.
+</Card>
