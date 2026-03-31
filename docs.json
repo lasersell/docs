@@ -3,7 +3,7 @@
   "theme": "maple",
   "name": "LaserSell Documentation",
   "colors": {
-    "primary": "#0D9373"
+    "primary": "#00BFFF"
   },
   "openapi": "openapi.yaml",
   "api": {
