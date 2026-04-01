@@ -41,7 +41,8 @@
                   "web-app/overview",
                   "web-app/wallet",
                   "web-app/trading",
-                  "web-app/security"
+                  "web-app/security",
+                  "web-app/account-deletion"
                 ]
               },
               {
