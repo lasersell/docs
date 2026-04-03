@@ -3,19 +3,19 @@ title: "Referral Program"
 description: "Earn from every SOL trade your referrals make. Three tier trading fee referrals plus subscription commissions."
 ---
 
-Invite traders to LaserSell and earn a share of their SOL trading fees. Build a referral chain up to three levels deep, and earn subscription commissions when your referrals upgrade to a paid plan. Trading fee earnings apply to SOL trades only; USD1 trades are excluded.
+Invite traders to LaserSell and earn a share of their SOL trading fees. Build a referral chain up to three levels deep, and earn subscription commissions when your referrals upgrade to a paid plan. Trading fee earnings are split atomically on chain at trade time, so SOL arrives in your wallet instantly. USD1 trades are excluded.
 
 ## How It Works
 
 <Steps>
   <Step title="Join the Program">
-    Sign in to your [LaserSell dashboard](https://app.lasersell.io/referrals) and claim a unique referral username. Your link becomes `lasersell.io/@you`.
+    Sign in to your [LaserSell dashboard](https://app.lasersell.io/referrals), claim a unique referral username, and set your payout wallet (any Solana wallet address). Your link becomes `lasersell.io/@you`.
   </Step>
   <Step title="Share Your Link">
     Send your referral link to friends, communities, or your audience. When someone signs up through your link, they are permanently linked to you.
   </Step>
   <Step title="Earn Rewards">
-    Earn a percentage of your referrals' SOL trading fees, plus subscription commissions in USD. SOL trading fee rewards are claimable after a 7 day hold; subscription commissions have a 30 day hold. USD1 trades are not eligible for trading fee earnings.
+    Earn a percentage of your referrals' SOL trading fees, paid instantly on chain to your payout wallet the moment they trade. You also earn subscription commissions in USD through Whop. USD1 trades are not eligible for trading fee earnings.
   </Step>
 </Steps>
 
@@ -56,9 +56,13 @@ Subscription commissions are paid in USD through **Whop** with a **30 day hold**
 
 ### Trading fee earnings (SOL)
 
-Trading fee earnings are paid in SOL to any Solana wallet address you provide. Only SOL-denominated trades are eligible; USD1 trades do not generate referral trading fee earnings. All SOL earnings are subject to a **7 day hold period** before becoming claimable. You can claim from the referral dashboard whenever your claimable balance exceeds **0.01 SOL**.
+Trading fee earnings are paid in SOL instantly at trade time. When one of your referrals executes a trade, the protocol fee is split atomically on chain and your share is sent directly to your payout wallet in the same transaction. There is no hold period and no manual step required. Only SOL denominated trades are eligible; USD1 trades do not generate referral trading fee earnings.
 
-Payouts are sent from the LaserSell treasury wallet. The USD value of your earnings is determined by your referrals' trading volume and the fee tier they are on.
+You set your payout wallet when creating your referral code. You can update it at any time from the referral dashboard.
+
+<Note>
+  **Rent exemption note:** If your payout wallet is new and empty (0 SOL), very small payouts under ~0.002 SOL may be deferred until a larger trade comes through. Fund your wallet with any amount of SOL to receive all payouts.
+</Note>
 
 ### Subscription earnings (USD)
 
@@ -70,8 +74,8 @@ Subscription commissions are paid in USD through Whop with a **30 day hold**. Af
   <Card title="Username" icon="user">
     Alphanumeric only, 3 to 15 characters. You choose it once and it cannot be changed. Certain reserved names (admin, support, etc.) are blocked.
   </Card>
-  <Card title="SOL Payouts" icon="clock">
-    SOL trading fee earnings are subject to a **7 day hold**. Subscription commissions are paid in USD via Whop with a **30 day hold**.
+  <Card title="SOL Payouts" icon="bolt">
+    SOL trading fee earnings arrive in your payout wallet **instantly** at trade time. Subscription commissions are paid in USD via Whop with a **30 day hold**.
   </Card>
   <Card title="Referral Trial" icon="gift">
     Users who sign up through your referral link get **7 days of Pro tier** features for free. More features means more trades, which means more earnings for you.
@@ -81,17 +85,11 @@ Subscription commissions are paid in USD through Whop with a **30 day hold**. Af
   </Card>
 </CardGroup>
 
-## Earning Status Lifecycle
+## Earning Status
 
-Each earning goes through the following stages:
+**Trading fee earnings (SOL)** are instant. The moment a referred user trades, your share of the fee is delivered on chain to your payout wallet. There is no pending state or manual action needed. You can verify each payout on a Solana block explorer.
 
-| Status | Meaning |
-|--------|---------|
-| **Pending / Held** | Earnings are in the hold period (7 days for SOL trading fees, 30 days for subscription commissions). |
-| **Claimable** | The hold period has passed. SOL earnings can be claimed from the dashboard. |
-| **Claimed / Paid** | Paid out to your wallet (SOL) or bank account (USD). |
-
-SOL trading fee earnings must be manually claimed from the dashboard. Subscription commissions are automatically transferred through Whop after the 30 day hold and paid out to your connected payout method.
+**Subscription commissions (USD)** follow Whop's payout schedule. After a 30 day hold period, commissions are automatically transferred to your connected payout method through Whop.
 
 ## Get Started
 
